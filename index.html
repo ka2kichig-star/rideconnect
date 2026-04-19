@@ -191,6 +191,8 @@ const db=firebase.firestore();
 
 let myId=localStorage.getItem('rcUid')||(Math.random().toString(36).slice(2)+Date.now().toString(36));
 localStorage.setItem('rcUid',myId);
+// 起動時に前回の自分のデータを削除
+db.collection("riders").doc(myId).delete().catch(()=>{});
 let myName='',myBike='',myPref='',myCity='',isActive=false;
 let riders={},currentTab='global',directTarget=null;
 let unsubGlobal=null,unsubDirect=null,unsubRiders=null;
@@ -256,10 +258,7 @@ function saveLocation(){
   });
 }
 function removeLocation(){
-  db.collection('riders').doc(myId).set({
-    name:myName,bike:myBike,pref:myPref,city:myCity,
-    active:false,updatedAt:firebase.firestore.FieldValue.serverTimestamp()
-  });
+  db.collection('riders').doc(myId).delete();
 }
 
 function toggleStatus(){

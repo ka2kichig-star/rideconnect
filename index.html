@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="ja">
 <head>
@@ -7,109 +6,132 @@
 <title>RideConnect</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Noto+Sans+JP:wght@400;700;900&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 <style>
-  :root{--bg:#0e0e0e;--surface:#1a1a1a;--card:#222;--orange:#ff6a00;--white:#f0ede8;--gray:#888;--green:#39ff6a;--red:#ff3b3b;--blue:#4da6ff;}
-  *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
-  html,body{height:100%;overflow:hidden;}
-  body{background:var(--bg);color:var(--white);font-family:'Noto Sans JP',sans-serif;height:100dvh;display:flex;flex-direction:column;}
-  .screen{display:none;flex-direction:column;height:100%;}
-  .screen.active{display:flex;}
+:root{--bg:#0e0e0e;--surface:#1a1a1a;--card:#222;--orange:#ff6a00;--white:#f0ede8;--gray:#888;--green:#39ff6a;--red:#ff3b3b;--blue:#4da6ff;}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+html,body{height:100%;overflow:hidden;}
+body{background:var(--bg);color:var(--white);font-family:'Noto Sans JP',sans-serif;height:100dvh;display:flex;flex-direction:column;}
+.screen{display:none;flex-direction:column;height:100%;}
+.screen.active{display:flex;}
 
-  #setupScreen{background:linear-gradient(160deg,#1a0a00,#0e0e0e);align-items:center;justify-content:center;padding:32px 24px;gap:24px;}
-  .setup-logo{font-family:'Bebas Neue',sans-serif;font-size:52px;letter-spacing:6px;color:var(--orange);line-height:1;text-align:center;}
-  .setup-logo span{color:var(--white);}
-  .setup-sub{font-size:13px;color:var(--gray);text-align:center;margin-top:-16px;}
-  .setup-form{width:100%;display:flex;flex-direction:column;gap:14px;}
-  .setup-form label{font-size:11px;color:var(--gray);letter-spacing:1px;text-transform:uppercase;margin-bottom:4px;display:block;}
-  .setup-form input{width:100%;background:#2a2a2a;border:1px solid #333;border-radius:10px;padding:14px 16px;color:var(--white);font-family:'Noto Sans JP',sans-serif;font-size:16px;outline:none;transition:border-color .2s;}
-  .setup-form input:focus{border-color:var(--orange);}
-  .btn-start{width:100%;background:var(--orange);color:#000;font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:3px;border:none;border-radius:12px;padding:16px;cursor:pointer;margin-top:8px;}
-  .btn-start:active{transform:scale(.97);opacity:.9;}
+/* SETUP */
+#setupScreen{background:linear-gradient(160deg,#1a0a00,#0e0e0e);align-items:center;justify-content:center;padding:28px 24px;gap:20px;overflow-y:auto;}
+.setup-logo{font-family:'Bebas Neue',sans-serif;font-size:48px;letter-spacing:6px;color:var(--orange);line-height:1;text-align:center;}
+.setup-logo span{color:var(--white);}
+.setup-sub{font-size:13px;color:var(--gray);text-align:center;margin-top:-14px;}
+.setup-form{width:100%;display:flex;flex-direction:column;gap:12px;}
+.setup-form label{font-size:11px;color:var(--gray);letter-spacing:1px;text-transform:uppercase;margin-bottom:3px;display:block;}
+.setup-form input,.setup-form select{width:100%;background:#2a2a2a;border:1px solid #333;border-radius:10px;padding:13px 16px;color:var(--white);font-family:'Noto Sans JP',sans-serif;font-size:16px;outline:none;transition:border-color .2s;appearance:none;}
+.setup-form select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23888' stroke-width='2' fill='none'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 16px center;padding-right:40px;}
+.setup-form select option{background:#2a2a2a;color:var(--white);}
+.setup-form input:focus,.setup-form select:focus{border-color:var(--orange);}
+.btn-start{width:100%;background:var(--orange);color:#000;font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:3px;border:none;border-radius:12px;padding:15px;cursor:pointer;margin-top:4px;}
+.btn-start:active{transform:scale(.97);}
 
-  .header{display:flex;align-items:center;justify-content:space-between;padding:12px 16px 10px;background:var(--bg);border-bottom:1px solid #2a2a2a;flex-shrink:0;z-index:100;}
-  .logo{font-family:'Bebas Neue',sans-serif;font-size:24px;letter-spacing:3px;color:var(--orange);}
-  .logo span{color:var(--white);}
-  .header-right{display:flex;align-items:center;gap:12px;}
-  .nearby-badge{font-size:11px;color:var(--gray);text-align:right;line-height:1.3;}
-  .nearby-badge strong{display:block;font-size:20px;font-family:'Bebas Neue',sans-serif;color:var(--orange);}
-  .chat-btn{width:40px;height:40px;border-radius:50%;background:#2a2a2a;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:18px;position:relative;}
-  .chat-badge{position:absolute;top:0;right:0;width:16px;height:16px;background:var(--red);border-radius:50%;font-size:9px;font-weight:700;color:#fff;display:none;align-items:center;justify-content:center;}
-  .chat-badge.show{display:flex;}
+/* HEADER */
+.header{display:flex;align-items:center;justify-content:space-between;padding:12px 16px 10px;background:var(--bg);border-bottom:1px solid #2a2a2a;flex-shrink:0;z-index:100;}
+.logo{font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:3px;color:var(--orange);}
+.logo span{color:var(--white);}
+.header-right{display:flex;align-items:center;gap:10px;}
+.nearby-badge{font-size:11px;color:var(--gray);text-align:right;line-height:1.3;}
+.nearby-badge strong{display:block;font-size:20px;font-family:'Bebas Neue',sans-serif;color:var(--orange);}
+.chat-btn{width:40px;height:40px;border-radius:50%;background:#2a2a2a;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:18px;position:relative;}
+.chat-badge{position:absolute;top:0;right:0;width:16px;height:16px;background:var(--red);border-radius:50%;font-size:9px;font-weight:700;color:#fff;display:none;align-items:center;justify-content:center;}
+.chat-badge.show{display:flex;}
 
-  #map{flex:1;min-height:0;z-index:1;}
-  .leaflet-control-attribution{font-size:9px!important;}
+/* REGION BANNER */
+.region-banner{background:#1a1a1a;padding:8px 16px;border-bottom:1px solid #2a2a2a;font-size:12px;color:var(--gray);flex-shrink:0;}
+.region-banner span{color:var(--orange);font-weight:700;}
 
-  .bottom-panel{flex-shrink:0;background:var(--surface);border-top:1px solid #2f2f2f;padding:12px 16px 16px;z-index:100;}
-  .status-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;}
-  .status-label .title{font-size:11px;color:var(--gray);margin-bottom:2px;}
-  .status-label .value{font-size:15px;font-weight:900;color:var(--red);}
-  .status-label .value.active{color:var(--green);}
-  .toggle-btn{width:64px;height:34px;border-radius:17px;border:none;background:#333;position:relative;cursor:pointer;transition:background .3s;flex-shrink:0;}
-  .toggle-btn.on{background:var(--orange);}
-  .toggle-btn::after{content:'';position:absolute;width:26px;height:26px;border-radius:50%;background:var(--white);top:4px;left:4px;transition:transform .3s cubic-bezier(.34,1.56,.64,1);box-shadow:0 2px 6px rgba(0,0,0,.4);}
-  .toggle-btn.on::after{transform:translateX(30px);}
-  .riders-title{font-size:10px;color:var(--gray);text-transform:uppercase;letter-spacing:2px;margin-bottom:8px;}
-  .riders-scroll{display:flex;gap:8px;overflow-x:auto;padding-bottom:2px;scrollbar-width:none;}
-  .riders-scroll::-webkit-scrollbar{display:none;}
-  .rider-card{flex-shrink:0;background:var(--card);border-radius:10px;padding:10px 12px;min-width:120px;border:1px solid #2f2f2f;cursor:pointer;position:relative;}
-  .rider-card:active{transform:scale(.97);border-color:var(--orange);}
-  .rider-dot{width:7px;height:7px;border-radius:50%;background:var(--green);position:absolute;top:9px;right:9px;box-shadow:0 0 5px var(--green);animation:pulse 2s infinite;}
-  @keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.5;transform:scale(1.3)}}
-  .rider-name{font-size:13px;font-weight:700;margin-bottom:3px;}
-  .rider-bike{font-size:10px;color:var(--gray);margin-bottom:5px;}
-  .rider-dist{font-size:11px;color:var(--orange);font-weight:700;}
-  .msg-btn{margin-top:6px;width:100%;background:#2a2a2a;border:none;border-radius:6px;color:var(--blue);font-size:11px;font-family:'Noto Sans JP',sans-serif;padding:5px;cursor:pointer;}
+/* RIDERS LIST */
+.riders-container{flex:1;overflow-y:auto;padding:16px;}
+.riders-area-title{font-size:11px;color:var(--gray);text-transform:uppercase;letter-spacing:2px;margin-bottom:12px;}
+.rider-item{background:var(--card);border-radius:12px;padding:14px 16px;margin-bottom:10px;border:1px solid #2f2f2f;display:flex;align-items:center;justify-content:space-between;cursor:pointer;transition:border-color .2s;}
+.rider-item:active{border-color:var(--orange);}
+.rider-item-left{display:flex;align-items:center;gap:12px;}
+.rider-avatar{width:42px;height:42px;border-radius:50%;background:var(--orange);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;}
+.rider-info .name{font-size:15px;font-weight:700;margin-bottom:3px;}
+.rider-info .bike{font-size:12px;color:var(--gray);}
+.rider-info .region{font-size:11px;color:var(--blue);margin-top:2px;}
+.rider-dot{width:8px;height:8px;border-radius:50%;background:var(--green);box-shadow:0 0 6px var(--green);animation:pulse 2s infinite;flex-shrink:0;}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.5;transform:scale(1.3)}}
+.msg-btn-small{background:#2a2a2a;border:none;border-radius:8px;color:var(--blue);font-size:12px;font-family:'Noto Sans JP',sans-serif;padding:6px 12px;cursor:pointer;white-space:nowrap;}
+.empty-riders{text-align:center;color:var(--gray);font-size:13px;padding:48px 16px;line-height:2;}
 
-  .leaflet-popup-content-wrapper{background:var(--card)!important;color:var(--white)!important;border-radius:12px!important;border:1px solid var(--orange)!important;box-shadow:0 4px 20px rgba(255,106,0,.3)!important;}
-  .leaflet-popup-tip{background:var(--card)!important;}
-  .leaflet-popup-content{margin:12px 14px!important;}
-  .popup-name{font-size:14px;font-weight:900;color:var(--orange);margin-bottom:4px;}
-  .popup-info{font-size:11px;color:#aaa;line-height:1.7;}
+/* BOTTOM */
+.bottom-panel{flex-shrink:0;background:var(--surface);border-top:1px solid #2f2f2f;padding:12px 16px 16px;z-index:100;}
+.status-row{display:flex;align-items:center;justify-content:space-between;}
+.status-label .title{font-size:11px;color:var(--gray);margin-bottom:2px;}
+.status-label .value{font-size:15px;font-weight:900;color:var(--red);}
+.status-label .value.active{color:var(--green);}
+.toggle-btn{width:64px;height:34px;border-radius:17px;border:none;background:#333;position:relative;cursor:pointer;transition:background .3s;flex-shrink:0;}
+.toggle-btn.on{background:var(--orange);}
+.toggle-btn::after{content:'';position:absolute;width:26px;height:26px;border-radius:50%;background:var(--white);top:4px;left:4px;transition:transform .3s cubic-bezier(.34,1.56,.64,1);box-shadow:0 2px 6px rgba(0,0,0,.4);}
+.toggle-btn.on::after{transform:translateX(30px);}
 
-  #chatScreen{background:var(--bg);}
-  .chat-header{display:flex;align-items:center;gap:12px;padding:12px 16px;background:var(--surface);border-bottom:1px solid #2a2a2a;flex-shrink:0;}
-  .back-btn{background:none;border:none;color:var(--orange);font-size:22px;cursor:pointer;padding:0 4px;}
-  .chat-header-info{flex:1;}
-  .chat-header-name{font-size:16px;font-weight:700;}
-  .chat-header-sub{font-size:11px;color:var(--gray);}
-  .chat-tabs{display:flex;background:var(--surface);border-bottom:1px solid #2a2a2a;flex-shrink:0;}
-  .chat-tab{flex:1;padding:12px;background:none;border:none;color:var(--gray);font-family:'Noto Sans JP',sans-serif;font-size:13px;cursor:pointer;border-bottom:2px solid transparent;}
-  .chat-tab.active{color:var(--orange);border-bottom-color:var(--orange);}
-  .messages-list{flex:1;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:10px;min-height:0;}
-  .msg-wrap{display:flex;flex-direction:column;}
-  .msg-bubble{max-width:75%;padding:10px 14px;border-radius:16px;font-size:14px;line-height:1.5;word-break:break-word;}
-  .msg-bubble.mine{background:var(--orange);color:#000;align-self:flex-end;border-bottom-right-radius:4px;font-weight:700;}
-  .msg-bubble.theirs{background:#2a2a2a;color:var(--white);align-self:flex-start;border-bottom-left-radius:4px;}
-  .msg-meta{font-size:10px;color:var(--gray);margin-top:3px;}
-  .msg-meta.right{text-align:right;}
-  .msg-sender{font-size:10px;color:var(--gray);margin-bottom:2px;}
-  .chat-input-row{display:flex;gap:8px;padding:10px 16px 20px;background:var(--surface);border-top:1px solid #2a2a2a;flex-shrink:0;}
-  .chat-input{flex:1;background:#2a2a2a;border:1px solid #333;border-radius:22px;padding:10px 16px;color:var(--white);font-family:'Noto Sans JP',sans-serif;font-size:14px;outline:none;}
-  .chat-input:focus{border-color:var(--orange);}
-  .send-btn{width:44px;height:44px;border-radius:50%;background:var(--orange);border:none;font-size:20px;cursor:pointer;flex-shrink:0;}
-  .send-btn:disabled{opacity:.4;}
-  .empty-msg{text-align:center;color:var(--gray);font-size:13px;padding:32px 16px;align-self:center;}
+/* CHAT */
+#chatScreen{background:var(--bg);}
+.chat-header{display:flex;align-items:center;gap:12px;padding:12px 16px;background:var(--surface);border-bottom:1px solid #2a2a2a;flex-shrink:0;}
+.back-btn{background:none;border:none;color:var(--orange);font-size:22px;cursor:pointer;padding:0 4px;}
+.chat-header-info{flex:1;}
+.chat-header-name{font-size:16px;font-weight:700;}
+.chat-header-sub{font-size:11px;color:var(--gray);}
+.chat-tabs{display:flex;background:var(--surface);border-bottom:1px solid #2a2a2a;flex-shrink:0;}
+.chat-tab{flex:1;padding:11px;background:none;border:none;color:var(--gray);font-family:'Noto Sans JP',sans-serif;font-size:13px;cursor:pointer;border-bottom:2px solid transparent;}
+.chat-tab.active{color:var(--orange);border-bottom-color:var(--orange);}
+.messages-list{flex:1;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:10px;min-height:0;}
+.msg-wrap{display:flex;flex-direction:column;}
+.msg-bubble{max-width:75%;padding:10px 14px;border-radius:16px;font-size:14px;line-height:1.5;word-break:break-word;}
+.msg-bubble.mine{background:var(--orange);color:#000;align-self:flex-end;border-bottom-right-radius:4px;font-weight:700;}
+.msg-bubble.theirs{background:#2a2a2a;color:var(--white);align-self:flex-start;border-bottom-left-radius:4px;}
+.msg-meta{font-size:10px;color:var(--gray);margin-top:3px;}
+.msg-meta.right{text-align:right;}
+.msg-sender{font-size:10px;color:var(--gray);margin-bottom:2px;}
+.chat-input-row{display:flex;gap:8px;padding:10px 16px 20px;background:var(--surface);border-top:1px solid #2a2a2a;flex-shrink:0;}
+.chat-input{flex:1;background:#2a2a2a;border:1px solid #333;border-radius:22px;padding:10px 16px;color:var(--white);font-family:'Noto Sans JP',sans-serif;font-size:14px;outline:none;}
+.chat-input:focus{border-color:var(--orange);}
+.send-btn{width:44px;height:44px;border-radius:50%;background:var(--orange);border:none;font-size:20px;cursor:pointer;flex-shrink:0;}
+.send-btn:disabled{opacity:.4;}
+.empty-msg{text-align:center;color:var(--gray);font-size:13px;padding:32px 16px;align-self:center;}
 
-  .toast{position:fixed;top:70px;left:50%;transform:translateX(-50%) translateY(-10px);background:var(--orange);color:#000;font-weight:700;font-size:13px;padding:8px 20px;border-radius:20px;opacity:0;pointer-events:none;transition:opacity .3s,transform .3s;z-index:9999;white-space:nowrap;}
-  .toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+/* TOAST */
+.toast{position:fixed;top:70px;left:50%;transform:translateX(-50%) translateY(-10px);background:var(--orange);color:#000;font-weight:700;font-size:13px;padding:8px 20px;border-radius:20px;opacity:0;pointer-events:none;transition:opacity .3s,transform .3s;z-index:9999;white-space:nowrap;}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
 </style>
 </head>
 <body>
 
+<!-- SETUP -->
 <div class="screen active" id="setupScreen">
   <div class="setup-logo">RIDE<span>CONNECT</span></div>
   <div class="setup-sub">走りたい仲間を見つけよう</div>
   <div class="setup-form">
-    <div><label>ニックネーム</label><input type="text" id="inputName" placeholder="例：カツキ" maxlength="10"></div>
-    <div><label>バイク</label><input type="text" id="inputBike" placeholder="例：ニンジャ250" maxlength="20"></div>
+    <div><label>ニックネーム</label><input type="text" id="inputName" placeholder="例：太郎" maxlength="10"></div>
+    <div><label>バイク</label><input type="text" id="inputBike" placeholder="例：ZX-10R" maxlength="20"></div>
+    <div>
+      <label>都道府県</label>
+      <select id="inputPref">
+        <option value="">選択してください</option>
+        <option>北海道</option><option>青森県</option><option>岩手県</option><option>宮城県</option><option>秋田県</option>
+        <option>山形県</option><option>福島県</option><option>茨城県</option><option>栃木県</option><option>群馬県</option>
+        <option>埼玉県</option><option>千葉県</option><option>東京都</option><option>神奈川県</option><option>新潟県</option>
+        <option>富山県</option><option>石川県</option><option>福井県</option><option>山梨県</option><option>長野県</option>
+        <option>岐阜県</option><option>静岡県</option><option>愛知県</option><option>三重県</option><option>滋賀県</option>
+        <option>京都府</option><option>大阪府</option><option>兵庫県</option><option>奈良県</option><option>和歌山県</option>
+        <option>鳥取県</option><option>島根県</option><option>岡山県</option><option>広島県</option><option>山口県</option>
+        <option>徳島県</option><option>香川県</option><option>愛媛県</option><option>高知県</option><option>福岡県</option>
+        <option>佐賀県</option><option>長崎県</option><option>熊本県</option><option>大分県</option><option>宮崎県</option>
+        <option>鹿児島県</option><option>沖縄県</option>
+      </select>
+    </div>
+    <div><label>市区町村（任意）</label><input type="text" id="inputCity" placeholder="例：上野" maxlength="20"></div>
     <button class="btn-start" onclick="startApp()">START RIDING 🏍️</button>
   </div>
 </div>
 
+<!-- MAIN -->
 <div class="screen" id="mainScreen">
   <div class="header">
     <div class="logo">RIDE<span>CONNECT</span></div>
@@ -118,7 +140,11 @@
       <button class="chat-btn" onclick="openChat()">💬<div class="chat-badge" id="chatBadge"></div></button>
     </div>
   </div>
-  <div id="map"></div>
+  <div class="region-banner">エリア：<span id="regionLabel">-</span></div>
+  <div class="riders-container">
+    <div class="riders-area-title">同じエリアのライダー</div>
+    <div id="riderList"></div>
+  </div>
   <div class="bottom-panel">
     <div class="status-row">
       <div class="status-label">
@@ -127,21 +153,20 @@
       </div>
       <button class="toggle-btn" id="toggleBtn" onclick="toggleStatus()"></button>
     </div>
-    <div class="riders-title">近くのライダー</div>
-    <div class="riders-scroll" id="riderList"></div>
   </div>
 </div>
 
+<!-- CHAT -->
 <div class="screen" id="chatScreen">
   <div class="chat-header">
     <button class="back-btn" onclick="closeChat()">←</button>
     <div class="chat-header-info">
       <div class="chat-header-name" id="chatTitle">みんなのチャット</div>
-      <div class="chat-header-sub" id="chatSub">近くのライダーと話そう</div>
+      <div class="chat-header-sub" id="chatSub">同じエリアのライダーと話そう</div>
     </div>
   </div>
   <div class="chat-tabs">
-    <button class="chat-tab active" id="tabGlobal" onclick="switchTab('global')">🌐 みんな</button>
+    <button class="chat-tab active" id="tabGlobal" onclick="switchTab('global')">🌐 エリア</button>
     <button class="chat-tab" id="tabDirect" onclick="switchTab('direct')">👤 個別</button>
   </div>
   <div class="messages-list" id="messagesList"></div>
@@ -154,11 +179,6 @@
 <div class="toast" id="toast"></div>
 
 <script>
-// ページ読み込み直後に位置情報許可をリクエスト
-if(navigator.geolocation){
-  navigator.geolocation.getCurrentPosition(()=>{}, ()=>{});
-}
-
 firebase.initializeApp({
   apiKey:"AIzaSyCJ43W-7afDkW4IgA_bPBw42rsEELhC2Vc",
   authDomain:"rideconnect-dbcb8.firebaseapp.com",
@@ -171,14 +191,12 @@ const db=firebase.firestore();
 
 let myId=localStorage.getItem('rcUid')||(Math.random().toString(36).slice(2)+Date.now().toString(36));
 localStorage.setItem('rcUid',myId);
-let myName='',myBike='',myLat=null,myLng=null,isActive=false;
-let map=null,myMarker=null,riderMarkers={},riders={};
-let watchId=null,currentTab='global',directTarget=null;
+let myName='',myBike='',myPref='',myCity='',isActive=false;
+let riders={},currentTab='global',directTarget=null;
 let unsubGlobal=null,unsubDirect=null,unsubRiders=null;
 let unreadCount=0;
 
 function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
-function dist(a,b,c,d){const R=6371000,dL=(c-a)*Math.PI/180,dG=(d-b)*Math.PI/180,x=Math.sin(dL/2)**2+Math.cos(a*Math.PI/180)*Math.cos(c*Math.PI/180)*Math.sin(dG/2)**2,m=R*2*Math.atan2(Math.sqrt(x),Math.sqrt(1-x));return m<1000?Math.round(m)+'m':(m/1000).toFixed(1)+'km';}
 function fmt(ts){if(!ts)return '';const d=ts.toDate?ts.toDate():new Date();return d.toLocaleTimeString('ja-JP',{hour:'2-digit',minute:'2-digit'});}
 function roomId(a,b){return [a,b].sort().join('_');}
 function toast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2200);}
@@ -186,65 +204,63 @@ function toast(msg){const t=document.getElementById('toast');t.textContent=msg;t
 function startApp(){
   const n=document.getElementById('inputName').value.trim();
   const b=document.getElementById('inputBike').value.trim();
-  if(!n||!b){toast('名前とバイクを入力してください');return;}
-  myName=n;myBike=b;
+  const p=document.getElementById('inputPref').value;
+  const c=document.getElementById('inputCity').value.trim();
+  if(!n||!b||!p){toast('名前・バイク・都道府県を入力してください');return;}
+  myName=n;myBike=b;myPref=p;myCity=c;
+
+  // 前回のデータを引き継ぎ
+  localStorage.setItem('rcName',n);
+  localStorage.setItem('rcBike',b);
+  localStorage.setItem('rcPref',p);
+  localStorage.setItem('rcCity',c);
+
+  document.getElementById('regionLabel').textContent=c?p+' '+c:p;
   document.getElementById('setupScreen').classList.remove('active');
   document.getElementById('mainScreen').classList.add('active');
-  initMap();listenRiders();listenGlobalChat();getLocation();
+  listenRiders();
+  listenGlobalChat();
 }
 
-function initMap(){
-  map=L.map('map',{zoomControl:false}).setView([35.6762,139.6503],14);
-  L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',{attribution:'© OpenStreetMap © CARTO',maxZoom:19}).addTo(map);
-  myMarker=L.circleMarker([35.6762,139.6503],{radius:10,color:'#ff6a00',fillColor:'#ff6a00',fillOpacity:0.3,weight:3}).addTo(map);
-}
-
-let mapCentered=false;
-function getLocation(){
-  if(!navigator.geolocation){toast('位置情報が使えません');return;}
-  // まず一回素早く取得してから継続監視
-  navigator.geolocation.getCurrentPosition(pos=>{
-    myLat=pos.coords.latitude;myLng=pos.coords.longitude;
-    myMarker.setLatLng([myLat,myLng]);
-    map.setView([myLat,myLng],15);
-    mapCentered=true;
-    if(isActive)saveLocation();
-    renderCards();
-  },{enableHighAccuracy:true,timeout:10000,maximumAge:0});
-
-  watchId=navigator.geolocation.watchPosition(pos=>{
-    myLat=pos.coords.latitude;myLng=pos.coords.longitude;
-    myMarker.setLatLng([myLat,myLng]);
-    if(!mapCentered){map.setView([myLat,myLng],15);mapCentered=true;}
-    if(isActive)saveLocation();
-    renderCards();
-  },{enableHighAccuracy:true,maximumAge:0,timeout:20000});
-}
+// 前回のデータを復元
+window.addEventListener('load',()=>{
+  const n=localStorage.getItem('rcName');
+  const b=localStorage.getItem('rcBike');
+  const p=localStorage.getItem('rcPref');
+  const c=localStorage.getItem('rcCity');
+  if(n)document.getElementById('inputName').value=n;
+  if(b)document.getElementById('inputBike').value=b;
+  if(p)document.getElementById('inputPref').value=p;
+  if(c)document.getElementById('inputCity').value=c;
+});
 
 function listenRiders(){
-  unsubRiders=db.collection('riders').onSnapshot(snap=>{
-    snap.docChanges().forEach(ch=>{
-      const id=ch.doc.id,d=ch.doc.data();
-      if(id===myId)return;
-      if(ch.type==='removed'||!d.active){
-        if(riderMarkers[id]){map.removeLayer(riderMarkers[id]);delete riderMarkers[id];}
-        delete riders[id];
-      } else {
-        riders[id]=d;
-        const icon=L.divIcon({html:`<div style="background:#ff6a00;border:2px solid #fff;border-radius:50%;width:14px;height:14px;box-shadow:0 0 8px rgba(255,106,0,.8)"></div>`,className:'',iconSize:[14,14],iconAnchor:[7,7]});
-        if(riderMarkers[id])riderMarkers[id].setLatLng([d.lat,d.lng]);
-        else{riderMarkers[id]=L.marker([d.lat,d.lng],{icon}).addTo(map).bindPopup(`<div class="popup-name">🏍️ ${esc(d.name)}</div><div class="popup-info">${esc(d.bike)}</div>`);riderMarkers[id].on('click',()=>openDirectChat(id,d.name,d.bike));}
-      }
+  if(unsubRiders){unsubRiders();unsubRiders=null;}
+  // 同じ都道府県のライダーを取得
+  unsubRiders=db.collection('riders')
+    .where('pref','==',myPref)
+    .where('active','==',true)
+    .onSnapshot(snap=>{
+      riders={};
+      snap.docs.forEach(d=>{
+        if(d.id!==myId) riders[d.id]=d.data();
+      });
+      renderCards();
     });
-    renderCards();
-  });
 }
 
 function saveLocation(){
-  if(!myLat||!myLng)return;
-  db.collection('riders').doc(myId).set({name:myName,bike:myBike,lat:myLat,lng:myLng,active:true,updatedAt:firebase.firestore.FieldValue.serverTimestamp()});
+  db.collection('riders').doc(myId).set({
+    name:myName,bike:myBike,pref:myPref,city:myCity,
+    active:true,updatedAt:firebase.firestore.FieldValue.serverTimestamp()
+  });
 }
-function removeLocation(){db.collection('riders').doc(myId).delete();}
+function removeLocation(){
+  db.collection('riders').doc(myId).set({
+    name:myName,bike:myBike,pref:myPref,city:myCity,
+    active:false,updatedAt:firebase.firestore.FieldValue.serverTimestamp()
+  });
+}
 
 function toggleStatus(){
   isActive=!isActive;
@@ -252,26 +268,32 @@ function toggleStatus(){
   const v=document.getElementById('statusText');
   v.textContent=isActive?'走りたい！':'オフライン';
   v.className='value'+(isActive?' active':'');
-  myMarker.setStyle({color:isActive?'#39ff6a':'#ff6a00',fillColor:isActive?'#39ff6a':'#ff6a00'});
   toast(isActive?'🏍️ 走りたいモード ON！':'オフラインにしました');
   isActive?saveLocation():removeLocation();
 }
 
 function renderCards(){
   const list=document.getElementById('riderList');
-  const es=Object.entries(riders).filter(([,d])=>d.active);
-  document.getElementById('riderCount').textContent=es.length;
-  if(!es.length){list.innerHTML=`<div style="color:var(--gray);font-size:12px;padding:8px 0">まだ近くにライダーがいません</div>`;return;}
-  list.innerHTML=es.map(([id,d])=>`<div class="rider-card" onclick="focusRider('${id}')">
-    <div class="rider-dot"></div>
-    <div class="rider-name">${esc(d.name)}</div>
-    <div class="rider-bike">${esc(d.bike)}</div>
-    <div class="rider-dist">📍 ${myLat?dist(myLat,myLng,d.lat,d.lng):'--'}</div>
-    <button class="msg-btn" onclick="event.stopPropagation();openDirectChat('${id}','${esc(d.name)}','${esc(d.bike)}')">💬 話しかける</button>
-  </div>`).join('');
+  const entries=Object.entries(riders);
+  document.getElementById('riderCount').textContent=entries.length;
+  if(!entries.length){
+    list.innerHTML=`<div class="empty-riders">🏍️<br>${myPref}にまだライダーがいません<br><br>「走りたい！」をONにして<br>仲間を待ちましょう！</div>`;
+    return;
+  }
+  list.innerHTML=entries.map(([id,d])=>`
+    <div class="rider-item" onclick="openDirectChat('${id}','${esc(d.name)}','${esc(d.bike)}')">
+      <div class="rider-item-left">
+        <div class="rider-avatar">🏍️</div>
+        <div class="rider-info">
+          <div class="name">${esc(d.name)}</div>
+          <div class="bike">${esc(d.bike)}</div>
+          <div class="region">📍 ${esc(d.pref)}${d.city?' '+esc(d.city):''}</div>
+        </div>
+      </div>
+      <button class="msg-btn-small" onclick="event.stopPropagation();openDirectChat('${id}','${esc(d.name)}','${esc(d.bike)}')">💬 話す</button>
+    </div>
+  `).join('');
 }
-
-function focusRider(id){const d=riders[id];if(d)map.setView([d.lat,d.lng],15);}
 
 function openChat(){
   unreadCount=0;document.getElementById('chatBadge').classList.remove('show');
@@ -288,8 +310,8 @@ function switchTab(tab){
   document.getElementById('tabGlobal').classList.toggle('active',tab==='global');
   document.getElementById('tabDirect').classList.toggle('active',tab==='direct');
   if(tab==='global'){
-    document.getElementById('chatTitle').textContent='みんなのチャット';
-    document.getElementById('chatSub').textContent='近くのライダーと話そう';
+    document.getElementById('chatTitle').textContent=myPref+'のチャット';
+    document.getElementById('chatSub').textContent='同じエリアのライダーと話そう';
     if(unsubDirect){unsubDirect();unsubDirect=null;}
     listenGlobalChat();
   }
@@ -310,16 +332,19 @@ function openDirectChat(tid,tname,tbike){
 
 function listenGlobalChat(){
   if(unsubGlobal)return;
-  unsubGlobal=db.collection('globalChat').orderBy('createdAt').limitToLast(100).onSnapshot(snap=>{
-    const open=document.getElementById('chatScreen').classList.contains('active')&&currentTab==='global';
-    if(!open){
-      if(snap.docChanges().some(c=>c.type==='added'&&c.doc.data().senderId!==myId)){
-        unreadCount++;const b=document.getElementById('chatBadge');b.textContent=unreadCount>9?'9+':unreadCount;b.classList.add('show');
+  // 都道府県別チャットルーム
+  const roomName='area_'+myPref;
+  unsubGlobal=db.collection('areaChat').doc(roomName).collection('messages')
+    .orderBy('createdAt').limitToLast(100).onSnapshot(snap=>{
+      const open=document.getElementById('chatScreen').classList.contains('active')&&currentTab==='global';
+      if(!open){
+        if(snap.docChanges().some(c=>c.type==='added'&&c.doc.data().senderId!==myId)){
+          unreadCount++;const b=document.getElementById('chatBadge');b.textContent=unreadCount>9?'9+':unreadCount;b.classList.add('show');
+        }
+        return;
       }
-      return;
-    }
-    renderMsgs(snap.docs.map(d=>({id:d.id,...d.data()})));
-  });
+      renderMsgs(snap.docs.map(d=>({id:d.id,...d.data()})));
+    });
 }
 
 function renderMsgs(msgs){
@@ -336,12 +361,16 @@ function sendMessage(){
   document.getElementById('sendBtn').disabled=true;
   setTimeout(()=>document.getElementById('sendBtn').disabled=false,600);
   const data={text,senderId:myId,senderName:myName,createdAt:firebase.firestore.FieldValue.serverTimestamp()};
-  if(currentTab==='global')db.collection('globalChat').add(data);
-  else if(directTarget)db.collection('directChat').doc(roomId(myId,directTarget.id)).collection('messages').add(data);
+  if(currentTab==='global'){
+    const roomName='area_'+myPref;
+    db.collection('areaChat').doc(roomName).collection('messages').add(data);
+  } else if(directTarget){
+    db.collection('directChat').doc(roomId(myId,directTarget.id)).collection('messages').add(data);
+  }
 }
 
 document.getElementById('chatInput').addEventListener('keydown',e=>{if(e.key==='Enter')sendMessage();});
-window.addEventListener('beforeunload',()=>{if(isActive)removeLocation();if(watchId)navigator.geolocation.clearWatch(watchId);});
+window.addEventListener('beforeunload',()=>{if(isActive)removeLocation();});
 </script>
 </body>
 </html>

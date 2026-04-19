@@ -193,15 +193,26 @@ function initMap(){
   myMarker=L.circleMarker([35.6762,139.6503],{radius:10,color:'#ff6a00',fillColor:'#ff6a00',fillOpacity:0.3,weight:3}).addTo(map);
 }
 
+let mapCentered=false;
 function getLocation(){
   if(!navigator.geolocation){toast('位置情報が使えません');return;}
+  // まず一回素早く取得してから継続監視
+  navigator.geolocation.getCurrentPosition(pos=>{
+    myLat=pos.coords.latitude;myLng=pos.coords.longitude;
+    myMarker.setLatLng([myLat,myLng]);
+    map.setView([myLat,myLng],15);
+    mapCentered=true;
+    if(isActive)saveLocation();
+    renderCards();
+  },{enableHighAccuracy:true,timeout:10000,maximumAge:0});
+
   watchId=navigator.geolocation.watchPosition(pos=>{
     myLat=pos.coords.latitude;myLng=pos.coords.longitude;
     myMarker.setLatLng([myLat,myLng]);
-    map.setView([myLat,myLng],14);
+    if(!mapCentered){map.setView([myLat,myLng],15);mapCentered=true;}
     if(isActive)saveLocation();
     renderCards();
-  },{enableHighAccuracy:true,maximumAge:10000,timeout:20000});
+  },{enableHighAccuracy:true,maximumAge:0,timeout:20000});
 }
 
 function listenRiders(){

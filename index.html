@@ -313,6 +313,7 @@ function switchTab(tab){
     document.getElementById('chatSub').textContent='同じエリアのライダーと話そう';
     if(unsubDirect){unsubDirect();unsubDirect=null;}
     listenGlobalChat();
+    if(globalMsgsCache.length) renderMsgs(globalMsgsCache,'global');
   }
 }
 function openDirectChat(tid,tname,tbike){
@@ -329,29 +330,54 @@ function openDirectChat(tid,tname,tbike){
     .orderBy('createdAt').limitToLast(100).onSnapshot(snap=>renderMsgs(snap.docs.map(d=>({id:d.id,...d.data()}))));
 }
 
+let globalMsgsCache=[];
+let holdTimer=null;
+
 function listenGlobalChat(){
   if(unsubGlobal)return;
-  // 都道府県別チャットルーム
   const roomName='area_'+myPref;
   unsubGlobal=db.collection('areaChat').doc(roomName).collection('messages')
-    .orderBy('createdAt').limitToLast(100).onSnapshot(snap=>{
+    .orderBy('createdAt').limitToLast(200)
+    .onSnapshot(snap=>{
+      const allMsgs=snap.docs.map(d=>({id:d.id,...d.data()}));
+      globalMsgsCache=allMsgs;
       const open=document.getElementById('chatScreen').classList.contains('active')&&currentTab==='global';
       if(!open){
         if(snap.docChanges().some(c=>c.type==='added'&&c.doc.data().senderId!==myId)){
           unreadCount++;const b=document.getElementById('chatBadge');b.textContent=unreadCount>9?'9+':unreadCount;b.classList.add('show');
         }
-        return;
       }
-      renderMsgs(snap.docs.map(d=>({id:d.id,...d.data()})));
+      if(open) renderMsgs(allMsgs,'global');
     });
 }
 
-function renderMsgs(msgs){
+function renderMsgs(msgs,type){
   const list=document.getElementById('messagesList');
   if(!msgs.length){list.innerHTML=`<div class="empty-msg">まだメッセージがありません<br>最初に話しかけてみよう！🏍️</div>`;return;}
-  list.innerHTML=msgs.map(m=>{const mine=m.senderId===myId;return `<div class="msg-wrap">${!mine?`<div class="msg-sender">${esc(m.senderName||'')}</div>`:''}<div class="msg-bubble ${mine?'mine':'theirs'}">${esc(m.text)}</div><div class="msg-meta ${mine?'right':''}">${fmt(m.createdAt)}</div></div>`;}).join('');
+  list.innerHTML=msgs.map(m=>{
+    const mine=m.senderId===myId;
+    const del=mine?`ontouchstart="startHold('${m.id}','${type||currentTab}')" ontouchend="cancelHold()" onmousedown="startHold('${m.id}','${type||currentTab}')" onmouseup="cancelHold()"`:'' ;
+    return `<div class="msg-wrap">
+      ${!mine?`<div class="msg-sender">${esc(m.senderName||'')}</div>`:''}
+      <div class="msg-bubble ${mine?'mine':'theirs'}" ${del}>${esc(m.text)}</div>
+      <div class="msg-meta ${mine?'right':''}">${fmt(m.createdAt)}${mine?' ✕長押し削除':''}</div>
+    </div>`;
+  }).join('');
   list.scrollTop=list.scrollHeight;
 }
+
+function startHold(msgId,type){
+  holdTimer=setTimeout(()=>{
+    if(confirm('このメッセージを削除しますか？')){
+      if(type==='global'){
+        db.collection('areaChat').doc('area_'+myPref).collection('messages').doc(msgId).delete();
+      } else if(directTarget){
+        db.collection('directChat').doc(roomId(myId,directTarget.id)).collection('messages').doc(msgId).delete();
+      }
+    }
+  },600);
+}
+function cancelHold(){clearTimeout(holdTimer);}
 
 function sendMessage(){
   const input=document.getElementById('chatInput'),text=input.value.trim();

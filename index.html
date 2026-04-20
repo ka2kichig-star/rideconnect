@@ -7,6 +7,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Noto+Sans+JP:wght@400;700;900&display=swap" rel="stylesheet">
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 <style>
 :root{--bg:#0e0e0e;--surface:#1a1a1a;--card:#222;--orange:#ff6a00;--white:#f0ede8;--gray:#888;--green:#39ff6a;--red:#ff3b3b;--blue:#4da6ff;}
@@ -54,13 +55,9 @@ input[type=file]{display:none;}
 .pref-check-label{font-size:13px;}
 .btn-start{width:100%;background:var(--orange);color:#000;font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:3px;border:none;border-radius:12px;padding:15px;cursor:pointer;margin-top:4px;}
 .btn-start:active{transform:scale(.97);}
-
-/* 利用規約リンク */
 .legal-links{display:flex;gap:16px;justify-content:center;flex-wrap:wrap;padding:4px 0;}
 .legal-link{font-size:11px;color:var(--gray);text-decoration:underline;cursor:pointer;background:none;border:none;font-family:'Noto Sans JP',sans-serif;}
 .legal-link:active{color:var(--orange);}
-
-/* 法的モーダル */
 .legal-modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.9);z-index:300;flex-direction:column;}
 .legal-modal.open{display:flex;}
 .legal-modal-inner{background:var(--surface);border-radius:20px 20px 0 0;margin-top:60px;flex:1;display:flex;flex-direction:column;overflow:hidden;}
@@ -73,7 +70,6 @@ input[type=file]{display:none;}
 .legal-modal-body p{font-size:13px;color:#ccc;line-height:1.8;margin-bottom:8px;}
 .legal-modal-body ul{padding-left:20px;margin-bottom:8px;}
 .legal-modal-body ul li{font-size:13px;color:#ccc;line-height:1.8;}
-
 .header{display:flex;align-items:center;justify-content:space-between;padding:12px 16px 10px;background:var(--bg);border-bottom:1px solid #2a2a2a;flex-shrink:0;z-index:100;}
 .logo{font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:3px;color:var(--orange);}
 .logo span{color:var(--white);}
@@ -199,8 +195,6 @@ input[type=file]{display:none;}
       <button class="pref-toggle-btn" onclick="openPrefModal()">＋ 都道府県を選ぶ</button>
     </div>
     <button class="btn-start" onclick="startApp()">START RIDING 🏍️</button>
-
-    <!-- 法的リンク -->
     <div class="legal-links">
       <button class="legal-link" onclick="openLegal('privacy')">プライバシーポリシー</button>
       <button class="legal-link" onclick="openLegal('terms')">利用規約</button>
@@ -287,85 +281,49 @@ input[type=file]{display:none;}
 <script>
 const PREFS=['北海道','青森県','岩手県','宮城県','秋田県','山形県','福島県','茨城県','栃木県','群馬県','埼玉県','千葉県','東京都','神奈川県','新潟県','富山県','石川県','福井県','山梨県','長野県','岐阜県','静岡県','愛知県','三重県','滋賀県','京都府','大阪府','兵庫県','奈良県','和歌山県','鳥取県','島根県','岡山県','広島県','山口県','徳島県','香川県','愛媛県','高知県','福岡県','佐賀県','長崎県','熊本県','大分県','宮崎県','鹿児島県','沖縄県'];
 
-/* ── 法的コンテンツ ── */
 const LEGAL={
-  privacy:{
-    title:'プライバシーポリシー',
-    body:`
-      <h4>1. 収集する情報</h4>
-      <p>本サービスでは、ユーザーが入力した以下の情報を収集します。</p>
-      <ul>
-        <li>ニックネーム</li>
-        <li>バイクの車種</li>
-        <li>都道府県・市区町村（任意）</li>
-        <li>バイクの写真（任意）</li>
-        <li>チャットメッセージの内容</li>
-      </ul>
-      <h4>2. 情報の利用目的</h4>
-      <p>収集した情報は、同じエリアのライダー同士のマッチングおよびチャット機能の提供のみに使用します。第三者への販売・提供は行いません。</p>
-      <h4>3. 情報の保存</h4>
-      <p>入力された情報はGoogle Firebase（Firestore）に保存されます。ステータスをOFFにした場合、ライダー一覧からの情報は削除されます。</p>
-      <h4>4. Cookieおよびローカルストレージ</h4>
-      <p>本サービスはユーザー識別のためブラウザのローカルストレージを使用します。広告目的のトラッキングは行いません。</p>
-      <h4>5. 情報の削除</h4>
-      <p>ご自身の情報の削除をご希望の場合は、ステータスをOFFにした状態でブラウザのキャッシュ・ローカルストレージをクリアしてください。</p>
-      <h4>6. 免責事項</h4>
-      <p>ユーザー同士のやり取りにより生じたトラブルについて、運営者は一切の責任を負いません。</p>
-      <h4>7. ポリシーの変更</h4>
-      <p>本ポリシーは予告なく変更される場合があります。最新の内容は本ページをご確認ください。</p>
-    `
-  },
-  terms:{
-    title:'利用規約',
-    body:`
-      <h4>第1条（適用）</h4>
-      <p>本規約は、RideConnect（以下「本サービス」）の利用に関する条件を定めるものです。本サービスを利用することで、本規約に同意したものとみなします。</p>
-      <h4>第2条（禁止事項）</h4>
-      <p>ユーザーは以下の行為を行ってはなりません。</p>
-      <ul>
-        <li>他のユーザーへの誹謗中傷・嫌がらせ</li>
-        <li>個人情報の無断収集・流布</li>
-        <li>出会いや性的目的での利用</li>
-        <li>スパム・迷惑メッセージの送信</li>
-        <li>虚偽の情報の登録</li>
-        <li>本サービスの運営を妨害する行為</li>
-        <li>その他、法令または公序良俗に違反する行為</li>
-      </ul>
-      <h4>第3条（サービスの変更・中断・終了）</h4>
-      <p>運営者は、予告なく本サービスの内容を変更、中断、または終了することができます。これによりユーザーに生じた損害について、運営者は責任を負いません。</p>
-      <h4>第4条（免責事項）</h4>
-      <p>本サービスはユーザー同士を繋ぐプラットフォームです。ユーザー間のトラブル、実際のツーリング中の事故・トラブルについて、運営者は一切の責任を負いません。</p>
-      <h4>第5条（規約の変更）</h4>
-      <p>本規約は予告なく変更される場合があります。変更後も本サービスを継続利用した場合、変更後の規約に同意したものとみなします。</p>
-    `
-  },
-  operator:{
-    title:'運営者情報',
-    body:`
-      <h4>サービス名</h4>
-      <p>RideConnect</p>
-      <h4>運営者</h4>
-      <p>古川 勝貴</p>
-      <h4>サービスURL</h4>
-      <p>https://ka2kichig-star.github.io/rideconnect/</p>
-      <h4>サービス内容</h4>
-      <p>バイク乗り向けエリアマッチング・チャットWebアプリ</p>
-      <h4>お問い合わせ</h4>
-      <p>本サービスに関するお問い合わせは、サービス内チャット機能をご利用いただくか、GitHubページよりご連絡ください。</p>
-    `
-  }
+  privacy:{title:'プライバシーポリシー',body:`
+    <h4>1. 収集する情報</h4>
+    <p>本サービスでは、ユーザーが入力した以下の情報を収集します。</p>
+    <ul><li>ニックネーム</li><li>バイクの車種</li><li>都道府県・市区町村（任意）</li><li>バイクの写真（任意）</li><li>チャットメッセージの内容</li></ul>
+    <h4>2. 情報の利用目的</h4>
+    <p>収集した情報は、同じエリアのライダー同士のマッチングおよびチャット機能の提供のみに使用します。第三者への販売・提供は行いません。</p>
+    <h4>3. 情報の保存</h4>
+    <p>入力された情報はGoogle Firebase（Firestore）に保存されます。ステータスをOFFにした場合、ライダー一覧からの情報は削除されます。</p>
+    <h4>4. 認証について</h4>
+    <p>本サービスはFirebase匿名認証を使用します。ユーザーの操作なしに自動でIDが発行され、データの保護に使用されます。</p>
+    <h4>5. 情報の削除</h4>
+    <p>ご自身の情報の削除をご希望の場合は、ステータスをOFFにした状態でブラウザのキャッシュ・ローカルストレージをクリアしてください。</p>
+    <h4>6. 免責事項</h4>
+    <p>ユーザー同士のやり取りにより生じたトラブルについて、運営者は一切の責任を負いません。</p>
+  `},
+  terms:{title:'利用規約',body:`
+    <h4>第1条（適用）</h4>
+    <p>本規約は、RideConnectの利用に関する条件を定めるものです。本サービスを利用することで、本規約に同意したものとみなします。</p>
+    <h4>第2条（禁止事項）</h4>
+    <ul><li>他のユーザーへの誹謗中傷・嫌がらせ</li><li>個人情報の無断収集・流布</li><li>出会いや性的目的での利用</li><li>スパム・迷惑メッセージの送信</li><li>虚偽の情報の登録</li><li>本サービスの運営を妨害する行為</li></ul>
+    <h4>第3条（免責事項）</h4>
+    <p>本サービスはユーザー同士を繋ぐプラットフォームです。ユーザー間のトラブル、実際のツーリング中の事故・トラブルについて、運営者は一切の責任を負いません。</p>
+    <h4>第4条（サービスの変更・終了）</h4>
+    <p>運営者は予告なく本サービスの内容を変更、中断、または終了することができます。</p>
+  `},
+  operator:{title:'運営者情報',body:`
+    <h4>サービス名</h4><p>RideConnect</p>
+    <h4>運営者</h4><p>古川 勝貴</p>
+    <h4>サービスURL</h4><p>https://ka2kichig-star.github.io/rideconnect/</p>
+    <h4>サービス内容</h4><p>バイク乗り向けエリアマッチング・チャットWebアプリ</p>
+    <h4>お問い合わせ</h4><p>GitHubページよりご連絡ください。</p>
+  `}
 };
 
 function openLegal(type){
-  const data=LEGAL[type];
-  document.getElementById('legalTitle').textContent=data.title;
-  document.getElementById('legalBody').innerHTML=data.body;
+  document.getElementById('legalTitle').textContent=LEGAL[type].title;
+  document.getElementById('legalBody').innerHTML=LEGAL[type].body;
   document.getElementById('legalModal').classList.add('open');
 }
-function closeLegal(){
-  document.getElementById('legalModal').classList.remove('open');
-}
+function closeLegal(){document.getElementById('legalModal').classList.remove('open');}
 
+/* ── Firebase初期化 ── */
 firebase.initializeApp({
   apiKey:"AIzaSyCJ43W-7afDkW4IgA_bPBw42rsEELhC2Vc",
   authDomain:"rideconnect-dbcb8.firebaseapp.com",
@@ -375,11 +333,9 @@ firebase.initializeApp({
   appId:"1:219375068042:web:b00ec4e54dc8726d095e73"
 });
 const db=firebase.firestore();
+const auth=firebase.auth();
 
-let myId=localStorage.getItem('rcUid')||(Math.random().toString(36).slice(2)+Date.now().toString(36));
-localStorage.setItem('rcUid',myId);
-db.collection("riders").doc(myId).delete().catch(()=>{});
-
+let myId=null; // ★ 匿名ログイン後にUIDをセット
 let myName='',myBike='',myPref='',myCity='',myPhoto='';
 let selectedPrefs=[],isActive=false,riders={};
 let currentMainTab='area',currentPref='',directTarget=null;
@@ -390,6 +346,30 @@ function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').repl
 function fmt(ts){if(!ts)return '';const d=ts.toDate?ts.toDate():new Date();return d.toLocaleTimeString('ja-JP',{hour:'2-digit',minute:'2-digit'});}
 function roomId(a,b){return [a,b].sort().join('_');}
 function toast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2200);}
+
+/* ── ★ 匿名ログイン ── */
+window.addEventListener('load',()=>{
+  buildPrefModal();
+  // 前回の入力を復元
+  const n=localStorage.getItem('rcName'),b=localStorage.getItem('rcBike');
+  const p=localStorage.getItem('rcPref'),c=localStorage.getItem('rcCity');
+  const sp=localStorage.getItem('rcSelectedPrefs'),ph=localStorage.getItem('rcPhoto');
+  if(n)document.getElementById('inputName').value=n;
+  if(b)document.getElementById('inputBike').value=b;
+  if(p)document.getElementById('inputPref').value=p;
+  if(c)document.getElementById('inputCity').value=c;
+  if(sp){selectedPrefs=JSON.parse(sp);updateSelectedDisplay();}
+  if(ph){myPhoto=ph;document.getElementById('bikePhotoImg').src=ph;document.getElementById('bikePhotoPreview').classList.add('has-img');}
+
+  // 匿名ログイン（既にログイン済みならそのまま使う）
+  auth.onAuthStateChanged(user=>{
+    if(user){
+      myId=user.uid;
+    } else {
+      auth.signInAnonymously().catch(e=>console.error('Auth error:',e));
+    }
+  });
+});
 
 function handlePhotoSelect(e){
   const file=e.target.files[0];if(!file)return;
@@ -440,6 +420,7 @@ function openPrefModal(){document.getElementById('prefModal').classList.add('ope
 function closePrefModal(){document.getElementById('prefModal').classList.remove('open');updateSelectedDisplay();}
 
 function startApp(){
+  if(!myId){toast('認証中です。少し待ってからもう一度お試しください。');return;}
   const n=document.getElementById('inputName').value.trim();
   const b=document.getElementById('inputBike').value.trim();
   const p=document.getElementById('inputPref').value;
@@ -451,6 +432,8 @@ function startApp(){
   localStorage.setItem('rcPref',p);localStorage.setItem('rcCity',c);
   localStorage.setItem('rcSelectedPrefs',JSON.stringify(selectedPrefs));
   if(myPhoto)localStorage.setItem('rcPhoto',myPhoto);
+  // 起動時に前回のデータを削除
+  db.collection('riders').doc(myId).delete().catch(()=>{});
   document.getElementById('regionLabel').textContent=c?p+' '+c:p;
   document.getElementById('setupScreen').classList.remove('active');
   document.getElementById('mainScreen').classList.add('active');
@@ -458,19 +441,6 @@ function startApp(){
   selectedPrefs.forEach(pref=>listenAreaChat(pref));
   buildPrefTabs();currentPref=myPref;
 }
-
-window.addEventListener('load',()=>{
-  buildPrefModal();
-  const n=localStorage.getItem('rcName'),b=localStorage.getItem('rcBike');
-  const p=localStorage.getItem('rcPref'),c=localStorage.getItem('rcCity');
-  const sp=localStorage.getItem('rcSelectedPrefs'),ph=localStorage.getItem('rcPhoto');
-  if(n)document.getElementById('inputName').value=n;
-  if(b)document.getElementById('inputBike').value=b;
-  if(p)document.getElementById('inputPref').value=p;
-  if(c)document.getElementById('inputCity').value=c;
-  if(sp){selectedPrefs=JSON.parse(sp);updateSelectedDisplay();}
-  if(ph){myPhoto=ph;document.getElementById('bikePhotoImg').src=ph;document.getElementById('bikePhotoPreview').classList.add('has-img');}
-});
 
 function listenRiders(){
   if(unsubRiders){unsubRiders();unsubRiders=null;}

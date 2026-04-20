@@ -92,6 +92,7 @@ body{background:var(--bg);color:var(--white);font-family:'Noto Sans JP',sans-ser
 .chat-input-row{display:flex;gap:8px;padding:10px 16px 20px;background:var(--surface);border-top:1px solid #2a2a2a;flex-shrink:0;}
 .chat-input{flex:1;background:#2a2a2a;border:1px solid #333;border-radius:22px;padding:10px 16px;color:var(--white);font-family:'Noto Sans JP',sans-serif;font-size:14px;outline:none;}
 .chat-input:focus{border-color:var(--orange);}
+.chat-input{resize:none;overflow-y:auto;line-height:1.4;}
 .send-btn{width:44px;height:44px;border-radius:50%;background:var(--orange);border:none;font-size:20px;cursor:pointer;flex-shrink:0;}
 .send-btn:disabled{opacity:.4;}
 .empty-msg{text-align:center;color:var(--gray);font-size:13px;padding:32px 16px;align-self:center;}
@@ -171,7 +172,7 @@ body{background:var(--bg);color:var(--white);font-family:'Noto Sans JP',sans-ser
   </div>
   <div class="messages-list" id="messagesList"></div>
   <div class="chat-input-row">
-    <input class="chat-input" id="chatInput" placeholder="メッセージを入力..." maxlength="200">
+    <textarea class="chat-input" id="chatInput" placeholder="メッセージを入力..." maxlength="200" rows="1"></textarea>
     <button class="send-btn" id="sendBtn" onclick="sendMessage()">➤</button>
   </div>
 </div>
@@ -394,7 +395,12 @@ function sendMessage(){
   }
 }
 
-document.getElementById('chatInput').addEventListener('keydown',e=>{if(e.key==='Enter')sendMessage();});
+// Enterキーは改行のみ、送信はボタンで
+// 入力に合わせて高さ自動調整
+document.getElementById('chatInput').addEventListener('input',function(){
+  this.style.height='auto';
+  this.style.height=Math.min(this.scrollHeight,120)+'px';
+});
 window.addEventListener('beforeunload',()=>{if(isActive)removeLocation();});
 </script>
 </body>

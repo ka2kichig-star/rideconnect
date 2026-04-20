@@ -54,6 +54,26 @@ input[type=file]{display:none;}
 .pref-check-label{font-size:13px;}
 .btn-start{width:100%;background:var(--orange);color:#000;font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:3px;border:none;border-radius:12px;padding:15px;cursor:pointer;margin-top:4px;}
 .btn-start:active{transform:scale(.97);}
+
+/* 利用規約リンク */
+.legal-links{display:flex;gap:16px;justify-content:center;flex-wrap:wrap;padding:4px 0;}
+.legal-link{font-size:11px;color:var(--gray);text-decoration:underline;cursor:pointer;background:none;border:none;font-family:'Noto Sans JP',sans-serif;}
+.legal-link:active{color:var(--orange);}
+
+/* 法的モーダル */
+.legal-modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.9);z-index:300;flex-direction:column;}
+.legal-modal.open{display:flex;}
+.legal-modal-inner{background:var(--surface);border-radius:20px 20px 0 0;margin-top:60px;flex:1;display:flex;flex-direction:column;overflow:hidden;}
+.legal-modal-header{display:flex;align-items:center;justify-content:space-between;padding:16px 20px;border-bottom:1px solid #2a2a2a;flex-shrink:0;}
+.legal-modal-header h3{font-size:16px;font-weight:700;}
+.legal-modal-close{background:none;border:none;color:var(--gray);font-size:24px;cursor:pointer;padding:0 4px;}
+.legal-modal-body{overflow-y:auto;padding:20px;flex:1;}
+.legal-modal-body h4{font-size:14px;font-weight:700;color:var(--orange);margin:20px 0 8px;}
+.legal-modal-body h4:first-child{margin-top:0;}
+.legal-modal-body p{font-size:13px;color:#ccc;line-height:1.8;margin-bottom:8px;}
+.legal-modal-body ul{padding-left:20px;margin-bottom:8px;}
+.legal-modal-body ul li{font-size:13px;color:#ccc;line-height:1.8;}
+
 .header{display:flex;align-items:center;justify-content:space-between;padding:12px 16px 10px;background:var(--bg);border-bottom:1px solid #2a2a2a;flex-shrink:0;z-index:100;}
 .logo{font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:3px;color:var(--orange);}
 .logo span{color:var(--white);}
@@ -113,8 +133,6 @@ input[type=file]{display:none;}
 .direct-rider-info .region{font-size:11px;color:var(--blue);margin-top:2px;}
 .messages-list{flex:1;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:10px;min-height:0;}
 .msg-wrap{display:flex;flex-direction:column;}
-
-/* 相手メッセージ行：アイコン + 吹き出し + DMボタン */
 .msg-theirs-row{display:flex;align-items:flex-end;gap:6px;}
 .msg-sender-icon{width:28px;height:28px;border-radius:50%;background:var(--orange);display:flex;align-items:center;justify-content:center;font-size:12px;flex-shrink:0;overflow:hidden;border:1px solid #444;align-self:flex-end;}
 .msg-sender-icon img{width:100%;height:100%;object-fit:cover;}
@@ -125,40 +143,11 @@ input[type=file]{display:none;}
 .msg-bubble.theirs{background:#2a2a2a;color:var(--white);align-self:flex-start;border-bottom-left-radius:4px;}
 .msg-meta{font-size:10px;color:var(--gray);margin-top:3px;}
 .msg-meta.right{text-align:right;}
-
-/* ★ DMボタン：メッセージの横に常時表示 */
-.dm-btn{
-  flex-shrink:0;
-  width:32px;height:32px;
-  border-radius:50%;
-  background:#1a1a2e;
-  border:1px solid var(--blue);
-  color:var(--blue);
-  font-size:14px;
-  display:flex;align-items:center;justify-content:center;
-  cursor:pointer;
-  align-self:flex-end;
-  margin-bottom:2px;
-}
+.dm-btn{flex-shrink:0;width:32px;height:32px;border-radius:50%;background:#1a1a2e;border:1px solid var(--blue);color:var(--blue);font-size:14px;display:flex;align-items:center;justify-content:center;cursor:pointer;align-self:flex-end;margin-bottom:2px;}
 .dm-btn:active{background:var(--blue);color:#000;}
-
-/* 自分メッセージの削除ボタン */
-.del-btn{
-  flex-shrink:0;
-  width:28px;height:28px;
-  border-radius:50%;
-  background:transparent;
-  border:1px solid #333;
-  color:var(--gray);
-  font-size:12px;
-  display:flex;align-items:center;justify-content:center;
-  cursor:pointer;
-  align-self:flex-end;
-  margin-bottom:2px;
-}
+.del-btn{flex-shrink:0;width:28px;height:28px;border-radius:50%;background:transparent;border:1px solid #333;color:var(--gray);font-size:12px;display:flex;align-items:center;justify-content:center;cursor:pointer;align-self:flex-end;margin-bottom:2px;}
 .del-btn:active{background:var(--red);border-color:var(--red);color:#fff;}
 .msg-mine-row{display:flex;align-items:flex-end;gap:6px;justify-content:flex-end;}
-
 .chat-input-row{display:flex;gap:8px;padding:10px 16px 20px;background:var(--surface);border-top:1px solid #2a2a2a;flex-shrink:0;}
 .chat-input{flex:1;background:#2a2a2a;border:1px solid #333;border-radius:22px;padding:10px 16px;color:var(--white);font-family:'Noto Sans JP',sans-serif;font-size:14px;outline:none;resize:none;overflow-y:auto;line-height:1.4;}
 .chat-input:focus{border-color:var(--orange);}
@@ -210,6 +199,13 @@ input[type=file]{display:none;}
       <button class="pref-toggle-btn" onclick="openPrefModal()">＋ 都道府県を選ぶ</button>
     </div>
     <button class="btn-start" onclick="startApp()">START RIDING 🏍️</button>
+
+    <!-- 法的リンク -->
+    <div class="legal-links">
+      <button class="legal-link" onclick="openLegal('privacy')">プライバシーポリシー</button>
+      <button class="legal-link" onclick="openLegal('terms')">利用規約</button>
+      <button class="legal-link" onclick="openLegal('operator')">運営者情報</button>
+    </div>
   </div>
 </div>
 
@@ -222,6 +218,17 @@ input[type=file]{display:none;}
       <button class="pref-modal-done" onclick="closePrefModal()">完了</button>
     </div>
     <div class="pref-list" id="prefList"></div>
+  </div>
+</div>
+
+<!-- 法的モーダル -->
+<div class="legal-modal" id="legalModal">
+  <div class="legal-modal-inner">
+    <div class="legal-modal-header">
+      <h3 id="legalTitle">-</h3>
+      <button class="legal-modal-close" onclick="closeLegal()">×</button>
+    </div>
+    <div class="legal-modal-body" id="legalBody"></div>
   </div>
 </div>
 
@@ -279,6 +286,85 @@ input[type=file]{display:none;}
 
 <script>
 const PREFS=['北海道','青森県','岩手県','宮城県','秋田県','山形県','福島県','茨城県','栃木県','群馬県','埼玉県','千葉県','東京都','神奈川県','新潟県','富山県','石川県','福井県','山梨県','長野県','岐阜県','静岡県','愛知県','三重県','滋賀県','京都府','大阪府','兵庫県','奈良県','和歌山県','鳥取県','島根県','岡山県','広島県','山口県','徳島県','香川県','愛媛県','高知県','福岡県','佐賀県','長崎県','熊本県','大分県','宮崎県','鹿児島県','沖縄県'];
+
+/* ── 法的コンテンツ ── */
+const LEGAL={
+  privacy:{
+    title:'プライバシーポリシー',
+    body:`
+      <h4>1. 収集する情報</h4>
+      <p>本サービスでは、ユーザーが入力した以下の情報を収集します。</p>
+      <ul>
+        <li>ニックネーム</li>
+        <li>バイクの車種</li>
+        <li>都道府県・市区町村（任意）</li>
+        <li>バイクの写真（任意）</li>
+        <li>チャットメッセージの内容</li>
+      </ul>
+      <h4>2. 情報の利用目的</h4>
+      <p>収集した情報は、同じエリアのライダー同士のマッチングおよびチャット機能の提供のみに使用します。第三者への販売・提供は行いません。</p>
+      <h4>3. 情報の保存</h4>
+      <p>入力された情報はGoogle Firebase（Firestore）に保存されます。ステータスをOFFにした場合、ライダー一覧からの情報は削除されます。</p>
+      <h4>4. Cookieおよびローカルストレージ</h4>
+      <p>本サービスはユーザー識別のためブラウザのローカルストレージを使用します。広告目的のトラッキングは行いません。</p>
+      <h4>5. 情報の削除</h4>
+      <p>ご自身の情報の削除をご希望の場合は、ステータスをOFFにした状態でブラウザのキャッシュ・ローカルストレージをクリアしてください。</p>
+      <h4>6. 免責事項</h4>
+      <p>ユーザー同士のやり取りにより生じたトラブルについて、運営者は一切の責任を負いません。</p>
+      <h4>7. ポリシーの変更</h4>
+      <p>本ポリシーは予告なく変更される場合があります。最新の内容は本ページをご確認ください。</p>
+    `
+  },
+  terms:{
+    title:'利用規約',
+    body:`
+      <h4>第1条（適用）</h4>
+      <p>本規約は、RideConnect（以下「本サービス」）の利用に関する条件を定めるものです。本サービスを利用することで、本規約に同意したものとみなします。</p>
+      <h4>第2条（禁止事項）</h4>
+      <p>ユーザーは以下の行為を行ってはなりません。</p>
+      <ul>
+        <li>他のユーザーへの誹謗中傷・嫌がらせ</li>
+        <li>個人情報の無断収集・流布</li>
+        <li>出会いや性的目的での利用</li>
+        <li>スパム・迷惑メッセージの送信</li>
+        <li>虚偽の情報の登録</li>
+        <li>本サービスの運営を妨害する行為</li>
+        <li>その他、法令または公序良俗に違反する行為</li>
+      </ul>
+      <h4>第3条（サービスの変更・中断・終了）</h4>
+      <p>運営者は、予告なく本サービスの内容を変更、中断、または終了することができます。これによりユーザーに生じた損害について、運営者は責任を負いません。</p>
+      <h4>第4条（免責事項）</h4>
+      <p>本サービスはユーザー同士を繋ぐプラットフォームです。ユーザー間のトラブル、実際のツーリング中の事故・トラブルについて、運営者は一切の責任を負いません。</p>
+      <h4>第5条（規約の変更）</h4>
+      <p>本規約は予告なく変更される場合があります。変更後も本サービスを継続利用した場合、変更後の規約に同意したものとみなします。</p>
+    `
+  },
+  operator:{
+    title:'運営者情報',
+    body:`
+      <h4>サービス名</h4>
+      <p>RideConnect</p>
+      <h4>運営者</h4>
+      <p>古川 勝貴</p>
+      <h4>サービスURL</h4>
+      <p>https://ka2kichig-star.github.io/rideconnect/</p>
+      <h4>サービス内容</h4>
+      <p>バイク乗り向けエリアマッチング・チャットWebアプリ</p>
+      <h4>お問い合わせ</h4>
+      <p>本サービスに関するお問い合わせは、サービス内チャット機能をご利用いただくか、GitHubページよりご連絡ください。</p>
+    `
+  }
+};
+
+function openLegal(type){
+  const data=LEGAL[type];
+  document.getElementById('legalTitle').textContent=data.title;
+  document.getElementById('legalBody').innerHTML=data.body;
+  document.getElementById('legalModal').classList.add('open');
+}
+function closeLegal(){
+  document.getElementById('legalModal').classList.remove('open');
+}
 
 firebase.initializeApp({
   apiKey:"AIzaSyCJ43W-7afDkW4IgA_bPBw42rsEELhC2Vc",
@@ -540,14 +626,11 @@ function openDirectChat(tid,tname,tbike,tphoto){
     .onSnapshot(snap=>renderMsgs(snap.docs.map(d=>({id:d.id,...d.data()})),'direct'));
   setTimeout(()=>document.getElementById('chatInput').focus(),300);
 }
-
-/* ── メッセージ描画 ── */
 function renderMsgs(msgs,type){
   const list=document.getElementById('messagesList');
   if(!msgs.length){
     list.innerHTML=`<div class="empty-msg">まだメッセージがありません<br>最初に話しかけてみよう！🏍️</div>`;return;
   }
-  // senderキャッシュ
   const sc={};
   msgs.forEach(m=>{
     if(m.senderId&&m.senderId!==myId&&!sc[m.senderId]){
@@ -555,27 +638,20 @@ function renderMsgs(msgs,type){
       sc[m.senderId]={name:rd?.name||m.senderName||'',bike:rd?.bike||'',photo:rd?.photo||''};
     }
   });
-
   list.innerHTML=msgs.map(m=>{
     const mine=m.senderId===myId;
     const s=sc[m.senderId]||{};
     const sp=s.photo||'';
-
     if(mine){
-      // 自分：削除ボタン付き
-      const delId='del_'+m.id;
       return `<div class="msg-wrap">
         <div class="msg-mine-row">
-          <button class="del-btn" id="${delId}" onclick="deleteMsg('${m.id}','${type}')">✕</button>
+          <button class="del-btn" onclick="deleteMsg('${m.id}','${type}')">✕</button>
           <div class="msg-bubble mine">${esc(m.text)}</div>
         </div>
         <div class="msg-meta right">${fmt(m.createdAt)}</div>
       </div>`;
     } else {
-      // 相手：アイコン＋名前＋吹き出し＋💬ボタン
       const icon=sp?`<div class="msg-sender-icon"><img src="${sp}" alt=""></div>`:`<div class="msg-sender-icon">🏍️</div>`;
-      const dmId='dm_'+m.id;
-      // DMボタンのデータをエスケープして埋め込む
       const sid=esc(m.senderId||'');
       const sname=esc(s.name||m.senderName||'');
       const sbike=esc(s.bike||'');
@@ -588,14 +664,13 @@ function renderMsgs(msgs,type){
             <div class="msg-bubble theirs">${esc(m.text)}</div>
             <div class="msg-meta">${fmt(m.createdAt)}</div>
           </div>
-          <button class="dm-btn" id="${dmId}" onclick="openDirectChat('${sid}','${sname}','${sbike}','${sphoto}')">💬</button>
+          <button class="dm-btn" onclick="openDirectChat('${sid}','${sname}','${sbike}','${sphoto}')">💬</button>
         </div>
       </div>`;
     }
   }).join('');
   list.scrollTop=list.scrollHeight;
 }
-
 function deleteMsg(msgId,type){
   if(!confirm('このメッセージを削除しますか？'))return;
   if(type==='area'){
@@ -604,7 +679,6 @@ function deleteMsg(msgId,type){
     db.collection('directChat').doc(roomId(myId,directTarget.id)).collection('messages').doc(msgId).delete();
   }
 }
-
 function sendMessage(){
   const input=document.getElementById('chatInput'),text=input.value.trim();
   if(!text)return;

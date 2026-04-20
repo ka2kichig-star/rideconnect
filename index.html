@@ -26,7 +26,7 @@ body{background:var(--bg);color:var(--white);font-family:'Noto Sans JP',sans-ser
 .setup-form input{width:100%;background:#2a2a2a;border:1px solid #333;border-radius:10px;padding:13px 16px;color:var(--white);font-family:'Noto Sans JP',sans-serif;font-size:16px;outline:none;transition:border-color .2s;}
 .setup-form input:focus{border-color:var(--orange);}
 
-/* バイク写真アップロード */
+/* バイク写真 */
 .bike-photo-upload{width:100%;display:flex;flex-direction:column;gap:8px;}
 .bike-photo-preview{width:100%;height:160px;border-radius:12px;background:#2a2a2a;border:2px dashed #444;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;overflow:hidden;transition:border-color .2s;position:relative;}
 .bike-photo-preview:active{border-color:var(--orange);}
@@ -40,7 +40,7 @@ body{background:var(--bg);color:var(--white);font-family:'Noto Sans JP',sans-ser
 .bike-photo-preview.has-img .bike-photo-change{display:block;}
 input[type=file]{display:none;}
 
-/* 都道府県チェックボックス */
+/* 都道府県 */
 .pref-section{width:100%;}
 .pref-section-label{font-size:11px;color:var(--gray);letter-spacing:1px;text-transform:uppercase;margin-bottom:8px;display:block;}
 .pref-selected-display{background:#2a2a2a;border:1px solid #333;border-radius:10px;padding:10px 14px;min-height:44px;margin-bottom:8px;font-size:13px;color:var(--white);line-height:1.8;}
@@ -55,7 +55,7 @@ input[type=file]{display:none;}
 .pref-list{overflow-y:auto;padding:12px 16px 24px;display:grid;grid-template-columns:1fr 1fr;gap:8px;}
 .pref-check-item{display:flex;align-items:center;gap:8px;background:var(--card);border:1px solid #2f2f2f;border-radius:10px;padding:10px 12px;cursor:pointer;transition:border-color .2s;}
 .pref-check-item.checked{border-color:var(--orange);background:#1a0e00;}
-.pref-check-box{width:18px;height:18px;border-radius:4px;border:2px solid #555;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:12px;transition:all .2s;}
+.pref-check-box{width:18px;height:18px;border-radius:4px;border:2px solid #555;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:12px;}
 .pref-check-item.checked .pref-check-box{background:var(--orange);border-color:var(--orange);color:#000;}
 .pref-check-label{font-size:13px;}
 
@@ -88,7 +88,6 @@ input[type=file]{display:none;}
 .rider-info .name{font-size:15px;font-weight:700;margin-bottom:3px;}
 .rider-info .bike{font-size:12px;color:var(--gray);}
 .rider-info .region{font-size:11px;color:var(--blue);margin-top:2px;}
-@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.5;transform:scale(1.3)}}
 .msg-btn-small{background:#2a2a2a;border:none;border-radius:8px;color:var(--blue);font-size:12px;font-family:'Noto Sans JP',sans-serif;padding:6px 12px;cursor:pointer;white-space:nowrap;}
 .empty-riders{text-align:center;color:var(--gray);font-size:13px;padding:48px 16px;line-height:2;}
 
@@ -107,26 +106,25 @@ input[type=file]{display:none;}
 #chatScreen{background:var(--bg);}
 .chat-header{display:flex;align-items:center;gap:12px;padding:12px 16px;background:var(--surface);border-bottom:1px solid #2a2a2a;flex-shrink:0;}
 .back-btn{background:none;border:none;color:var(--orange);font-size:22px;cursor:pointer;padding:0 4px;}
+.chat-header-avatar{width:36px;height:36px;border-radius:50%;background:var(--orange);display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0;overflow:hidden;border:2px solid #444;}
+.chat-header-avatar img{width:100%;height:100%;object-fit:cover;}
 .chat-header-info{flex:1;}
 .chat-header-name{font-size:16px;font-weight:700;}
 .chat-header-sub{font-size:11px;color:var(--gray);}
-/* チャットヘッダーアイコン */
-.chat-header-avatar{width:36px;height:36px;border-radius:50%;background:var(--orange);display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0;overflow:hidden;border:2px solid #444;}
-.chat-header-avatar img{width:100%;height:100%;object-fit:cover;}
 
 /* メインタブ */
 .chat-main-tabs{display:flex;background:var(--surface);border-bottom:1px solid #2a2a2a;flex-shrink:0;}
 .chat-main-tab{flex:1;padding:11px;background:none;border:none;color:var(--gray);font-family:'Noto Sans JP',sans-serif;font-size:13px;cursor:pointer;border-bottom:2px solid transparent;}
 .chat-main-tab.active{color:var(--orange);border-bottom-color:var(--orange);}
 
-/* 県タブ横スクロール */
+/* 県タブ */
 .pref-tabs-wrap{flex-shrink:0;background:#111;border-bottom:1px solid #2a2a2a;overflow-x:auto;scrollbar-width:none;}
 .pref-tabs-wrap::-webkit-scrollbar{display:none;}
 .pref-tabs{display:flex;padding:0 8px;white-space:nowrap;}
-.pref-tab{flex-shrink:0;padding:9px 16px;background:none;border:none;color:var(--gray);font-family:'Noto Sans JP',sans-serif;font-size:13px;cursor:pointer;border-bottom:2px solid transparent;transition:color .2s;}
+.pref-tab{flex-shrink:0;padding:9px 16px;background:none;border:none;color:var(--gray);font-family:'Noto Sans JP',sans-serif;font-size:13px;cursor:pointer;border-bottom:2px solid transparent;}
 .pref-tab.active{color:var(--orange);border-bottom-color:var(--orange);}
 
-/* 個別タブのライダー一覧 */
+/* 個別ライダー一覧 */
 .direct-riders-list{flex:1;overflow-y:auto;padding:16px;}
 .direct-rider-item{background:var(--card);border-radius:12px;padding:14px 16px;margin-bottom:10px;border:1px solid #2f2f2f;display:flex;align-items:center;gap:12px;cursor:pointer;transition:border-color .2s;}
 .direct-rider-item:active{border-color:var(--orange);}
@@ -136,22 +134,40 @@ input[type=file]{display:none;}
 .direct-rider-info .name{font-size:15px;font-weight:700;margin-bottom:3px;}
 .direct-rider-info .bike{font-size:12px;color:var(--gray);}
 .direct-rider-info .region{font-size:11px;color:var(--blue);margin-top:2px;}
-.direct-rider-arrow{color:var(--gray);font-size:18px;}
 
+/* メッセージ */
 .messages-list{flex:1;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:10px;min-height:0;}
 .msg-wrap{display:flex;flex-direction:column;}
+
+/* 送信者行（アイコン＋名前） */
+.msg-sender-row{display:flex;align-items:center;gap:6px;margin-bottom:3px;}
+.msg-sender-icon{width:24px;height:24px;border-radius:50%;background:var(--orange);display:flex;align-items:center;justify-content:center;font-size:11px;flex-shrink:0;overflow:hidden;border:1px solid #444;}
+.msg-sender-icon img{width:100%;height:100%;object-fit:cover;}
+.msg-sender-name{font-size:11px;color:var(--gray);}
+
 .msg-bubble{max-width:75%;padding:10px 14px;border-radius:16px;font-size:14px;line-height:1.5;word-break:break-word;}
 .msg-bubble.mine{background:var(--orange);color:#000;align-self:flex-end;border-bottom-right-radius:4px;font-weight:700;}
 .msg-bubble.theirs{background:#2a2a2a;color:var(--white);align-self:flex-start;border-bottom-left-radius:4px;}
 .msg-meta{font-size:10px;color:var(--gray);margin-top:3px;}
 .msg-meta.right{text-align:right;}
-.msg-sender{font-size:10px;color:var(--gray);margin-bottom:2px;}
+
+/* アクションメニュー（長押し） */
+.msg-action-menu{position:fixed;background:var(--surface);border:1px solid #333;border-radius:16px;padding:8px;z-index:500;box-shadow:0 8px 32px rgba(0,0,0,0.6);min-width:180px;}
+.msg-action-item{display:flex;align-items:center;gap:10px;padding:12px 16px;border-radius:10px;cursor:pointer;font-size:14px;transition:background .15s;}
+.msg-action-item:active{background:#2a2a2a;}
+.msg-action-item.dm{color:var(--blue);}
+.msg-action-item.del{color:var(--red);}
+
 .chat-input-row{display:flex;gap:8px;padding:10px 16px 20px;background:var(--surface);border-top:1px solid #2a2a2a;flex-shrink:0;}
 .chat-input{flex:1;background:#2a2a2a;border:1px solid #333;border-radius:22px;padding:10px 16px;color:var(--white);font-family:'Noto Sans JP',sans-serif;font-size:14px;outline:none;resize:none;overflow-y:auto;line-height:1.4;}
 .chat-input:focus{border-color:var(--orange);}
 .send-btn{width:44px;height:44px;border-radius:50%;background:var(--orange);border:none;font-size:20px;cursor:pointer;flex-shrink:0;}
 .send-btn:disabled{opacity:.4;}
 .empty-msg{text-align:center;color:var(--gray);font-size:13px;padding:32px 16px;align-self:center;}
+
+/* オーバーレイ（メニュー閉じる用） */
+.menu-overlay{display:none;position:fixed;inset:0;z-index:499;}
+.menu-overlay.show{display:block;}
 
 /* TOAST */
 .toast{position:fixed;top:70px;left:50%;transform:translateX(-50%) translateY(-10px);background:var(--orange);color:#000;font-weight:700;font-size:13px;padding:8px 20px;border-radius:20px;opacity:0;pointer-events:none;transition:opacity .3s,transform .3s;z-index:9999;white-space:nowrap;}
@@ -167,22 +183,15 @@ input[type=file]{display:none;}
   <div class="setup-form">
     <div><label>ニックネーム</label><input type="text" id="inputName" placeholder="例：太郎" maxlength="10"></div>
     <div><label>バイク</label><input type="text" id="inputBike" placeholder="例：ZX-10R" maxlength="20"></div>
-
-    <!-- バイク写真 -->
     <div class="bike-photo-upload">
       <label>バイクの写真（任意）</label>
       <div class="bike-photo-preview" id="bikePhotoPreview" onclick="document.getElementById('bikePhotoInput').click()">
-        <div class="bike-photo-placeholder">
-          <span>🏍️</span>
-          <p>タップして写真を追加</p>
-        </div>
+        <div class="bike-photo-placeholder"><span>🏍️</span><p>タップして写真を追加</p></div>
         <img id="bikePhotoImg" src="" alt="バイク写真">
         <div class="bike-photo-change">写真を変更</div>
       </div>
       <input type="file" id="bikePhotoInput" accept="image/*" onchange="handlePhotoSelect(event)">
     </div>
-
-    <!-- 自分のエリア -->
     <div class="pref-section">
       <span class="pref-section-label">自分のエリア（必須）</span>
       <select id="inputPref" style="width:100%;background:#2a2a2a;border:1px solid #333;border-radius:10px;padding:13px 16px;color:var(--white);font-family:'Noto Sans JP',sans-serif;font-size:16px;outline:none;appearance:none;background-image:url('data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 width=%2712%27 height=%278%27 viewBox=%270 0 12 8%27%3E%3Cpath d=%27M1 1l5 5 5-5%27 stroke=%27%23888%27 stroke-width=%272%27 fill=%27none%27/%3E%3C/svg%3E');background-repeat:no-repeat;background-position:right 16px center;padding-right:40px;">
@@ -199,16 +208,12 @@ input[type=file]{display:none;}
         <option>鹿児島県</option><option>沖縄県</option>
       </select>
     </div>
-
     <div><label>市区町村（任意）</label><input type="text" id="inputCity" placeholder="例：上野" maxlength="20"></div>
-
-    <!-- チャットで見たい県 -->
     <div class="pref-section">
       <span class="pref-section-label">チャットで見たい県（複数選択可）</span>
       <div class="pref-selected-display empty" id="selectedPrefDisplay">未選択（自分のエリアのみ表示）</div>
       <button class="pref-toggle-btn" onclick="openPrefModal()">＋ 都道府県を選ぶ</button>
     </div>
-
     <button class="btn-start" onclick="startApp()">START RIDING 🏍️</button>
   </div>
 </div>
@@ -264,18 +269,22 @@ input[type=file]{display:none;}
     <button class="chat-main-tab active" id="tabArea" onclick="switchMainTab('area')">🌐 エリア</button>
     <button class="chat-main-tab" id="tabDirect" onclick="switchMainTab('direct')">👤 個別</button>
   </div>
-  <!-- 県タブ（エリアのみ） -->
   <div class="pref-tabs-wrap" id="prefTabsWrap">
     <div class="pref-tabs" id="prefTabs"></div>
   </div>
-  <!-- メッセージ or ライダー一覧 -->
   <div class="messages-list" id="messagesList"></div>
   <div class="direct-riders-list" id="directRidersList" style="display:none;"></div>
-  <!-- 入力欄 -->
   <div class="chat-input-row" id="chatInputRow">
     <textarea class="chat-input" id="chatInput" placeholder="メッセージを入力..." maxlength="200" rows="1"></textarea>
     <button class="send-btn" id="sendBtn" onclick="sendMessage()">➤</button>
   </div>
+</div>
+
+<!-- 長押しメニュー -->
+<div class="menu-overlay" id="menuOverlay" onclick="closeActionMenu()"></div>
+<div class="msg-action-menu" id="msgActionMenu" style="display:none;">
+  <div class="msg-action-item dm" id="actionDM" onclick="doActionDM()">💬 個別にメッセージを送る</div>
+  <div class="msg-action-item del" id="actionDelete" style="display:none;" onclick="doActionDelete()">🗑️ メッセージを削除</div>
 </div>
 
 <div class="toast" id="toast"></div>
@@ -301,34 +310,29 @@ let myName='',myBike='',myPref='',myCity='',myPhoto='';
 let selectedPrefs=[];
 let isActive=false;
 let riders={};
-let currentMainTab='area';
-let currentPref='';
-let directTarget=null;
+let currentMainTab='area',currentPref='',directTarget=null;
 let unsubRiders=null,unsubDirect=null;
-let prefUnsubs={};
-let prefMsgsCache={};
-let unreadCount=0;
-let holdTimer=null;
+let prefUnsubs={},prefMsgsCache={};
+let unreadCount=0,holdTimer=null;
+
+// 長押しメニュー用
+let actionTarget=null; // {msgId, senderId, senderName, senderBike, senderPhoto, type}
 
 function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
 function fmt(ts){if(!ts)return '';const d=ts.toDate?ts.toDate():new Date();return d.toLocaleTimeString('ja-JP',{hour:'2-digit',minute:'2-digit'});}
 function roomId(a,b){return [a,b].sort().join('_');}
 function toast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2200);}
 
-/* ── 写真選択 ── */
+/* ── 写真 ── */
 function handlePhotoSelect(e){
-  const file=e.target.files[0];
-  if(!file)return;
+  const file=e.target.files[0];if(!file)return;
   const reader=new FileReader();
   reader.onload=ev=>{
-    // 画質を下げてリサイズ（Firestoreサイズ制限対策）
     const img=new Image();
     img.onload=()=>{
       const canvas=document.createElement('canvas');
-      const MAX=400;
-      let w=img.width,h=img.height;
-      if(w>h){if(w>MAX){h=h*MAX/w;w=MAX;}}
-      else{if(h>MAX){w=w*MAX/h;h=MAX;}}
+      const MAX=400;let w=img.width,h=img.height;
+      if(w>h){if(w>MAX){h=h*MAX/w;w=MAX;}}else{if(h>MAX){w=w*MAX/h;h=MAX;}}
       canvas.width=w;canvas.height=h;
       canvas.getContext('2d').drawImage(img,0,0,w,h);
       myPhoto=canvas.toDataURL('image/jpeg',0.7);
@@ -342,28 +346,23 @@ function handlePhotoSelect(e){
 
 /* ── 都道府県モーダル ── */
 function buildPrefModal(){
-  const list=document.getElementById('prefList');
-  list.innerHTML=PREFS.map(p=>`
+  document.getElementById('prefList').innerHTML=PREFS.map(p=>`
     <div class="pref-check-item" id="pci_${p}" onclick="togglePrefCheck('${p}')">
       <div class="pref-check-box" id="pcb_${p}"></div>
       <span class="pref-check-label">${p}</span>
-    </div>
-  `).join('');
+    </div>`).join('');
 }
 function togglePrefCheck(pref){
   const idx=selectedPrefs.indexOf(pref);
-  if(idx>=0)selectedPrefs.splice(idx,1);
-  else selectedPrefs.push(pref);
+  if(idx>=0)selectedPrefs.splice(idx,1);else selectedPrefs.push(pref);
   updatePrefCheckUI();updateSelectedDisplay();
 }
 function updatePrefCheckUI(){
   PREFS.forEach(p=>{
-    const item=document.getElementById('pci_'+p);
-    const box=document.getElementById('pcb_'+p);
+    const item=document.getElementById('pci_'+p),box=document.getElementById('pcb_'+p);
     if(!item)return;
-    const checked=selectedPrefs.includes(p);
-    item.classList.toggle('checked',checked);
-    box.textContent=checked?'✓':'';
+    const c=selectedPrefs.includes(p);
+    item.classList.toggle('checked',c);box.textContent=c?'✓':'';
   });
 }
 function updateSelectedDisplay(){
@@ -374,7 +373,7 @@ function updateSelectedDisplay(){
 function openPrefModal(){document.getElementById('prefModal').classList.add('open');updatePrefCheckUI();}
 function closePrefModal(){document.getElementById('prefModal').classList.remove('open');updateSelectedDisplay();}
 
-/* ── アプリ起動 ── */
+/* ── 起動 ── */
 function startApp(){
   const n=document.getElementById('inputName').value.trim();
   const b=document.getElementById('inputBike').value.trim();
@@ -383,10 +382,8 @@ function startApp(){
   if(!n||!b||!p){toast('名前・バイク・都道府県を入力してください');return;}
   myName=n;myBike=b;myPref=p;myCity=c;
   if(!selectedPrefs.includes(p))selectedPrefs.unshift(p);
-  localStorage.setItem('rcName',n);
-  localStorage.setItem('rcBike',b);
-  localStorage.setItem('rcPref',p);
-  localStorage.setItem('rcCity',c);
+  localStorage.setItem('rcName',n);localStorage.setItem('rcBike',b);
+  localStorage.setItem('rcPref',p);localStorage.setItem('rcCity',c);
   localStorage.setItem('rcSelectedPrefs',JSON.stringify(selectedPrefs));
   if(myPhoto)localStorage.setItem('rcPhoto',myPhoto);
   document.getElementById('regionLabel').textContent=c?p+' '+c:p;
@@ -394,49 +391,38 @@ function startApp(){
   document.getElementById('mainScreen').classList.add('active');
   listenRiders();
   selectedPrefs.forEach(pref=>listenAreaChat(pref));
-  buildPrefTabs();
-  currentPref=myPref;
+  buildPrefTabs();currentPref=myPref;
 }
 
 window.addEventListener('load',()=>{
   buildPrefModal();
-  const n=localStorage.getItem('rcName');
-  const b=localStorage.getItem('rcBike');
-  const p=localStorage.getItem('rcPref');
-  const c=localStorage.getItem('rcCity');
-  const sp=localStorage.getItem('rcSelectedPrefs');
-  const ph=localStorage.getItem('rcPhoto');
+  const n=localStorage.getItem('rcName'),b=localStorage.getItem('rcBike');
+  const p=localStorage.getItem('rcPref'),c=localStorage.getItem('rcCity');
+  const sp=localStorage.getItem('rcSelectedPrefs'),ph=localStorage.getItem('rcPhoto');
   if(n)document.getElementById('inputName').value=n;
   if(b)document.getElementById('inputBike').value=b;
   if(p)document.getElementById('inputPref').value=p;
   if(c)document.getElementById('inputCity').value=c;
   if(sp){selectedPrefs=JSON.parse(sp);updateSelectedDisplay();}
-  if(ph){
-    myPhoto=ph;
-    document.getElementById('bikePhotoImg').src=ph;
-    document.getElementById('bikePhotoPreview').classList.add('has-img');
-  }
+  if(ph){myPhoto=ph;document.getElementById('bikePhotoImg').src=ph;document.getElementById('bikePhotoPreview').classList.add('has-img');}
 });
 
 /* ── ライダー一覧 ── */
 function listenRiders(){
   if(unsubRiders){unsubRiders();unsubRiders=null;}
-  unsubRiders=db.collection('riders')
-    .where('pref','==',myPref)
-    .where('active','==',true)
+  unsubRiders=db.collection('riders').where('pref','==',myPref).where('active','==',true)
     .onSnapshot(snap=>{
       riders={};
       snap.docs.forEach(d=>{if(d.id!==myId)riders[d.id]=d.data();});
       renderCards();
-      // 個別タブが開いてたら更新
       if(currentMainTab==='direct')renderDirectRidersList();
     });
 }
 function saveLocation(){
   db.collection('riders').doc(myId).set({
     name:myName,bike:myBike,pref:myPref,city:myCity,
-    photo:myPhoto||'',
-    active:true,updatedAt:firebase.firestore.FieldValue.serverTimestamp()
+    photo:myPhoto||'',active:true,
+    updatedAt:firebase.firestore.FieldValue.serverTimestamp()
   });
 }
 function removeLocation(){db.collection('riders').doc(myId).delete();}
@@ -450,9 +436,11 @@ function toggleStatus(){
   isActive?saveLocation():removeLocation();
 }
 
-function avatarHTML(photo,fallback='🏍️',cls='rider-avatar'){
-  if(photo)return `<div class="${cls}"><img src="${photo}" alt="バイク"></div>`;
-  return `<div class="${cls}">${fallback}</div>`;
+function avatarEl(photo,fallback,cls){
+  const div=document.createElement('div');div.className=cls;
+  if(photo){const img=document.createElement('img');img.src=photo;img.alt='';div.appendChild(img);}
+  else div.textContent=fallback;
+  return div.outerHTML;
 }
 
 function renderCards(){
@@ -460,13 +448,12 @@ function renderCards(){
   const entries=Object.entries(riders);
   document.getElementById('riderCount').textContent=entries.length;
   if(!entries.length){
-    list.innerHTML=`<div class="empty-riders">🏍️<br>${myPref}にまだライダーがいません<br><br>「走りたい！」をONにして<br>仲間を待ちましょう！</div>`;
-    return;
+    list.innerHTML=`<div class="empty-riders">🏍️<br>${myPref}にまだライダーがいません<br><br>「走りたい！」をONにして<br>仲間を待ちましょう！</div>`;return;
   }
   list.innerHTML=entries.map(([id,d])=>`
     <div class="rider-item" onclick="openDirectChat('${id}','${esc(d.name)}','${esc(d.bike)}','${esc(d.photo||'')}')">
       <div class="rider-item-left">
-        ${avatarHTML(d.photo,'🏍️','rider-avatar')}
+        ${avatarEl(d.photo,'🏍️','rider-avatar')}
         <div class="rider-info">
           <div class="name">${esc(d.name)}</div>
           <div class="bike">${esc(d.bike)}</div>
@@ -474,37 +461,31 @@ function renderCards(){
         </div>
       </div>
       <button class="msg-btn-small" onclick="event.stopPropagation();openDirectChat('${id}','${esc(d.name)}','${esc(d.bike)}','${esc(d.photo||'')}')">💬 話す</button>
-    </div>
-  `).join('');
+    </div>`).join('');
 }
 
-/* ── 個別タブのライダー一覧 ── */
 function renderDirectRidersList(){
   const list=document.getElementById('directRidersList');
   const entries=Object.entries(riders);
   if(!entries.length){
-    list.innerHTML=`<div class="empty-msg">🏍️ ${myPref}に走りたいライダーがいません<br>ライダーが「走りたい！」をONにすると表示されます</div>`;
-    return;
+    list.innerHTML=`<div class="empty-msg">🏍️ ${myPref}に走りたいライダーがいません</div>`;return;
   }
   list.innerHTML=entries.map(([id,d])=>`
     <div class="direct-rider-item" onclick="openDirectChat('${id}','${esc(d.name)}','${esc(d.bike)}','${esc(d.photo||'')}')">
-      ${avatarHTML(d.photo,'🏍️','direct-rider-avatar')}
+      ${avatarEl(d.photo,'🏍️','direct-rider-avatar')}
       <div class="direct-rider-info">
         <div class="name">${esc(d.name)}</div>
         <div class="bike">${esc(d.bike)}</div>
         <div class="region">📍 ${esc(d.pref)}${d.city?' '+esc(d.city):''}</div>
       </div>
-      <div class="direct-rider-arrow">›</div>
-    </div>
-  `).join('');
+      <span style="color:var(--gray);font-size:18px;">›</span>
+    </div>`).join('');
 }
 
-/* ── チャット ── */
+/* ── 県タブ ── */
 function buildPrefTabs(){
-  const wrap=document.getElementById('prefTabs');
-  wrap.innerHTML=selectedPrefs.map(p=>`
-    <button class="pref-tab ${p===currentPref?'active':''}" id="ptab_${p}" onclick="switchPrefTab('${p}')">${p}</button>
-  `).join('');
+  document.getElementById('prefTabs').innerHTML=selectedPrefs.map(p=>`
+    <button class="pref-tab ${p===currentPref?'active':''}" id="ptab_${p}" onclick="switchPrefTab('${p}')">${p}</button>`).join('');
 }
 
 function listenAreaChat(pref){
@@ -516,21 +497,17 @@ function listenAreaChat(pref){
       prefMsgsCache[pref]=msgs;
       const isViewing=document.getElementById('chatScreen').classList.contains('active')
         &&currentMainTab==='area'&&currentPref===pref;
-      if(!isViewing){
-        if(snap.docChanges().some(c=>c.type==='added'&&c.doc.data().senderId!==myId)){
-          unreadCount++;
-          const b=document.getElementById('chatBadge');
-          b.textContent=unreadCount>9?'9+':unreadCount;
-          b.classList.add('show');
-        }
+      if(!isViewing&&snap.docChanges().some(c=>c.type==='added'&&c.doc.data().senderId!==myId)){
+        unreadCount++;
+        const b=document.getElementById('chatBadge');
+        b.textContent=unreadCount>9?'9+':unreadCount;b.classList.add('show');
       }
       if(isViewing)renderMsgs(msgs,'area');
     });
 }
 
 function openChat(){
-  unreadCount=0;
-  document.getElementById('chatBadge').classList.remove('show');
+  unreadCount=0;document.getElementById('chatBadge').classList.remove('show');
   document.getElementById('mainScreen').classList.remove('active');
   document.getElementById('chatScreen').classList.add('active');
   switchMainTab('area');
@@ -544,41 +521,31 @@ function switchMainTab(tab){
   currentMainTab=tab;
   document.getElementById('tabArea').classList.toggle('active',tab==='area');
   document.getElementById('tabDirect').classList.toggle('active',tab==='direct');
-
   if(tab==='area'){
-    // エリアタブ
     document.getElementById('prefTabsWrap').style.display='block';
     document.getElementById('messagesList').style.display='flex';
     document.getElementById('directRidersList').style.display='none';
     document.getElementById('chatInputRow').style.display='flex';
-    // ヘッダーリセット
-    document.getElementById('chatHeaderAvatar').innerHTML='🌐';
-    document.getElementById('chatHeaderAvatar').style.background='transparent';
     switchPrefTab(currentPref||myPref);
   } else {
-    // 個別タブ：ライダー一覧を表示
     document.getElementById('prefTabsWrap').style.display='none';
     document.getElementById('messagesList').style.display='none';
     document.getElementById('directRidersList').style.display='block';
     document.getElementById('chatInputRow').style.display='none';
     document.getElementById('chatTitle').textContent='個別チャット';
     document.getElementById('chatSub').textContent='話しかけたいライダーを選ぼう';
-    document.getElementById('chatHeaderAvatar').innerHTML='👤';
-    document.getElementById('chatHeaderAvatar').style.background='transparent';
+    const av=document.getElementById('chatHeaderAvatar');
+    av.innerHTML='👤';av.style.background='transparent';
     renderDirectRidersList();
   }
 }
 
 function switchPrefTab(pref){
   currentPref=pref;
-  selectedPrefs.forEach(p=>{
-    const el=document.getElementById('ptab_'+p);
-    if(el)el.classList.toggle('active',p===pref);
-  });
+  selectedPrefs.forEach(p=>{const el=document.getElementById('ptab_'+p);if(el)el.classList.toggle('active',p===pref);});
   document.getElementById('chatTitle').textContent=pref+'のチャット';
-  document.getElementById('chatSub').textContent='同じエリアのライダーと話そう';
-  document.getElementById('chatHeaderAvatar').innerHTML='🌐';
-  document.getElementById('chatHeaderAvatar').style.background='transparent';
+  document.getElementById('chatSub').textContent='長押しで個別メッセージも送れます';
+  const av=document.getElementById('chatHeaderAvatar');av.innerHTML='🌐';av.style.background='transparent';
   const cached=prefMsgsCache[pref]||[];
   if(cached.length)renderMsgs(cached,'area');
   else document.getElementById('messagesList').innerHTML=`<div class="empty-msg">まだメッセージがありません<br>最初に話しかけてみよう！🏍️</div>`;
@@ -589,10 +556,9 @@ function switchPrefTab(pref){
 function openDirectChat(tid,tname,tbike,tphoto){
   directTarget={id:tid,name:tname,bike:tbike,photo:tphoto};
   currentMainTab='direct';
-  // ヘッダー更新
-  const avatarEl=document.getElementById('chatHeaderAvatar');
-  if(tphoto){avatarEl.innerHTML=`<img src="${tphoto}" alt="">`;avatarEl.style.background='none';}
-  else{avatarEl.innerHTML='🏍️';avatarEl.style.background='var(--orange)';}
+  const av=document.getElementById('chatHeaderAvatar');
+  if(tphoto){av.innerHTML=`<img src="${tphoto}" alt="">`;av.style.background='none';}
+  else{av.innerHTML='🏍️';av.style.background='var(--orange)';}
   document.getElementById('chatTitle').textContent=tname;
   document.getElementById('chatSub').textContent=tbike;
   document.getElementById('tabArea').classList.remove('active');
@@ -609,37 +575,106 @@ function openDirectChat(tid,tname,tbike,tphoto){
     .onSnapshot(snap=>renderMsgs(snap.docs.map(d=>({id:d.id,...d.data()})),'direct'));
 }
 
+/* ── メッセージ描画 ── */
 function renderMsgs(msgs,type){
   const list=document.getElementById('messagesList');
   if(!msgs.length){
-    list.innerHTML=`<div class="empty-msg">まだメッセージがありません<br>最初に話しかけてみよう！🏍️</div>`;
-    return;
+    list.innerHTML=`<div class="empty-msg">まだメッセージがありません<br>最初に話しかけてみよう！🏍️</div>`;return;
   }
+
+  // senderIdからriderデータを引く（エリアチャット用）
   list.innerHTML=msgs.map(m=>{
     const mine=m.senderId===myId;
-    const del=mine
-      ?`ontouchstart="startHold('${m.id}','${type}')" ontouchend="cancelHold()" onmousedown="startHold('${m.id}','${type}')" onmouseup="cancelHold()"`:'';
-    return `<div class="msg-wrap">
-      ${!mine?`<div class="msg-sender">${esc(m.senderName||'')}</div>`:''}
-      <div class="msg-bubble ${mine?'mine':'theirs'}" ${del}>${esc(m.text)}</div>
-      <div class="msg-meta ${mine?'right':''}">${fmt(m.createdAt)}${mine?' ✕長押し削除':''}</div>
-    </div>`;
+    const riderData=riders[m.senderId]||null;
+    const senderPhoto=riderData?.photo||'';
+
+    if(mine){
+      // 自分のメッセージ：長押しで削除
+      return `<div class="msg-wrap">
+        <div class="msg-bubble mine"
+          ontouchstart="startHoldOwn('${m.id}','${type}',event)" ontouchend="cancelHold()"
+          onmousedown="startHoldOwn('${m.id}','${type}',event)" onmouseup="cancelHold()"
+        >${esc(m.text)}</div>
+        <div class="msg-meta right">${fmt(m.createdAt)} ✕長押し削除</div>
+      </div>`;
+    } else {
+      // 相手のメッセージ：アイコン＋名前＋長押しでDMメニュー
+      const iconHtml=senderPhoto
+        ?`<div class="msg-sender-icon"><img src="${senderPhoto}" alt=""></div>`
+        :`<div class="msg-sender-icon">🏍️</div>`;
+      return `<div class="msg-wrap">
+        <div class="msg-sender-row">
+          ${iconHtml}
+          <span class="msg-sender-name">${esc(m.senderName||'')}</span>
+        </div>
+        <div class="msg-bubble theirs"
+          ontouchstart="startHoldOther('${m.id}','${esc(m.senderId)}','${esc(m.senderName||'')}','${esc(riderData?.bike||'')}','${esc(senderPhoto)}','${type}',event)" ontouchend="cancelHold()"
+          onmousedown="startHoldOther('${m.id}','${esc(m.senderId)}','${esc(m.senderName||'')}','${esc(riderData?.bike||'')}','${esc(senderPhoto)}','${type}',event)" onmouseup="cancelHold()"
+        >${esc(m.text)}</div>
+        <div class="msg-meta">${fmt(m.createdAt)}</div>
+      </div>`;
+    }
   }).join('');
   list.scrollTop=list.scrollHeight;
 }
 
-function startHold(msgId,type){
-  holdTimer=setTimeout(()=>{
-    if(confirm('このメッセージを削除しますか？')){
-      if(type==='area'){
-        db.collection('areaChat').doc('area_'+currentPref).collection('messages').doc(msgId).delete();
-      } else if(directTarget){
-        db.collection('directChat').doc(roomId(myId,directTarget.id)).collection('messages').doc(msgId).delete();
-      }
-    }
+/* ── 長押しメニュー ── */
+let holdTimer2=null;
+
+function startHoldOwn(msgId,type,e){
+  holdTimer2=setTimeout(()=>{
+    actionTarget={msgId,type,isMine:true};
+    document.getElementById('actionDM').style.display='none';
+    document.getElementById('actionDelete').style.display='flex';
+    showActionMenu(e);
   },600);
 }
-function cancelHold(){clearTimeout(holdTimer);}
+
+function startHoldOther(msgId,senderId,senderName,senderBike,senderPhoto,type,e){
+  holdTimer2=setTimeout(()=>{
+    actionTarget={msgId,senderId,senderName,senderBike,senderPhoto,type,isMine:false};
+    document.getElementById('actionDM').style.display='flex';
+    document.getElementById('actionDelete').style.display='none';
+    showActionMenu(e);
+  },600);
+}
+
+function cancelHold(){clearTimeout(holdTimer2);}
+
+function showActionMenu(e){
+  const menu=document.getElementById('msgActionMenu');
+  const overlay=document.getElementById('menuOverlay');
+  menu.style.display='block';
+  overlay.classList.add('show');
+  // タッチ位置に表示
+  const touch=e.touches?e.touches[0]:e;
+  const x=Math.min(touch.clientX,window.innerWidth-200);
+  const y=Math.min(touch.clientY,window.innerHeight-120);
+  menu.style.left=x+'px';menu.style.top=y+'px';
+}
+
+function closeActionMenu(){
+  document.getElementById('msgActionMenu').style.display='none';
+  document.getElementById('menuOverlay').classList.remove('show');
+  actionTarget=null;
+}
+
+function doActionDM(){
+  if(!actionTarget)return;
+  closeActionMenu();
+  openDirectChat(actionTarget.senderId,actionTarget.senderName,actionTarget.senderBike,actionTarget.senderPhoto);
+}
+
+function doActionDelete(){
+  if(!actionTarget)return;
+  closeActionMenu();
+  if(!confirm('このメッセージを削除しますか？'))return;
+  if(actionTarget.type==='area'){
+    db.collection('areaChat').doc('area_'+currentPref).collection('messages').doc(actionTarget.msgId).delete();
+  } else if(directTarget){
+    db.collection('directChat').doc(roomId(myId,directTarget.id)).collection('messages').doc(actionTarget.msgId).delete();
+  }
+}
 
 function sendMessage(){
   const input=document.getElementById('chatInput'),text=input.value.trim();

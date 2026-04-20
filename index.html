@@ -122,19 +122,32 @@ input[type=file]{display:none;}
 .msg-bubble.theirs{background:#2a2a2a;color:var(--white);align-self:flex-start;border-bottom-left-radius:4px;}
 .msg-meta{font-size:10px;color:var(--gray);margin-top:3px;}
 .msg-meta.right{text-align:right;}
-.msg-action-menu{position:fixed;background:var(--surface);border:1px solid #444;border-radius:16px;padding:6px;z-index:600;box-shadow:0 8px 32px rgba(0,0,0,0.7);min-width:200px;}
-.msg-action-item{display:flex;align-items:center;gap:10px;padding:14px 16px;border-radius:10px;cursor:pointer;font-size:14px;font-family:'Noto Sans JP',sans-serif;}
-.msg-action-item:active{background:#2a2a2a;}
+
+/* ★ overlayをz-index 599、メニューを600にして
+   overlayはpointer-events:noneにし、メニュー外タップはdocumentで検知 */
+.action-overlay{display:none;position:fixed;inset:0;z-index:599;background:rgba(0,0,0,0.3);}
+.action-overlay.show{display:block;}
+.msg-action-menu{
+  position:fixed;background:var(--surface);border:1px solid #444;
+  border-radius:16px;padding:6px;z-index:600;
+  box-shadow:0 8px 32px rgba(0,0,0,0.7);min-width:200px;
+  display:none;
+}
+.msg-action-item{
+  display:flex;align-items:center;gap:10px;
+  padding:14px 16px;border-radius:10px;cursor:pointer;
+  font-size:14px;font-family:'Noto Sans JP',sans-serif;
+  -webkit-user-select:none;user-select:none;
+}
 .msg-action-item.dm{color:var(--blue);}
 .msg-action-item.del{color:var(--red);}
+
 .chat-input-row{display:flex;gap:8px;padding:10px 16px 20px;background:var(--surface);border-top:1px solid #2a2a2a;flex-shrink:0;}
 .chat-input{flex:1;background:#2a2a2a;border:1px solid #333;border-radius:22px;padding:10px 16px;color:var(--white);font-family:'Noto Sans JP',sans-serif;font-size:14px;outline:none;resize:none;overflow-y:auto;line-height:1.4;}
 .chat-input:focus{border-color:var(--orange);}
 .send-btn{width:44px;height:44px;border-radius:50%;background:var(--orange);border:none;font-size:20px;cursor:pointer;flex-shrink:0;}
 .send-btn:disabled{opacity:.4;}
 .empty-msg{text-align:center;color:var(--gray);font-size:13px;padding:32px 16px;align-self:center;}
-.menu-overlay{display:none;position:fixed;inset:0;z-index:599;}
-.menu-overlay.show{display:block;}
 .toast{position:fixed;top:70px;left:50%;transform:translateX(-50%) translateY(-10px);background:var(--orange);color:#000;font-weight:700;font-size:13px;padding:8px 20px;border-radius:20px;opacity:0;pointer-events:none;transition:opacity .3s,transform .3s;z-index:9999;white-space:nowrap;}
 .toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
 </style>
@@ -245,10 +258,11 @@ input[type=file]{display:none;}
   </div>
 </div>
 
-<div class="menu-overlay" id="menuOverlay" onclick="closeActionMenu()"></div>
-<div class="msg-action-menu" id="msgActionMenu" style="display:none;">
-  <div class="msg-action-item dm" id="actionDM" onclick="doActionDM()">💬 個別にメッセージを送る</div>
-  <div class="msg-action-item del" id="actionDelete" style="display:none;" onclick="doActionDelete()">🗑️ メッセージを削除</div>
+<!-- ★ overlayはdocumentクリックで閉じる。メニューボタンはtouchendで反応 -->
+<div class="action-overlay" id="actionOverlay"></div>
+<div class="msg-action-menu" id="msgActionMenu">
+  <div class="msg-action-item dm" id="actionDM">💬 個別にメッセージを送る</div>
+  <div class="msg-action-item del" id="actionDelete" style="display:none;">🗑️ メッセージを削除</div>
 </div>
 
 <div class="toast" id="toast"></div>
@@ -281,6 +295,7 @@ function fmt(ts){if(!ts)return '';const d=ts.toDate?ts.toDate():new Date();retur
 function roomId(a,b){return [a,b].sort().join('_');}
 function toast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2200);}
 
+/* ── 写真 ── */
 function handlePhotoSelect(e){
   const file=e.target.files[0];if(!file)return;
   const reader=new FileReader();
@@ -301,6 +316,7 @@ function handlePhotoSelect(e){
   reader.readAsDataURL(file);
 }
 
+/* ── 都道府県モーダル ── */
 function buildPrefModal(){
   document.getElementById('prefList').innerHTML=PREFS.map(p=>`
     <div class="pref-check-item" id="pci_${p}" onclick="togglePrefCheck('${p}')">
@@ -329,6 +345,7 @@ function updateSelectedDisplay(){
 function openPrefModal(){document.getElementById('prefModal').classList.add('open');updatePrefCheckUI();}
 function closePrefModal(){document.getElementById('prefModal').classList.remove('open');updateSelectedDisplay();}
 
+/* ── 起動 ── */
 function startApp(){
   const n=document.getElementById('inputName').value.trim();
   const b=document.getElementById('inputBike').value.trim();
@@ -360,8 +377,21 @@ window.addEventListener('load',()=>{
   if(c)document.getElementById('inputCity').value=c;
   if(sp){selectedPrefs=JSON.parse(sp);updateSelectedDisplay();}
   if(ph){myPhoto=ph;document.getElementById('bikePhotoImg').src=ph;document.getElementById('bikePhotoPreview').classList.add('has-img');}
+
+  // ★ メニューボタンにtouchendで登録（onclickより確実）
+  document.getElementById('actionDM').addEventListener('touchend',e=>{
+    e.preventDefault();e.stopPropagation();doActionDM();
+  });
+  document.getElementById('actionDelete').addEventListener('touchend',e=>{
+    e.preventDefault();e.stopPropagation();doActionDelete();
+  });
+  // メニュー外タップで閉じる
+  document.getElementById('actionOverlay').addEventListener('touchend',e=>{
+    e.preventDefault();closeActionMenu();
+  });
 });
 
+/* ── ライダー一覧 ── */
 function listenRiders(){
   if(unsubRiders){unsubRiders();unsubRiders=null;}
   unsubRiders=db.collection('riders').where('pref','==',myPref).where('active','==',true)
@@ -434,11 +464,11 @@ function renderDirectRidersList(){
     </div>`).join('');
 }
 
+/* ── 県タブ ── */
 function buildPrefTabs(){
   document.getElementById('prefTabs').innerHTML=selectedPrefs.map(p=>`
     <button class="pref-tab ${p===currentPref?'active':''}" id="ptab_${p}" onclick="switchPrefTab('${p}')">${p}</button>`).join('');
 }
-
 function listenAreaChat(pref){
   if(prefUnsubs[pref])return;
   prefUnsubs[pref]=db.collection('areaChat').doc('area_'+pref).collection('messages')
@@ -466,7 +496,6 @@ function closeChat(){
   document.getElementById('chatScreen').classList.remove('active');
   document.getElementById('mainScreen').classList.add('active');
 }
-
 function switchMainTab(tab){
   currentMainTab=tab;
   document.getElementById('tabArea').classList.toggle('active',tab==='area');
@@ -489,7 +518,6 @@ function switchMainTab(tab){
     renderDirectRidersList();
   }
 }
-
 function switchPrefTab(pref){
   currentPref=pref;
   selectedPrefs.forEach(p=>{const el=document.getElementById('ptab_'+p);if(el)el.classList.toggle('active',p===pref);});
@@ -502,7 +530,6 @@ function switchPrefTab(pref){
   const activeTab=document.getElementById('ptab_'+pref);
   if(activeTab)activeTab.scrollIntoView({behavior:'smooth',inline:'center',block:'nearest'});
 }
-
 function openDirectChat(tid,tname,tbike,tphoto){
   directTarget={id:tid,name:tname,bike:tbike,photo:tphoto};
   currentMainTab='direct';
@@ -532,48 +559,35 @@ function renderMsgs(msgs,type){
   if(!msgs.length){
     list.innerHTML=`<div class="empty-msg">まだメッセージがありません<br>最初に話しかけてみよう！🏍️</div>`;return;
   }
-
-  // ★ メッセージ内にsenderのFirestore情報をキャッシュ
-  // senderId → {name, bike, photo} をメッセージ自体から補完
   const senderCache={};
   msgs.forEach(m=>{
-    if(m.senderId&&m.senderId!==myId){
-      if(!senderCache[m.senderId]){
-        // riders一覧にいれば使う、いなければメッセージの情報を使う
-        const rd=riders[m.senderId];
-        senderCache[m.senderId]={
-          name:rd?.name||m.senderName||'',
-          bike:rd?.bike||m.senderBike||'',
-          photo:rd?.photo||m.senderPhoto||''
-        };
-      }
+    if(m.senderId&&m.senderId!==myId&&!senderCache[m.senderId]){
+      const rd=riders[m.senderId];
+      senderCache[m.senderId]={
+        name:rd?.name||m.senderName||'',
+        bike:rd?.bike||'',
+        photo:rd?.photo||''
+      };
     }
   });
-
   list.innerHTML=msgs.map(m=>{
     const mine=m.senderId===myId;
     const sc=senderCache[m.senderId]||{};
     const sp=sc.photo||'';
     if(mine){
       return `<div class="msg-wrap">
-        <div class="msg-bubble mine"
-          data-id="${m.id}" data-type="${type}" data-mine="1"
-        >${esc(m.text)}</div>
+        <div class="msg-bubble mine" data-id="${m.id}" data-type="${type}" data-mine="1">${esc(m.text)}</div>
         <div class="msg-meta right">${fmt(m.createdAt)} ✕長押し削除</div>
       </div>`;
     } else {
-      const icon=sp
-        ?`<div class="msg-sender-icon"><img src="${sp}" alt=""></div>`
-        :`<div class="msg-sender-icon">🏍️</div>`;
+      const icon=sp?`<div class="msg-sender-icon"><img src="${sp}" alt=""></div>`:`<div class="msg-sender-icon">🏍️</div>`;
       return `<div class="msg-wrap">
         <div class="msg-sender-row">${icon}<span class="msg-sender-name">${esc(sc.name||m.senderName||'')}</span></div>
         <div class="msg-bubble theirs"
-          data-id="${m.id}"
-          data-type="${type}"
-          data-mine="0"
+          data-id="${m.id}" data-type="${type}" data-mine="0"
           data-sender-id="${esc(m.senderId||'')}"
           data-sender-name="${esc(sc.name||m.senderName||'')}"
-          data-sender-bike="${esc(sc.bike||m.senderBike||'')}"
+          data-sender-bike="${esc(sc.bike||'')}"
           data-sender-photo="${esc(sp)}"
         >${esc(m.text)}</div>
         <div class="msg-meta">${fmt(m.createdAt)}</div>
@@ -582,7 +596,6 @@ function renderMsgs(msgs,type){
   }).join('');
   list.scrollTop=list.scrollHeight;
 
-  // 長押しイベント設定
   list.querySelectorAll('.msg-bubble').forEach(el=>{
     el.addEventListener('touchstart',onBubbleTouchStart,{passive:true});
     el.addEventListener('touchend',onBubbleTouchEnd);
@@ -596,9 +609,7 @@ function onBubbleTouchStart(e){
   bubbleHoldTimer=setTimeout(()=>{
     const isMine=el.dataset.mine==='1';
     actionTarget={
-      msgId:el.dataset.id,
-      type:el.dataset.type,
-      isMine,
+      msgId:el.dataset.id,type:el.dataset.type,isMine,
       senderId:el.dataset.senderId||'',
       senderName:el.dataset.senderName||'',
       senderBike:el.dataset.senderBike||'',
@@ -606,27 +617,24 @@ function onBubbleTouchStart(e){
     };
     document.getElementById('actionDM').style.display=isMine?'none':'flex';
     document.getElementById('actionDelete').style.display=isMine?'flex':'none';
-
     const touch=e.touches[0];
     const x=Math.min(touch.clientX,window.innerWidth-220);
     const y=Math.min(touch.clientY+20,window.innerHeight-100);
     const menu=document.getElementById('msgActionMenu');
     menu.style.left=x+'px';menu.style.top=y+'px';menu.style.display='block';
-    document.getElementById('menuOverlay').classList.add('show');
+    document.getElementById('actionOverlay').classList.add('show');
   },600);
 }
 function onBubbleTouchEnd(){clearTimeout(bubbleHoldTimer);}
 
 function closeActionMenu(){
   document.getElementById('msgActionMenu').style.display='none';
-  document.getElementById('menuOverlay').classList.remove('show');
+  document.getElementById('actionOverlay').classList.remove('show');
   actionTarget=null;
 }
-
 function doActionDM(){
   if(!actionTarget||!actionTarget.senderId)return;
   closeActionMenu();
-  // ★ riders一覧にいなくてもsenderIdとメッセージのdata属性から直接DM開く
   openDirectChat(
     actionTarget.senderId,
     actionTarget.senderName||'ライダー',
@@ -634,7 +642,6 @@ function doActionDM(){
     actionTarget.senderPhoto||''
   );
 }
-
 function doActionDelete(){
   if(!actionTarget)return;
   closeActionMenu();
@@ -659,7 +666,6 @@ function sendMessage(){
     db.collection('directChat').doc(roomId(myId,directTarget.id)).collection('messages').add(data);
   }
 }
-
 document.getElementById('chatInput').addEventListener('input',function(){
   this.style.height='auto';
   this.style.height=Math.min(this.scrollHeight,120)+'px';

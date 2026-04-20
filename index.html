@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
@@ -101,6 +102,7 @@ body{background:var(--bg);color:var(--white);font-family:'Noto Sans JP',sans-ser
 .toast{position:fixed;top:70px;left:50%;transform:translateX(-50%) translateY(-10px);background:var(--orange);color:#000;font-weight:700;font-size:13px;padding:8px 20px;border-radius:20px;opacity:0;pointer-events:none;transition:opacity .3s,transform .3s;z-index:9999;white-space:nowrap;}
 .toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
 </style>
+
 </head>
 <body>
 
@@ -192,7 +194,6 @@ const db=firebase.firestore();
 
 let myId=localStorage.getItem('rcUid')||(Math.random().toString(36).slice(2)+Date.now().toString(36));
 localStorage.setItem('rcUid',myId);
-// 起動時に前回の自分のデータを削除
 db.collection("riders").doc(myId).delete().catch(()=>{});
 let myName='',myBike='',myPref='',myCity='',isActive=false;
 let riders={},currentTab='global',directTarget=null;
@@ -211,13 +212,10 @@ function startApp(){
   const c=document.getElementById('inputCity').value.trim();
   if(!n||!b||!p){toast('名前・バイク・都道府県を入力してください');return;}
   myName=n;myBike=b;myPref=p;myCity=c;
-
-  // 前回のデータを引き継ぎ
   localStorage.setItem('rcName',n);
   localStorage.setItem('rcBike',b);
   localStorage.setItem('rcPref',p);
   localStorage.setItem('rcCity',c);
-
   document.getElementById('regionLabel').textContent=c?p+' '+c:p;
   document.getElementById('setupScreen').classList.remove('active');
   document.getElementById('mainScreen').classList.add('active');
@@ -225,7 +223,6 @@ function startApp(){
   listenGlobalChat();
 }
 
-// 前回のデータを復元
 window.addEventListener('load',()=>{
   const n=localStorage.getItem('rcName');
   const b=localStorage.getItem('rcBike');
@@ -239,7 +236,6 @@ window.addEventListener('load',()=>{
 
 function listenRiders(){
   if(unsubRiders){unsubRiders();unsubRiders=null;}
-  // 同じ都道府県のライダーを取得
   unsubRiders=db.collection('riders')
     .where('pref','==',myPref)
     .where('active','==',true)
@@ -305,6 +301,8 @@ function closeChat(){
   document.getElementById('chatScreen').classList.remove('active');
   document.getElementById('mainScreen').classList.add('active');
 }
+
+// ★ バグ修正: direct タブの処理を追加
 function switchTab(tab){
   currentTab=tab;
   document.getElementById('tabGlobal').classList.toggle('active',tab==='global');
@@ -315,8 +313,28 @@ function switchTab(tab){
     if(unsubDirect){unsubDirect();unsubDirect=null;}
     listenGlobalChat();
     if(globalMsgsCache.length) renderMsgs(globalMsgsCache,'global');
+  } else if(tab==='direct'){
+    if(!directTarget){
+      // 相手が未選択の場合は案内を表示
+      document.getElementById('chatTitle').textContent='個別チャット';
+      document.getElementById('chatSub').textContent='ライダーを選んで話しかけよう';
+      if(unsubGlobal){unsubGlobal();unsubGlobal=null;}
+      document.getElementById('messagesList').innerHTML=
+        `<div class="empty-msg">💬 ライダー一覧から<br>話しかけたい人を選んでください</div>`;
+    } else {
+      // 相手がいる場合は既存のDMを表示
+      document.getElementById('chatTitle').textContent=directTarget.name;
+      document.getElementById('chatSub').textContent=directTarget.bike;
+      if(unsubGlobal){unsubGlobal();unsubGlobal=null;}
+      if(!unsubDirect){
+        unsubDirect=db.collection('directChat').doc(roomId(myId,directTarget.id)).collection('messages')
+          .orderBy('createdAt').limitToLast(100)
+          .onSnapshot(snap=>renderMsgs(snap.docs.map(d=>({id:d.id,...d.data()})),'direct'));
+      }
+    }
   }
 }
+
 function openDirectChat(tid,tname,tbike){
   directTarget={id:tid,name:tname,bike:tbike};
   currentTab='direct';
@@ -327,8 +345,10 @@ function openDirectChat(tid,tname,tbike){
   document.getElementById('mainScreen').classList.remove('active');
   document.getElementById('chatScreen').classList.add('active');
   if(unsubDirect){unsubDirect();unsubDirect=null;}
+  if(unsubGlobal){unsubGlobal();unsubGlobal=null;}
   unsubDirect=db.collection('directChat').doc(roomId(myId,tid)).collection('messages')
-    .orderBy('createdAt').limitToLast(100).onSnapshot(snap=>renderMsgs(snap.docs.map(d=>({id:d.id,...d.data()})),'direct'));
+    .orderBy('createdAt').limitToLast(100)
+    .onSnapshot(snap=>renderMsgs(snap.docs.map(d=>({id:d.id,...d.data()})),'direct'));
 }
 
 let globalMsgsCache=[];
@@ -383,7 +403,7 @@ function cancelHold(){clearTimeout(holdTimer);}
 function sendMessage(){
   const input=document.getElementById('chatInput'),text=input.value.trim();
   if(!text)return;
-  input.value='';
+  input.value='';input.style.height='auto';
   document.getElementById('sendBtn').disabled=true;
   setTimeout(()=>document.getElementById('sendBtn').disabled=false,600);
   const data={text,senderId:myId,senderName:myName,createdAt:firebase.firestore.FieldValue.serverTimestamp()};
@@ -395,13 +415,12 @@ function sendMessage(){
   }
 }
 
-// Enterキーは改行のみ、送信はボタンで
-// 入力に合わせて高さ自動調整
 document.getElementById('chatInput').addEventListener('input',function(){
   this.style.height='auto';
   this.style.height=Math.min(this.scrollHeight,120)+'px';
 });
 window.addEventListener('beforeunload',()=>{if(isActive)removeLocation();});
 </script>
+
 </body>
 </html>

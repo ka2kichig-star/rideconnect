@@ -327,7 +327,7 @@ function openDirectChat(tid,tname,tbike){
   document.getElementById('chatScreen').classList.add('active');
   if(unsubDirect){unsubDirect();unsubDirect=null;}
   unsubDirect=db.collection('directChat').doc(roomId(myId,tid)).collection('messages')
-    .orderBy('createdAt').limitToLast(100).onSnapshot(snap=>renderMsgs(snap.docs.map(d=>({id:d.id,...d.data()}))));
+    .orderBy('createdAt').limitToLast(100).onSnapshot(snap=>renderMsgs(snap.docs.map(d=>({id:d.id,...d.data()})),'direct'));
 }
 
 let globalMsgsCache=[];

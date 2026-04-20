@@ -15,8 +15,6 @@ html,body{height:100%;overflow:hidden;}
 body{background:var(--bg);color:var(--white);font-family:'Noto Sans JP',sans-serif;height:100dvh;display:flex;flex-direction:column;}
 .screen{display:none;flex-direction:column;height:100%;}
 .screen.active{display:flex;}
-
-/* SETUP */
 #setupScreen{background:linear-gradient(160deg,#1a0a00,#0e0e0e);align-items:center;justify-content:center;padding:28px 24px;gap:16px;overflow-y:auto;}
 .setup-logo{font-family:'Bebas Neue',sans-serif;font-size:48px;letter-spacing:6px;color:var(--orange);line-height:1;text-align:center;}
 .setup-logo span{color:var(--white);}
@@ -25,8 +23,6 @@ body{background:var(--bg);color:var(--white);font-family:'Noto Sans JP',sans-ser
 .setup-form label{font-size:11px;color:var(--gray);letter-spacing:1px;text-transform:uppercase;margin-bottom:3px;display:block;}
 .setup-form input{width:100%;background:#2a2a2a;border:1px solid #333;border-radius:10px;padding:13px 16px;color:var(--white);font-family:'Noto Sans JP',sans-serif;font-size:16px;outline:none;transition:border-color .2s;}
 .setup-form input:focus{border-color:var(--orange);}
-
-/* バイク写真 */
 .bike-photo-upload{width:100%;display:flex;flex-direction:column;gap:8px;}
 .bike-photo-preview{width:100%;height:160px;border-radius:12px;background:#2a2a2a;border:2px dashed #444;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;overflow:hidden;transition:border-color .2s;position:relative;}
 .bike-photo-preview:active{border-color:var(--orange);}
@@ -39,8 +35,6 @@ body{background:var(--bg);color:var(--white);font-family:'Noto Sans JP',sans-ser
 .bike-photo-change{position:absolute;bottom:8px;right:8px;background:rgba(0,0,0,0.7);color:var(--orange);font-size:11px;font-weight:700;padding:4px 10px;border-radius:10px;display:none;}
 .bike-photo-preview.has-img .bike-photo-change{display:block;}
 input[type=file]{display:none;}
-
-/* 都道府県 */
 .pref-section{width:100%;}
 .pref-section-label{font-size:11px;color:var(--gray);letter-spacing:1px;text-transform:uppercase;margin-bottom:8px;display:block;}
 .pref-selected-display{background:#2a2a2a;border:1px solid #333;border-radius:10px;padding:10px 14px;min-height:44px;margin-bottom:8px;font-size:13px;color:var(--white);line-height:1.8;}
@@ -60,8 +54,6 @@ input[type=file]{display:none;}
 .pref-check-label{font-size:13px;}
 .btn-start{width:100%;background:var(--orange);color:#000;font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:3px;border:none;border-radius:12px;padding:15px;cursor:pointer;margin-top:4px;}
 .btn-start:active{transform:scale(.97);}
-
-/* HEADER */
 .header{display:flex;align-items:center;justify-content:space-between;padding:12px 16px 10px;background:var(--bg);border-bottom:1px solid #2a2a2a;flex-shrink:0;z-index:100;}
 .logo{font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:3px;color:var(--orange);}
 .logo span{color:var(--white);}
@@ -73,8 +65,6 @@ input[type=file]{display:none;}
 .chat-badge.show{display:flex;}
 .region-banner{background:#1a1a1a;padding:8px 16px;border-bottom:1px solid #2a2a2a;font-size:12px;color:var(--gray);flex-shrink:0;}
 .region-banner span{color:var(--orange);font-weight:700;}
-
-/* RIDERS LIST */
 .riders-container{flex:1;overflow-y:auto;padding:16px;}
 .riders-area-title{font-size:11px;color:var(--gray);text-transform:uppercase;letter-spacing:2px;margin-bottom:12px;}
 .rider-item{background:var(--card);border-radius:12px;padding:14px 16px;margin-bottom:10px;border:1px solid #2f2f2f;display:flex;align-items:center;justify-content:space-between;cursor:pointer;transition:border-color .2s;}
@@ -96,8 +86,6 @@ input[type=file]{display:none;}
 .toggle-btn.on{background:var(--orange);}
 .toggle-btn::after{content:'';position:absolute;width:26px;height:26px;border-radius:50%;background:var(--white);top:4px;left:4px;transition:transform .3s cubic-bezier(.34,1.56,.64,1);box-shadow:0 2px 6px rgba(0,0,0,.4);}
 .toggle-btn.on::after{transform:translateX(30px);}
-
-/* CHAT */
 #chatScreen{background:var(--bg);}
 .chat-header{display:flex;align-items:center;gap:12px;padding:12px 16px;background:var(--surface);border-bottom:1px solid #2a2a2a;flex-shrink:0;}
 .back-btn{background:none;border:none;color:var(--orange);font-size:22px;cursor:pointer;padding:0 4px;}
@@ -114,8 +102,6 @@ input[type=file]{display:none;}
 .pref-tabs{display:flex;padding:0 8px;white-space:nowrap;}
 .pref-tab{flex-shrink:0;padding:9px 16px;background:none;border:none;color:var(--gray);font-family:'Noto Sans JP',sans-serif;font-size:13px;cursor:pointer;border-bottom:2px solid transparent;}
 .pref-tab.active{color:var(--orange);border-bottom-color:var(--orange);}
-
-/* 個別ライダー一覧 */
 .direct-riders-list{flex:1;overflow-y:auto;padding:16px;}
 .direct-rider-item{background:var(--card);border-radius:12px;padding:14px 16px;margin-bottom:10px;border:1px solid #2f2f2f;display:flex;align-items:center;gap:12px;cursor:pointer;transition:border-color .2s;}
 .direct-rider-item:active{border-color:var(--orange);}
@@ -125,51 +111,30 @@ input[type=file]{display:none;}
 .direct-rider-info .name{font-size:15px;font-weight:700;margin-bottom:3px;}
 .direct-rider-info .bike{font-size:12px;color:var(--gray);}
 .direct-rider-info .region{font-size:11px;color:var(--blue);margin-top:2px;}
-
-/* メッセージ */
 .messages-list{flex:1;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:10px;min-height:0;}
 .msg-wrap{display:flex;flex-direction:column;}
 .msg-sender-row{display:flex;align-items:center;gap:6px;margin-bottom:3px;}
 .msg-sender-icon{width:24px;height:24px;border-radius:50%;background:var(--orange);display:flex;align-items:center;justify-content:center;font-size:11px;flex-shrink:0;overflow:hidden;border:1px solid #444;}
 .msg-sender-icon img{width:100%;height:100%;object-fit:cover;}
 .msg-sender-name{font-size:11px;color:var(--gray);}
-
-/* ★ iOSネイティブメニューを抑制 */
-.msg-bubble{
-  max-width:75%;padding:10px 14px;border-radius:16px;font-size:14px;line-height:1.5;word-break:break-word;
-  -webkit-user-select:none;user-select:none;
-  -webkit-touch-callout:none;
-}
+.msg-bubble{max-width:75%;padding:10px 14px;border-radius:16px;font-size:14px;line-height:1.5;word-break:break-word;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none;}
 .msg-bubble.mine{background:var(--orange);color:#000;align-self:flex-end;border-bottom-right-radius:4px;font-weight:700;}
 .msg-bubble.theirs{background:#2a2a2a;color:var(--white);align-self:flex-start;border-bottom-left-radius:4px;}
 .msg-meta{font-size:10px;color:var(--gray);margin-top:3px;}
 .msg-meta.right{text-align:right;}
-
-/* アクションメニュー */
-.msg-action-menu{
-  position:fixed;background:var(--surface);border:1px solid #444;
-  border-radius:16px;padding:6px;z-index:600;
-  box-shadow:0 8px 32px rgba(0,0,0,0.7);min-width:200px;
-}
-.msg-action-item{
-  display:flex;align-items:center;gap:10px;
-  padding:14px 16px;border-radius:10px;cursor:pointer;
-  font-size:14px;font-family:'Noto Sans JP',sans-serif;
-}
+.msg-action-menu{position:fixed;background:var(--surface);border:1px solid #444;border-radius:16px;padding:6px;z-index:600;box-shadow:0 8px 32px rgba(0,0,0,0.7);min-width:200px;}
+.msg-action-item{display:flex;align-items:center;gap:10px;padding:14px 16px;border-radius:10px;cursor:pointer;font-size:14px;font-family:'Noto Sans JP',sans-serif;}
 .msg-action-item:active{background:#2a2a2a;}
 .msg-action-item.dm{color:var(--blue);}
 .msg-action-item.del{color:var(--red);}
-
 .chat-input-row{display:flex;gap:8px;padding:10px 16px 20px;background:var(--surface);border-top:1px solid #2a2a2a;flex-shrink:0;}
 .chat-input{flex:1;background:#2a2a2a;border:1px solid #333;border-radius:22px;padding:10px 16px;color:var(--white);font-family:'Noto Sans JP',sans-serif;font-size:14px;outline:none;resize:none;overflow-y:auto;line-height:1.4;}
 .chat-input:focus{border-color:var(--orange);}
 .send-btn{width:44px;height:44px;border-radius:50%;background:var(--orange);border:none;font-size:20px;cursor:pointer;flex-shrink:0;}
 .send-btn:disabled{opacity:.4;}
 .empty-msg{text-align:center;color:var(--gray);font-size:13px;padding:32px 16px;align-self:center;}
-
 .menu-overlay{display:none;position:fixed;inset:0;z-index:599;}
 .menu-overlay.show{display:block;}
-
 .toast{position:fixed;top:70px;left:50%;transform:translateX(-50%) translateY(-10px);background:var(--orange);color:#000;font-weight:700;font-size:13px;padding:8px 20px;border-radius:20px;opacity:0;pointer-events:none;transition:opacity .3s,transform .3s;z-index:9999;white-space:nowrap;}
 .toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
 </style>
@@ -280,7 +245,6 @@ input[type=file]{display:none;}
   </div>
 </div>
 
-<!-- 長押しメニュー -->
 <div class="menu-overlay" id="menuOverlay" onclick="closeActionMenu()"></div>
 <div class="msg-action-menu" id="msgActionMenu" style="display:none;">
   <div class="msg-action-item dm" id="actionDM" onclick="doActionDM()">💬 個別にメッセージを送る</div>
@@ -307,18 +271,16 @@ localStorage.setItem('rcUid',myId);
 db.collection("riders").doc(myId).delete().catch(()=>{});
 
 let myName='',myBike='',myPref='',myCity='',myPhoto='';
-let selectedPrefs=[];
-let isActive=false,riders={};
+let selectedPrefs=[],isActive=false,riders={};
 let currentMainTab='area',currentPref='',directTarget=null;
 let unsubRiders=null,unsubDirect=null,prefUnsubs={},prefMsgsCache={};
-let unreadCount=0,holdTimer=null,actionTarget=null;
+let unreadCount=0,actionTarget=null,bubbleHoldTimer=null;
 
 function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
 function fmt(ts){if(!ts)return '';const d=ts.toDate?ts.toDate():new Date();return d.toLocaleTimeString('ja-JP',{hour:'2-digit',minute:'2-digit'});}
 function roomId(a,b){return [a,b].sort().join('_');}
 function toast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2200);}
 
-/* ── 写真 ── */
 function handlePhotoSelect(e){
   const file=e.target.files[0];if(!file)return;
   const reader=new FileReader();
@@ -339,7 +301,6 @@ function handlePhotoSelect(e){
   reader.readAsDataURL(file);
 }
 
-/* ── 都道府県モーダル ── */
 function buildPrefModal(){
   document.getElementById('prefList').innerHTML=PREFS.map(p=>`
     <div class="pref-check-item" id="pci_${p}" onclick="togglePrefCheck('${p}')">
@@ -368,7 +329,6 @@ function updateSelectedDisplay(){
 function openPrefModal(){document.getElementById('prefModal').classList.add('open');updatePrefCheckUI();}
 function closePrefModal(){document.getElementById('prefModal').classList.remove('open');updateSelectedDisplay();}
 
-/* ── 起動 ── */
 function startApp(){
   const n=document.getElementById('inputName').value.trim();
   const b=document.getElementById('inputBike').value.trim();
@@ -402,7 +362,6 @@ window.addEventListener('load',()=>{
   if(ph){myPhoto=ph;document.getElementById('bikePhotoImg').src=ph;document.getElementById('bikePhotoPreview').classList.add('has-img');}
 });
 
-/* ── ライダー一覧 ── */
 function listenRiders(){
   if(unsubRiders){unsubRiders();unsubRiders=null;}
   unsubRiders=db.collection('riders').where('pref','==',myPref).where('active','==',true)
@@ -475,11 +434,11 @@ function renderDirectRidersList(){
     </div>`).join('');
 }
 
-/* ── 県タブ ── */
 function buildPrefTabs(){
   document.getElementById('prefTabs').innerHTML=selectedPrefs.map(p=>`
     <button class="pref-tab ${p===currentPref?'active':''}" id="ptab_${p}" onclick="switchPrefTab('${p}')">${p}</button>`).join('');
 }
+
 function listenAreaChat(pref){
   if(prefUnsubs[pref])return;
   prefUnsubs[pref]=db.collection('areaChat').doc('area_'+pref).collection('messages')
@@ -551,7 +510,7 @@ function openDirectChat(tid,tname,tbike,tphoto){
   if(tphoto){av.innerHTML=`<img src="${tphoto}" alt="">`;av.style.background='none';}
   else{av.innerHTML='🏍️';av.style.background='var(--orange)';}
   document.getElementById('chatTitle').textContent=tname;
-  document.getElementById('chatSub').textContent=tbike;
+  document.getElementById('chatSub').textContent=tbike||'ライダー';
   document.getElementById('tabArea').classList.remove('active');
   document.getElementById('tabDirect').classList.add('active');
   document.getElementById('prefTabsWrap').style.display='none';
@@ -564,7 +523,6 @@ function openDirectChat(tid,tname,tbike,tphoto){
   unsubDirect=db.collection('directChat').doc(roomId(myId,tid)).collection('messages')
     .orderBy('createdAt').limitToLast(100)
     .onSnapshot(snap=>renderMsgs(snap.docs.map(d=>({id:d.id,...d.data()})),'direct'));
-  // 入力欄にフォーカス
   setTimeout(()=>document.getElementById('chatInput').focus(),300);
 }
 
@@ -574,24 +532,48 @@ function renderMsgs(msgs,type){
   if(!msgs.length){
     list.innerHTML=`<div class="empty-msg">まだメッセージがありません<br>最初に話しかけてみよう！🏍️</div>`;return;
   }
+
+  // ★ メッセージ内にsenderのFirestore情報をキャッシュ
+  // senderId → {name, bike, photo} をメッセージ自体から補完
+  const senderCache={};
+  msgs.forEach(m=>{
+    if(m.senderId&&m.senderId!==myId){
+      if(!senderCache[m.senderId]){
+        // riders一覧にいれば使う、いなければメッセージの情報を使う
+        const rd=riders[m.senderId];
+        senderCache[m.senderId]={
+          name:rd?.name||m.senderName||'',
+          bike:rd?.bike||m.senderBike||'',
+          photo:rd?.photo||m.senderPhoto||''
+        };
+      }
+    }
+  });
+
   list.innerHTML=msgs.map(m=>{
     const mine=m.senderId===myId;
-    const rd=riders[m.senderId]||null;
-    const sp=rd?.photo||'';
+    const sc=senderCache[m.senderId]||{};
+    const sp=sc.photo||'';
     if(mine){
       return `<div class="msg-wrap">
-        <div class="msg-bubble mine" data-id="${m.id}" data-type="${type}">${esc(m.text)}</div>
+        <div class="msg-bubble mine"
+          data-id="${m.id}" data-type="${type}" data-mine="1"
+        >${esc(m.text)}</div>
         <div class="msg-meta right">${fmt(m.createdAt)} ✕長押し削除</div>
       </div>`;
     } else {
-      const icon=sp?`<div class="msg-sender-icon"><img src="${sp}" alt=""></div>`:`<div class="msg-sender-icon">🏍️</div>`;
+      const icon=sp
+        ?`<div class="msg-sender-icon"><img src="${sp}" alt=""></div>`
+        :`<div class="msg-sender-icon">🏍️</div>`;
       return `<div class="msg-wrap">
-        <div class="msg-sender-row">${icon}<span class="msg-sender-name">${esc(m.senderName||'')}</span></div>
+        <div class="msg-sender-row">${icon}<span class="msg-sender-name">${esc(sc.name||m.senderName||'')}</span></div>
         <div class="msg-bubble theirs"
-          data-id="${m.id}" data-type="${type}"
-          data-sender-id="${m.senderId||''}"
-          data-sender-name="${esc(m.senderName||'')}"
-          data-sender-bike="${esc(rd?.bike||'')}"
+          data-id="${m.id}"
+          data-type="${type}"
+          data-mine="0"
+          data-sender-id="${esc(m.senderId||'')}"
+          data-sender-name="${esc(sc.name||m.senderName||'')}"
+          data-sender-bike="${esc(sc.bike||m.senderBike||'')}"
           data-sender-photo="${esc(sp)}"
         >${esc(m.text)}</div>
         <div class="msg-meta">${fmt(m.createdAt)}</div>
@@ -600,37 +582,31 @@ function renderMsgs(msgs,type){
   }).join('');
   list.scrollTop=list.scrollHeight;
 
-  // 長押しイベントをdata属性で処理（iOSネイティブメニュー抑制）
+  // 長押しイベント設定
   list.querySelectorAll('.msg-bubble').forEach(el=>{
-    el.addEventListener('touchstart',onBubbleTouchStart,{passive:false});
+    el.addEventListener('touchstart',onBubbleTouchStart,{passive:true});
     el.addEventListener('touchend',onBubbleTouchEnd);
     el.addEventListener('touchmove',onBubbleTouchEnd);
-    el.addEventListener('contextmenu',e=>{e.preventDefault();});
+    el.addEventListener('contextmenu',e=>e.preventDefault());
   });
 }
 
-let bubbleHoldTimer=null;
 function onBubbleTouchStart(e){
   const el=e.currentTarget;
   bubbleHoldTimer=setTimeout(()=>{
-    const mine=el.classList.contains('mine');
-    const msgId=el.dataset.id;
-    const type=el.dataset.type;
-    if(mine){
-      actionTarget={msgId,type,isMine:true};
-      document.getElementById('actionDM').style.display='none';
-      document.getElementById('actionDelete').style.display='flex';
-    } else {
-      actionTarget={
-        msgId,type,isMine:false,
-        senderId:el.dataset.senderId,
-        senderName:el.dataset.senderName,
-        senderBike:el.dataset.senderBike,
-        senderPhoto:el.dataset.senderPhoto
-      };
-      document.getElementById('actionDM').style.display='flex';
-      document.getElementById('actionDelete').style.display='none';
-    }
+    const isMine=el.dataset.mine==='1';
+    actionTarget={
+      msgId:el.dataset.id,
+      type:el.dataset.type,
+      isMine,
+      senderId:el.dataset.senderId||'',
+      senderName:el.dataset.senderName||'',
+      senderBike:el.dataset.senderBike||'',
+      senderPhoto:el.dataset.senderPhoto||''
+    };
+    document.getElementById('actionDM').style.display=isMine?'none':'flex';
+    document.getElementById('actionDelete').style.display=isMine?'flex':'none';
+
     const touch=e.touches[0];
     const x=Math.min(touch.clientX,window.innerWidth-220);
     const y=Math.min(touch.clientY+20,window.innerHeight-100);
@@ -639,20 +615,26 @@ function onBubbleTouchStart(e){
     document.getElementById('menuOverlay').classList.add('show');
   },600);
 }
-function onBubbleTouchEnd(){
-  clearTimeout(bubbleHoldTimer);
-}
+function onBubbleTouchEnd(){clearTimeout(bubbleHoldTimer);}
 
 function closeActionMenu(){
   document.getElementById('msgActionMenu').style.display='none';
   document.getElementById('menuOverlay').classList.remove('show');
   actionTarget=null;
 }
+
 function doActionDM(){
-  if(!actionTarget)return;
+  if(!actionTarget||!actionTarget.senderId)return;
   closeActionMenu();
-  openDirectChat(actionTarget.senderId,actionTarget.senderName,actionTarget.senderBike,actionTarget.senderPhoto);
+  // ★ riders一覧にいなくてもsenderIdとメッセージのdata属性から直接DM開く
+  openDirectChat(
+    actionTarget.senderId,
+    actionTarget.senderName||'ライダー',
+    actionTarget.senderBike||'',
+    actionTarget.senderPhoto||''
+  );
 }
+
 function doActionDelete(){
   if(!actionTarget)return;
   closeActionMenu();

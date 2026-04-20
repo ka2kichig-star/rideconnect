@@ -113,34 +113,51 @@ input[type=file]{display:none;}
 .direct-rider-info .region{font-size:11px;color:var(--blue);margin-top:2px;}
 .messages-list{flex:1;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:10px;min-height:0;}
 .msg-wrap{display:flex;flex-direction:column;}
-.msg-sender-row{display:flex;align-items:center;gap:6px;margin-bottom:3px;}
-.msg-sender-icon{width:24px;height:24px;border-radius:50%;background:var(--orange);display:flex;align-items:center;justify-content:center;font-size:11px;flex-shrink:0;overflow:hidden;border:1px solid #444;}
+
+/* 相手メッセージ行：アイコン + 吹き出し + DMボタン */
+.msg-theirs-row{display:flex;align-items:flex-end;gap:6px;}
+.msg-sender-icon{width:28px;height:28px;border-radius:50%;background:var(--orange);display:flex;align-items:center;justify-content:center;font-size:12px;flex-shrink:0;overflow:hidden;border:1px solid #444;align-self:flex-end;}
 .msg-sender-icon img{width:100%;height:100%;object-fit:cover;}
-.msg-sender-name{font-size:11px;color:var(--gray);}
-.msg-bubble{max-width:75%;padding:10px 14px;border-radius:16px;font-size:14px;line-height:1.5;word-break:break-word;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none;}
+.msg-theirs-content{display:flex;flex-direction:column;flex:1;min-width:0;}
+.msg-sender-name{font-size:10px;color:var(--gray);margin-bottom:2px;}
+.msg-bubble{max-width:100%;padding:10px 14px;border-radius:16px;font-size:14px;line-height:1.5;word-break:break-word;}
 .msg-bubble.mine{background:var(--orange);color:#000;align-self:flex-end;border-bottom-right-radius:4px;font-weight:700;}
 .msg-bubble.theirs{background:#2a2a2a;color:var(--white);align-self:flex-start;border-bottom-left-radius:4px;}
 .msg-meta{font-size:10px;color:var(--gray);margin-top:3px;}
 .msg-meta.right{text-align:right;}
 
-/* ★ overlayをz-index 599、メニューを600にして
-   overlayはpointer-events:noneにし、メニュー外タップはdocumentで検知 */
-.action-overlay{display:none;position:fixed;inset:0;z-index:599;background:rgba(0,0,0,0.3);}
-.action-overlay.show{display:block;}
-.msg-action-menu{
-  position:fixed;background:var(--surface);border:1px solid #444;
-  border-radius:16px;padding:6px;z-index:600;
-  box-shadow:0 8px 32px rgba(0,0,0,0.7);min-width:200px;
-  display:none;
+/* ★ DMボタン：メッセージの横に常時表示 */
+.dm-btn{
+  flex-shrink:0;
+  width:32px;height:32px;
+  border-radius:50%;
+  background:#1a1a2e;
+  border:1px solid var(--blue);
+  color:var(--blue);
+  font-size:14px;
+  display:flex;align-items:center;justify-content:center;
+  cursor:pointer;
+  align-self:flex-end;
+  margin-bottom:2px;
 }
-.msg-action-item{
-  display:flex;align-items:center;gap:10px;
-  padding:14px 16px;border-radius:10px;cursor:pointer;
-  font-size:14px;font-family:'Noto Sans JP',sans-serif;
-  -webkit-user-select:none;user-select:none;
+.dm-btn:active{background:var(--blue);color:#000;}
+
+/* 自分メッセージの削除ボタン */
+.del-btn{
+  flex-shrink:0;
+  width:28px;height:28px;
+  border-radius:50%;
+  background:transparent;
+  border:1px solid #333;
+  color:var(--gray);
+  font-size:12px;
+  display:flex;align-items:center;justify-content:center;
+  cursor:pointer;
+  align-self:flex-end;
+  margin-bottom:2px;
 }
-.msg-action-item.dm{color:var(--blue);}
-.msg-action-item.del{color:var(--red);}
+.del-btn:active{background:var(--red);border-color:var(--red);color:#fff;}
+.msg-mine-row{display:flex;align-items:flex-end;gap:6px;justify-content:flex-end;}
 
 .chat-input-row{display:flex;gap:8px;padding:10px 16px 20px;background:var(--surface);border-top:1px solid #2a2a2a;flex-shrink:0;}
 .chat-input{flex:1;background:#2a2a2a;border:1px solid #333;border-radius:22px;padding:10px 16px;color:var(--white);font-family:'Noto Sans JP',sans-serif;font-size:14px;outline:none;resize:none;overflow-y:auto;line-height:1.4;}
@@ -258,13 +275,6 @@ input[type=file]{display:none;}
   </div>
 </div>
 
-<!-- ★ overlayはdocumentクリックで閉じる。メニューボタンはtouchendで反応 -->
-<div class="action-overlay" id="actionOverlay"></div>
-<div class="msg-action-menu" id="msgActionMenu">
-  <div class="msg-action-item dm" id="actionDM">💬 個別にメッセージを送る</div>
-  <div class="msg-action-item del" id="actionDelete" style="display:none;">🗑️ メッセージを削除</div>
-</div>
-
 <div class="toast" id="toast"></div>
 
 <script>
@@ -288,14 +298,13 @@ let myName='',myBike='',myPref='',myCity='',myPhoto='';
 let selectedPrefs=[],isActive=false,riders={};
 let currentMainTab='area',currentPref='',directTarget=null;
 let unsubRiders=null,unsubDirect=null,prefUnsubs={},prefMsgsCache={};
-let unreadCount=0,actionTarget=null,bubbleHoldTimer=null;
+let unreadCount=0;
 
 function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
 function fmt(ts){if(!ts)return '';const d=ts.toDate?ts.toDate():new Date();return d.toLocaleTimeString('ja-JP',{hour:'2-digit',minute:'2-digit'});}
 function roomId(a,b){return [a,b].sort().join('_');}
 function toast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2200);}
 
-/* ── 写真 ── */
 function handlePhotoSelect(e){
   const file=e.target.files[0];if(!file)return;
   const reader=new FileReader();
@@ -316,7 +325,6 @@ function handlePhotoSelect(e){
   reader.readAsDataURL(file);
 }
 
-/* ── 都道府県モーダル ── */
 function buildPrefModal(){
   document.getElementById('prefList').innerHTML=PREFS.map(p=>`
     <div class="pref-check-item" id="pci_${p}" onclick="togglePrefCheck('${p}')">
@@ -345,7 +353,6 @@ function updateSelectedDisplay(){
 function openPrefModal(){document.getElementById('prefModal').classList.add('open');updatePrefCheckUI();}
 function closePrefModal(){document.getElementById('prefModal').classList.remove('open');updateSelectedDisplay();}
 
-/* ── 起動 ── */
 function startApp(){
   const n=document.getElementById('inputName').value.trim();
   const b=document.getElementById('inputBike').value.trim();
@@ -377,21 +384,8 @@ window.addEventListener('load',()=>{
   if(c)document.getElementById('inputCity').value=c;
   if(sp){selectedPrefs=JSON.parse(sp);updateSelectedDisplay();}
   if(ph){myPhoto=ph;document.getElementById('bikePhotoImg').src=ph;document.getElementById('bikePhotoPreview').classList.add('has-img');}
-
-  // ★ メニューボタンにtouchendで登録（onclickより確実）
-  document.getElementById('actionDM').addEventListener('touchend',e=>{
-    e.preventDefault();e.stopPropagation();doActionDM();
-  });
-  document.getElementById('actionDelete').addEventListener('touchend',e=>{
-    e.preventDefault();e.stopPropagation();doActionDelete();
-  });
-  // メニュー外タップで閉じる
-  document.getElementById('actionOverlay').addEventListener('touchend',e=>{
-    e.preventDefault();closeActionMenu();
-  });
 });
 
-/* ── ライダー一覧 ── */
 function listenRiders(){
   if(unsubRiders){unsubRiders();unsubRiders=null;}
   unsubRiders=db.collection('riders').where('pref','==',myPref).where('active','==',true)
@@ -419,12 +413,10 @@ function toggleStatus(){
   toast(isActive?'🏍️ 走りたいモード ON！':'オフラインにしました');
   isActive?saveLocation():removeLocation();
 }
-
 function mkAvatar(photo,fallback,cls){
   if(photo)return `<div class="${cls}"><img src="${photo}" alt=""></div>`;
   return `<div class="${cls}">${fallback}</div>`;
 }
-
 function renderCards(){
   const list=document.getElementById('riderList');
   const entries=Object.entries(riders);
@@ -445,7 +437,6 @@ function renderCards(){
       <button class="msg-btn-small" onclick="event.stopPropagation();openDirectChat('${id}','${esc(d.name)}','${esc(d.bike)}','${esc(d.photo||'')}')">💬 話す</button>
     </div>`).join('');
 }
-
 function renderDirectRidersList(){
   const list=document.getElementById('directRidersList');
   const entries=Object.entries(riders);
@@ -463,8 +454,6 @@ function renderDirectRidersList(){
       <span style="color:var(--gray);font-size:18px;">›</span>
     </div>`).join('');
 }
-
-/* ── 県タブ ── */
 function buildPrefTabs(){
   document.getElementById('prefTabs').innerHTML=selectedPrefs.map(p=>`
     <button class="pref-tab ${p===currentPref?'active':''}" id="ptab_${p}" onclick="switchPrefTab('${p}')">${p}</button>`).join('');
@@ -485,7 +474,6 @@ function listenAreaChat(pref){
       if(isViewing)renderMsgs(msgs,'area');
     });
 }
-
 function openChat(){
   unreadCount=0;document.getElementById('chatBadge').classList.remove('show');
   document.getElementById('mainScreen').classList.remove('active');
@@ -522,7 +510,7 @@ function switchPrefTab(pref){
   currentPref=pref;
   selectedPrefs.forEach(p=>{const el=document.getElementById('ptab_'+p);if(el)el.classList.toggle('active',p===pref);});
   document.getElementById('chatTitle').textContent=pref+'のチャット';
-  document.getElementById('chatSub').textContent='長押しで個別メッセージも送れます';
+  document.getElementById('chatSub').textContent='💬ボタンで個別メッセージも送れます';
   const av=document.getElementById('chatHeaderAvatar');av.innerHTML='🌐';av.style.background='transparent';
   const cached=prefMsgsCache[pref]||[];
   if(cached.length)renderMsgs(cached,'area');
@@ -559,97 +547,61 @@ function renderMsgs(msgs,type){
   if(!msgs.length){
     list.innerHTML=`<div class="empty-msg">まだメッセージがありません<br>最初に話しかけてみよう！🏍️</div>`;return;
   }
-  const senderCache={};
+  // senderキャッシュ
+  const sc={};
   msgs.forEach(m=>{
-    if(m.senderId&&m.senderId!==myId&&!senderCache[m.senderId]){
+    if(m.senderId&&m.senderId!==myId&&!sc[m.senderId]){
       const rd=riders[m.senderId];
-      senderCache[m.senderId]={
-        name:rd?.name||m.senderName||'',
-        bike:rd?.bike||'',
-        photo:rd?.photo||''
-      };
+      sc[m.senderId]={name:rd?.name||m.senderName||'',bike:rd?.bike||'',photo:rd?.photo||''};
     }
   });
+
   list.innerHTML=msgs.map(m=>{
     const mine=m.senderId===myId;
-    const sc=senderCache[m.senderId]||{};
-    const sp=sc.photo||'';
+    const s=sc[m.senderId]||{};
+    const sp=s.photo||'';
+
     if(mine){
+      // 自分：削除ボタン付き
+      const delId='del_'+m.id;
       return `<div class="msg-wrap">
-        <div class="msg-bubble mine" data-id="${m.id}" data-type="${type}" data-mine="1">${esc(m.text)}</div>
-        <div class="msg-meta right">${fmt(m.createdAt)} ✕長押し削除</div>
+        <div class="msg-mine-row">
+          <button class="del-btn" id="${delId}" onclick="deleteMsg('${m.id}','${type}')">✕</button>
+          <div class="msg-bubble mine">${esc(m.text)}</div>
+        </div>
+        <div class="msg-meta right">${fmt(m.createdAt)}</div>
       </div>`;
     } else {
+      // 相手：アイコン＋名前＋吹き出し＋💬ボタン
       const icon=sp?`<div class="msg-sender-icon"><img src="${sp}" alt=""></div>`:`<div class="msg-sender-icon">🏍️</div>`;
+      const dmId='dm_'+m.id;
+      // DMボタンのデータをエスケープして埋め込む
+      const sid=esc(m.senderId||'');
+      const sname=esc(s.name||m.senderName||'');
+      const sbike=esc(s.bike||'');
+      const sphoto=esc(sp);
       return `<div class="msg-wrap">
-        <div class="msg-sender-row">${icon}<span class="msg-sender-name">${esc(sc.name||m.senderName||'')}</span></div>
-        <div class="msg-bubble theirs"
-          data-id="${m.id}" data-type="${type}" data-mine="0"
-          data-sender-id="${esc(m.senderId||'')}"
-          data-sender-name="${esc(sc.name||m.senderName||'')}"
-          data-sender-bike="${esc(sc.bike||'')}"
-          data-sender-photo="${esc(sp)}"
-        >${esc(m.text)}</div>
-        <div class="msg-meta">${fmt(m.createdAt)}</div>
+        <div class="msg-theirs-row">
+          ${icon}
+          <div class="msg-theirs-content">
+            <div class="msg-sender-name">${sname}</div>
+            <div class="msg-bubble theirs">${esc(m.text)}</div>
+            <div class="msg-meta">${fmt(m.createdAt)}</div>
+          </div>
+          <button class="dm-btn" id="${dmId}" onclick="openDirectChat('${sid}','${sname}','${sbike}','${sphoto}')">💬</button>
+        </div>
       </div>`;
     }
   }).join('');
   list.scrollTop=list.scrollHeight;
-
-  list.querySelectorAll('.msg-bubble').forEach(el=>{
-    el.addEventListener('touchstart',onBubbleTouchStart,{passive:true});
-    el.addEventListener('touchend',onBubbleTouchEnd);
-    el.addEventListener('touchmove',onBubbleTouchEnd);
-    el.addEventListener('contextmenu',e=>e.preventDefault());
-  });
 }
 
-function onBubbleTouchStart(e){
-  const el=e.currentTarget;
-  bubbleHoldTimer=setTimeout(()=>{
-    const isMine=el.dataset.mine==='1';
-    actionTarget={
-      msgId:el.dataset.id,type:el.dataset.type,isMine,
-      senderId:el.dataset.senderId||'',
-      senderName:el.dataset.senderName||'',
-      senderBike:el.dataset.senderBike||'',
-      senderPhoto:el.dataset.senderPhoto||''
-    };
-    document.getElementById('actionDM').style.display=isMine?'none':'flex';
-    document.getElementById('actionDelete').style.display=isMine?'flex':'none';
-    const touch=e.touches[0];
-    const x=Math.min(touch.clientX,window.innerWidth-220);
-    const y=Math.min(touch.clientY+20,window.innerHeight-100);
-    const menu=document.getElementById('msgActionMenu');
-    menu.style.left=x+'px';menu.style.top=y+'px';menu.style.display='block';
-    document.getElementById('actionOverlay').classList.add('show');
-  },600);
-}
-function onBubbleTouchEnd(){clearTimeout(bubbleHoldTimer);}
-
-function closeActionMenu(){
-  document.getElementById('msgActionMenu').style.display='none';
-  document.getElementById('actionOverlay').classList.remove('show');
-  actionTarget=null;
-}
-function doActionDM(){
-  if(!actionTarget||!actionTarget.senderId)return;
-  closeActionMenu();
-  openDirectChat(
-    actionTarget.senderId,
-    actionTarget.senderName||'ライダー',
-    actionTarget.senderBike||'',
-    actionTarget.senderPhoto||''
-  );
-}
-function doActionDelete(){
-  if(!actionTarget)return;
-  closeActionMenu();
+function deleteMsg(msgId,type){
   if(!confirm('このメッセージを削除しますか？'))return;
-  if(actionTarget.type==='area'){
-    db.collection('areaChat').doc('area_'+currentPref).collection('messages').doc(actionTarget.msgId).delete();
+  if(type==='area'){
+    db.collection('areaChat').doc('area_'+currentPref).collection('messages').doc(msgId).delete();
   } else if(directTarget){
-    db.collection('directChat').doc(roomId(myId,directTarget.id)).collection('messages').doc(actionTarget.msgId).delete();
+    db.collection('directChat').doc(roomId(myId,directTarget.id)).collection('messages').doc(msgId).delete();
   }
 }
 

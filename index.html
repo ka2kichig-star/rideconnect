@@ -70,8 +70,6 @@ input[type=file]{display:none;}
 .legal-modal-body p{font-size:13px;color:#ccc;line-height:1.8;margin-bottom:8px;}
 .legal-modal-body ul{padding-left:20px;margin-bottom:8px;}
 .legal-modal-body ul li{font-size:13px;color:#ccc;line-height:1.8;}
-
-/* ── プロフィール表示モーダル ── */
 .profile-modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.85);z-index:400;flex-direction:column;align-items:center;justify-content:flex-end;}
 .profile-modal.open{display:flex;}
 .profile-modal-inner{background:var(--surface);border-radius:24px 24px 0 0;width:100%;padding:20px 24px 40px;display:flex;flex-direction:column;align-items:center;gap:14px;max-height:90vh;overflow-y:auto;}
@@ -88,8 +86,6 @@ input[type=file]{display:none;}
 .profile-dm-btn{width:100%;background:var(--orange);color:#000;font-family:'Bebas Neue',sans-serif;font-size:20px;letter-spacing:2px;border:none;border-radius:14px;padding:14px;cursor:pointer;}
 .profile-dm-btn:active{opacity:.85;}
 .profile-close-btn{width:100%;background:transparent;color:var(--gray);font-size:14px;font-family:'Noto Sans JP',sans-serif;border:1px solid #333;border-radius:14px;padding:12px;cursor:pointer;}
-
-/* ── プロフィール編集モーダル ── */
 .edit-modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.9);z-index:500;flex-direction:column;}
 .edit-modal.open{display:flex;}
 .edit-modal-inner{background:var(--surface);flex:1;display:flex;flex-direction:column;overflow:hidden;}
@@ -111,17 +107,14 @@ input[type=file]{display:none;}
 .edit-input:focus{border-color:var(--orange);}
 .edit-save-btn{width:100%;background:var(--orange);color:#000;font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:3px;border:none;border-radius:12px;padding:15px;cursor:pointer;margin-top:4px;}
 .edit-save-btn:active{transform:scale(.97);}
-
-/* HEADER */
 .header{display:flex;align-items:center;justify-content:space-between;padding:12px 16px 10px;background:var(--bg);border-bottom:1px solid #2a2a2a;flex-shrink:0;z-index:100;}
 .logo{font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:3px;color:var(--orange);}
 .logo span{color:var(--white);}
 .header-right{display:flex;align-items:center;gap:10px;}
 .nearby-badge{font-size:11px;color:var(--gray);text-align:right;line-height:1.3;}
 .nearby-badge strong{display:block;font-size:20px;font-family:'Bebas Neue',sans-serif;color:var(--orange);}
-/* プロフィール編集ボタン */
 .profile-edit-btn{width:40px;height:40px;border-radius:50%;background:#2a2a2a;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:18px;overflow:hidden;}
-.profile-edit-btn img{width:100%;height:100%;object-fit:cover;}
+.profile-edit-btn img{width:100%;height:100%;object-fit:cover;border-radius:50%;}
 .chat-btn{width:40px;height:40px;border-radius:50%;background:#2a2a2a;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:18px;position:relative;}
 .chat-badge{position:absolute;top:0;right:0;width:16px;height:16px;background:var(--red);border-radius:50%;font-size:9px;font-weight:700;color:#fff;display:none;align-items:center;justify-content:center;}
 .chat-badge.show{display:flex;}
@@ -342,8 +335,7 @@ input[type=file]{display:none;}
     <div class="logo">RIDE<span>CONNECT</span></div>
     <div class="header-right">
       <div class="nearby-badge"><strong id="riderCount">0</strong>近くのライダー</div>
-      <!-- ★ プロフィール編集ボタン -->
-      <button class="profile-edit-btn" id="profileEditBtn" onclick="openEditModal()" title="プロフィール編集">👤</button>
+      <button class="profile-edit-btn" id="profileEditBtn" onclick="openEditModal()">👤</button>
       <button class="chat-btn" onclick="openChat()">💬<div class="chat-badge" id="chatBadge"></div></button>
     </div>
   </div>
@@ -398,44 +390,37 @@ const LEGAL={
   terms:{title:'利用規約',body:`<h4>第1条（適用）</h4><p>本サービスを利用することで本規約に同意したものとみなします。</p><h4>第2条（禁止事項）</h4><ul><li>誹謗中傷・嫌がらせ</li><li>個人情報の無断収集・流布</li><li>出会いや性的目的での利用</li><li>スパム・迷惑メッセージ</li><li>虚偽情報の登録</li></ul><h4>第3条（免責）</h4><p>ユーザー間のトラブル・ツーリング中の事故について運営者は責任を負いません。</p>`},
   operator:{title:'運営者情報',body:`<h4>サービス名</h4><p>RideConnect</p><h4>運営者</h4><p>古川 勝貴</p><h4>URL</h4><p>https://ka2kichig-star.github.io/rideconnect/</p>`}
 };
-
 function openLegal(t){document.getElementById('legalTitle').textContent=LEGAL[t].title;document.getElementById('legalBody').innerHTML=LEGAL[t].body;document.getElementById('legalModal').classList.add('open');}
 function closeLegal(){document.getElementById('legalModal').classList.remove('open');}
 
 /* ── プロフィール表示 ── */
-let profileTarget=null;
-
-// ★ Firestoreからライダーデータを取得してプロフィール表示
 async function openProfile(tid,tname,tbike,tphoto,tarea){
-  // まずriders一覧にあればそれを使う
   let name=tname,bike=tbike,photo=tphoto,area=tarea;
+  // riders一覧（ONのライダー）にいれば優先
   if(riders[tid]){
     const d=riders[tid];
     name=d.name||tname;bike=d.bike||tbike;photo=d.photo||tphoto;
     area=d.pref+(d.city?' '+d.city:'');
-  } else {
-    // オフラインでもFirestoreから直接取得を試みる
+  } else if(!bike||!area){
+    // OFFでもFirestoreから取得を試みる
     try{
       const doc=await db.collection('riders').doc(tid).get();
-      if(doc.exists){const d=doc.data();name=d.name||tname;bike=d.bike||tbike;photo=d.photo||tphoto;area=d.pref+(d.city?' '+d.city:'');}
+      if(doc.exists){const d=doc.data();name=d.name||name;bike=d.bike||bike;photo=d.photo||photo;area=d.pref+(d.city?' '+d.city:'');}
     }catch(e){}
   }
-  profileTarget={id:tid,name,bike,photo,area};
-  const photoEl=document.getElementById('profilePhoto');
-  photoEl.innerHTML=photo?`<img src="${photo}" alt="バイク">`:`<div class="no-photo">🏍️</div>`;
+  document.getElementById('profilePhoto').innerHTML=photo?`<img src="${photo}" alt="バイク">`:`<div class="no-photo">🏍️</div>`;
   document.getElementById('profileName').textContent=name||'ライダー';
   document.getElementById('profileBike').textContent=bike||'-';
   document.getElementById('profileArea').textContent=area||'-';
   document.getElementById('profileDmBtn').onclick=()=>{closeProfile();openDirectChat(tid,name,bike,photo,area);};
   document.getElementById('profileModal').classList.add('open');
 }
-function closeProfile(){document.getElementById('profileModal').classList.remove('open');profileTarget=null;}
+function closeProfile(){document.getElementById('profileModal').classList.remove('open');}
 function handleProfileBgClick(e){if(e.target===document.getElementById('profileModal'))closeProfile();}
 function openHeaderProfile(){if(currentMainTab==='direct'&&directTarget)openProfile(directTarget.id,directTarget.name,directTarget.bike,directTarget.photo,directTarget.area||'');}
 
 /* ── プロフィール編集 ── */
 let editPhoto='';
-
 function openEditModal(){
   editPhoto=myPhoto;
   document.getElementById('editName').value=myName;
@@ -449,7 +434,6 @@ function openEditModal(){
   document.getElementById('editModal').classList.add('open');
 }
 function closeEditModal(){document.getElementById('editModal').classList.remove('open');}
-
 function saveProfile(){
   const n=document.getElementById('editName').value.trim();
   const b=document.getElementById('editBike').value.trim();
@@ -461,27 +445,22 @@ function saveProfile(){
   localStorage.setItem('rcName',n);localStorage.setItem('rcBike',b);
   localStorage.setItem('rcPref',p);localStorage.setItem('rcCity',c);
   if(myPhoto)localStorage.setItem('rcPhoto',myPhoto);
-  // ヘッダーアイコン更新
   updateProfileEditBtn();
-  // バナー更新
   document.getElementById('regionLabel').textContent=c?p+' '+c:p;
-  // ステータスONなら情報を更新
   if(isActive)saveLocation();
-  // 都道府県が変わったらライダー一覧を再購読
   if(prefChanged){
-    if(!selectedPrefs.includes(p)){selectedPrefs.unshift(p);}
+    if(!selectedPrefs.includes(p))selectedPrefs.unshift(p);
     localStorage.setItem('rcSelectedPrefs',JSON.stringify(selectedPrefs));
     listenRiders();
-    if(!prefUnsubs[p]){listenAreaChat(p);}
+    if(!prefUnsubs[p])listenAreaChat(p);
     buildPrefTabs();
   }
   closeEditModal();
   toast('プロフィールを更新しました！');
 }
-
 function updateProfileEditBtn(){
   const btn=document.getElementById('profileEditBtn');
-  if(myPhoto){btn.innerHTML=`<img src="${myPhoto}" alt="プロフィール" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">`;}
+  if(myPhoto){btn.innerHTML=`<img src="${myPhoto}" alt="プロフィール">`;}
   else{btn.textContent='👤';}
 }
 
@@ -496,8 +475,7 @@ firebase.initializeApp({
 const db=firebase.firestore();
 const auth=firebase.auth();
 
-let myId=null;
-let myName='',myBike='',myPref='',myCity='',myPhoto='';
+let myId=null,myName='',myBike='',myPref='',myCity='',myPhoto='';
 let selectedPrefs=[],isActive=false,riders={};
 let currentMainTab='area',currentPref='',directTarget=null;
 let unsubRiders=null,unsubDirect=null,prefUnsubs={},prefMsgsCache={};
@@ -649,7 +627,7 @@ function renderCards(){
           <div class="region">📍 ${esc(d.pref)}${d.city?' '+esc(d.city):''}</div>
         </div>
       </div>
-      <button class="msg-btn-small" onclick="event.stopPropagation();openDirectChat('${id}','${esc(d.name)}','${esc(d.bike)}','${esc(d.photo||'')}')">💬 話す</button>
+      <button class="msg-btn-small" onclick="event.stopPropagation();openDirectChat('${id}','${esc(d.name)}','${esc(d.bike)}','${esc(d.photo||'')}','${esc(d.pref+(d.city?' '+d.city:''))}')">💬 話す</button>
     </div>`).join('');
 }
 function renderDirectRidersList(){
@@ -659,7 +637,7 @@ function renderDirectRidersList(){
     list.innerHTML=`<div class="empty-msg">🏍️ ${myPref}に走りたいライダーがいません</div>`;return;
   }
   list.innerHTML=entries.map(([id,d])=>`
-    <div class="direct-rider-item" onclick="openDirectChat('${id}','${esc(d.name)}','${esc(d.bike)}','${esc(d.photo||'')}')">
+    <div class="direct-rider-item" onclick="openDirectChat('${id}','${esc(d.name)}','${esc(d.bike)}','${esc(d.photo||'')}','${esc(d.pref+(d.city?' '+d.city:''))}')">
       ${mkAvatar(d.photo,'🏍️','direct-rider-avatar')}
       <div class="direct-rider-info">
         <div class="name">${esc(d.name)}</div>
@@ -734,8 +712,7 @@ function switchPrefTab(pref){
   if(activeTab)activeTab.scrollIntoView({behavior:'smooth',inline:'center',block:'nearest'});
 }
 function openDirectChat(tid,tname,tbike,tphoto,tarea){
-  const area=tarea||riders[tid]?.pref||'';
-  directTarget={id:tid,name:tname,bike:tbike,photo:tphoto,area};
+  directTarget={id:tid,name:tname,bike:tbike,photo:tphoto,area:tarea||''};
   currentMainTab='direct';
   const av=document.getElementById('chatHeaderAvatar');
   if(tphoto){av.innerHTML=`<img src="${tphoto}" alt="">`;av.style.background='none';}
@@ -756,16 +733,25 @@ function openDirectChat(tid,tname,tbike,tphoto,tarea){
     .onSnapshot(snap=>renderMsgs(snap.docs.map(d=>({id:d.id,...d.data()})),'direct'));
   setTimeout(()=>document.getElementById('chatInput').focus(),300);
 }
+
 function renderMsgs(msgs,type){
   const list=document.getElementById('messagesList');
   if(!msgs.length){list.innerHTML=`<div class="empty-msg">まだメッセージがありません<br>最初に話しかけてみよう！🏍️</div>`;return;}
+
+  // ★ senderキャッシュ：riders一覧 → メッセージのsenderフィールドの順で参照
   const sc={};
   msgs.forEach(m=>{
     if(m.senderId&&m.senderId!==myId&&!sc[m.senderId]){
       const rd=riders[m.senderId];
-      sc[m.senderId]={name:rd?.name||m.senderName||'',bike:rd?.bike||'',photo:rd?.photo||'',area:rd?rd.pref+(rd.city?' '+rd.city:''):''};
+      sc[m.senderId]={
+        name: rd?.name || m.senderName || '',
+        bike: rd?.bike || m.senderBike || '',
+        photo: rd?.photo || m.senderPhoto || '',
+        area: rd ? (rd.pref+(rd.city?' '+rd.city:'')) : (m.senderArea || '')
+      };
     }
   });
+
   list.innerHTML=msgs.map(m=>{
     const mine=m.senderId===myId;
     const s=sc[m.senderId]||{};const sp=s.photo||'';
@@ -779,7 +765,8 @@ function renderMsgs(msgs,type){
       </div>`;
     } else {
       const sid=esc(m.senderId||''),sname=esc(s.name||m.senderName||''),sbike=esc(s.bike||''),sphoto=esc(sp),sarea=esc(s.area||'');
-      const icon=sp?`<div class="msg-sender-icon" onclick="openProfile('${sid}','${sname}','${sbike}','${sphoto}','${sarea}')"><img src="${sp}" alt=""></div>`
+      const icon=sp
+        ?`<div class="msg-sender-icon" onclick="openProfile('${sid}','${sname}','${sbike}','${sphoto}','${sarea}')"><img src="${sp}" alt=""></div>`
         :`<div class="msg-sender-icon" onclick="openProfile('${sid}','${sname}','${sbike}','','${sarea}')">🏍️</div>`;
       return `<div class="msg-wrap">
         <div class="msg-theirs-row">
@@ -797,21 +784,36 @@ function renderMsgs(msgs,type){
   }).join('');
   list.scrollTop=list.scrollHeight;
 }
+
 function deleteMsg(msgId,type){
   if(!confirm('このメッセージを削除しますか？'))return;
   if(type==='area'){db.collection('areaChat').doc('area_'+currentPref).collection('messages').doc(msgId).delete();}
   else if(directTarget){db.collection('directChat').doc(roomId(myId,directTarget.id)).collection('messages').doc(msgId).delete();}
 }
+
+// ★ 送信時にsenderBike・senderPhoto・senderAreaも保存
 function sendMessage(){
   const input=document.getElementById('chatInput'),text=input.value.trim();
   if(!text)return;
   input.value='';input.style.height='auto';
   document.getElementById('sendBtn').disabled=true;
   setTimeout(()=>document.getElementById('sendBtn').disabled=false,600);
-  const data={text,senderId:myId,senderName:myName,createdAt:firebase.firestore.FieldValue.serverTimestamp()};
-  if(currentMainTab==='area'){db.collection('areaChat').doc('area_'+currentPref).collection('messages').add(data);}
-  else if(directTarget){db.collection('directChat').doc(roomId(myId,directTarget.id)).collection('messages').add(data);}
+  const data={
+    text,
+    senderId:myId,
+    senderName:myName,
+    senderBike:myBike,
+    senderPhoto:myPhoto||'',
+    senderArea:myPref+(myCity?' '+myCity:''),
+    createdAt:firebase.firestore.FieldValue.serverTimestamp()
+  };
+  if(currentMainTab==='area'){
+    db.collection('areaChat').doc('area_'+currentPref).collection('messages').add(data);
+  } else if(directTarget){
+    db.collection('directChat').doc(roomId(myId,directTarget.id)).collection('messages').add(data);
+  }
 }
+
 document.getElementById('chatInput').addEventListener('input',function(){
   this.style.height='auto';
   this.style.height=Math.min(this.scrollHeight,120)+'px';

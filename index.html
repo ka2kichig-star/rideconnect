@@ -456,22 +456,44 @@ async function fetchProfile(uid){
 
 /* ── プロフィール表示 ── */
 async function openProfile(tid,tname,tbike,tphoto,tarea){
-  // まずUIをすぐ表示（既知の情報で）
-  document.getElementById('profilePhoto').innerHTML=tphoto?`<img src="${tphoto}" alt="バイク">`:`<div class="no-photo">🏍️</div>`;
-  document.getElementById('profileName').textContent=tname||'ライダー';
-  document.getElementById('profileBike').textContent=tbike||'読み込み中...';
-  document.getElementById('profileArea').textContent=tarea||'読み込み中...';
-  document.getElementById('profileDmBtn').onclick=()=>{closeProfile();openDirectChat(tid,tname,tbike,tphoto,tarea);};
+  if(!tid){toast('プロフィールを取得できませんでした');return;}
+
+  // ローディング表示
+  document.getElementById('profilePhoto').innerHTML=`<div class="no-photo">🏍️</div>`;
+  document.getElementById('profileName').textContent=tname||'読み込み中...';
+  document.getElementById('profileBike').textContent='読み込み中...';
+  document.getElementById('profileArea').textContent='読み込み中...';
   document.getElementById('profileModal').classList.add('open');
 
-  // userProfilesから最新情報を取得して更新
-  const p=await fetchProfile(tid);
-  if(p){
-    document.getElementById('profilePhoto').innerHTML=p.photo?`<img src="${p.photo}" alt="バイク">`:`<div class="no-photo">🏍️</div>`;
-    document.getElementById('profileName').textContent=p.name||tname||'ライダー';
-    document.getElementById('profileBike').textContent=p.bike||'-';
-    document.getElementById('profileArea').textContent=p.area||'-';
-    document.getElementById('profileDmBtn').onclick=()=>{closeProfile();openDirectChat(tid,p.name||tname,p.bike||tbike,p.photo||tphoto,p.area||tarea);};
+  // userProfilesから取得（awaitで完全に待つ）
+  let name=tname,bike=tbike,photo=tphoto,area=tarea;
+  try{
+    // まずridersキャッシュ
+    if(riders[tid]){
+      const d=riders[tid];
+      name=d.name||tname;bike=d.bike||tbike;photo=d.photo||tphoto;
+      area=d.pref+(d.city?' '+d.city:'');
+    } else {
+      // Firestoreから直接取得
+      const doc=await db.collection('userProfiles').doc(tid).get();
+      if(doc.exists){
+        const d=doc.data();
+        name=d.name||tname;
+        bike=d.bike||tbike;
+        photo=d.photo||tphoto;
+        area=d.pref+(d.city?' '+d.city:'');
+        profileCache[tid]={name,bike,photo,area};
+      }
+    }
+  }catch(e){console.error('profile fetch error',e);}
+
+  // モーダルがまだ開いてるなら更新
+  if(document.getElementById('profileModal').classList.contains('open')){
+    document.getElementById('profilePhoto').innerHTML=photo?`<img src="${photo}" alt="バイク">`:`<div class="no-photo">🏍️</div>`;
+    document.getElementById('profileName').textContent=name||'ライダー';
+    document.getElementById('profileBike').textContent=bike||'-';
+    document.getElementById('profileArea').textContent=area||'-';
+    document.getElementById('profileDmBtn').onclick=()=>{closeProfile();openDirectChat(tid,name,bike,photo,area);};
   }
 }
 function closeProfile(){document.getElementById('profileModal').classList.remove('open');}

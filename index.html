@@ -393,27 +393,86 @@ const LEGAL={
 function openLegal(t){document.getElementById('legalTitle').textContent=LEGAL[t].title;document.getElementById('legalBody').innerHTML=LEGAL[t].body;document.getElementById('legalModal').classList.add('open');}
 function closeLegal(){document.getElementById('legalModal').classList.remove('open');}
 
+firebase.initializeApp({
+  apiKey:"AIzaSyCJ43W-7afDkW4IgA_bPBw42rsEELhC2Vc",
+  authDomain:"rideconnect-dbcb8.firebaseapp.com",
+  projectId:"rideconnect-dbcb8",
+  storageBucket:"rideconnect-dbcb8.firebasestorage.app",
+  messagingSenderId:"219375068042",
+  appId:"1:219375068042:web:b00ec4e54dc8726d095e73"
+});
+const db=firebase.firestore();
+const auth=firebase.auth();
+
+let myId=null,myName='',myBike='',myPref='',myCity='',myPhoto='';
+let selectedPrefs=[],isActive=false,riders={};
+let currentMainTab='area',currentPref='',directTarget=null;
+let unsubRiders=null,unsubDirect=null,prefUnsubs={},prefMsgsCache={};
+let unreadCount=0;
+
+// ★ userProfilesキャッシュ（senderIdごと）
+const profileCache={};
+
+function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+function fmt(ts){if(!ts)return '';const d=ts.toDate?ts.toDate():new Date();return d.toLocaleTimeString('ja-JP',{hour:'2-digit',minute:'2-digit'});}
+function roomId(a,b){return [a,b].sort().join('_');}
+function toast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2200);}
+
+/* ── ★ userProfilesに保存 ── */
+function saveUserProfile(){
+  if(!myId)return;
+  db.collection('userProfiles').doc(myId).set({
+    name:myName,
+    bike:myBike,
+    pref:myPref,
+    city:myCity,
+    photo:myPhoto||'',
+    updatedAt:firebase.firestore.FieldValue.serverTimestamp()
+  });
+  // 自分のキャッシュも更新
+  profileCache[myId]={name:myName,bike:myBike,photo:myPhoto||'',area:myPref+(myCity?' '+myCity:'')};
+}
+
+/* ── ★ userProfilesから取得（キャッシュあり） ── */
+async function fetchProfile(uid){
+  if(profileCache[uid])return profileCache[uid];
+  // riders一覧（ONのユーザー）にいれば使う
+  if(riders[uid]){
+    const d=riders[uid];
+    const p={name:d.name,bike:d.bike,photo:d.photo||'',area:d.pref+(d.city?' '+d.city:'')};
+    profileCache[uid]=p;return p;
+  }
+  // userProfilesから取得
+  try{
+    const doc=await db.collection('userProfiles').doc(uid).get();
+    if(doc.exists){
+      const d=doc.data();
+      const p={name:d.name||'',bike:d.bike||'',photo:d.photo||'',area:d.pref+(d.city?' '+d.city:'')};
+      profileCache[uid]=p;return p;
+    }
+  }catch(e){}
+  return null;
+}
+
 /* ── プロフィール表示 ── */
 async function openProfile(tid,tname,tbike,tphoto,tarea){
-  let name=tname,bike=tbike,photo=tphoto,area=tarea;
-  // riders一覧（ONのライダー）にいれば優先
-  if(riders[tid]){
-    const d=riders[tid];
-    name=d.name||tname;bike=d.bike||tbike;photo=d.photo||tphoto;
-    area=d.pref+(d.city?' '+d.city:'');
-  } else if(!bike||!area){
-    // OFFでもFirestoreから取得を試みる
-    try{
-      const doc=await db.collection('riders').doc(tid).get();
-      if(doc.exists){const d=doc.data();name=d.name||name;bike=d.bike||bike;photo=d.photo||photo;area=d.pref+(d.city?' '+d.city:'');}
-    }catch(e){}
-  }
-  document.getElementById('profilePhoto').innerHTML=photo?`<img src="${photo}" alt="バイク">`:`<div class="no-photo">🏍️</div>`;
-  document.getElementById('profileName').textContent=name||'ライダー';
-  document.getElementById('profileBike').textContent=bike||'-';
-  document.getElementById('profileArea').textContent=area||'-';
-  document.getElementById('profileDmBtn').onclick=()=>{closeProfile();openDirectChat(tid,name,bike,photo,area);};
+  // まずUIをすぐ表示（既知の情報で）
+  document.getElementById('profilePhoto').innerHTML=tphoto?`<img src="${tphoto}" alt="バイク">`:`<div class="no-photo">🏍️</div>`;
+  document.getElementById('profileName').textContent=tname||'ライダー';
+  document.getElementById('profileBike').textContent=tbike||'読み込み中...';
+  document.getElementById('profileArea').textContent=tarea||'読み込み中...';
+  document.getElementById('profileDmBtn').onclick=()=>{closeProfile();openDirectChat(tid,tname,tbike,tphoto,tarea);};
   document.getElementById('profileModal').classList.add('open');
+
+  // userProfilesから最新情報を取得して更新
+  const p=await fetchProfile(tid);
+  if(p){
+    document.getElementById('profilePhoto').innerHTML=p.photo?`<img src="${p.photo}" alt="バイク">`:`<div class="no-photo">🏍️</div>`;
+    document.getElementById('profileName').textContent=p.name||tname||'ライダー';
+    document.getElementById('profileBike').textContent=p.bike||'-';
+    document.getElementById('profileArea').textContent=p.area||'-';
+    document.getElementById('profileDmBtn').onclick=()=>{closeProfile();openDirectChat(tid,p.name||tname,p.bike||tbike,p.photo||tphoto,p.area||tarea);};
+  }
 }
 function closeProfile(){document.getElementById('profileModal').classList.remove('open');}
 function handleProfileBgClick(e){if(e.target===document.getElementById('profileModal'))closeProfile();}
@@ -447,6 +506,7 @@ function saveProfile(){
   if(myPhoto)localStorage.setItem('rcPhoto',myPhoto);
   updateProfileEditBtn();
   document.getElementById('regionLabel').textContent=c?p+' '+c:p;
+  saveUserProfile(); // ★ userProfilesも更新
   if(isActive)saveLocation();
   if(prefChanged){
     if(!selectedPrefs.includes(p))selectedPrefs.unshift(p);
@@ -463,28 +523,6 @@ function updateProfileEditBtn(){
   if(myPhoto){btn.innerHTML=`<img src="${myPhoto}" alt="プロフィール">`;}
   else{btn.textContent='👤';}
 }
-
-firebase.initializeApp({
-  apiKey:"AIzaSyCJ43W-7afDkW4IgA_bPBw42rsEELhC2Vc",
-  authDomain:"rideconnect-dbcb8.firebaseapp.com",
-  projectId:"rideconnect-dbcb8",
-  storageBucket:"rideconnect-dbcb8.firebasestorage.app",
-  messagingSenderId:"219375068042",
-  appId:"1:219375068042:web:b00ec4e54dc8726d095e73"
-});
-const db=firebase.firestore();
-const auth=firebase.auth();
-
-let myId=null,myName='',myBike='',myPref='',myCity='',myPhoto='';
-let selectedPrefs=[],isActive=false,riders={};
-let currentMainTab='area',currentPref='',directTarget=null;
-let unsubRiders=null,unsubDirect=null,prefUnsubs={},prefMsgsCache={};
-let unreadCount=0;
-
-function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
-function fmt(ts){if(!ts)return '';const d=ts.toDate?ts.toDate():new Date();return d.toLocaleTimeString('ja-JP',{hour:'2-digit',minute:'2-digit'});}
-function roomId(a,b){return [a,b].sort().join('_');}
-function toast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2200);}
 
 window.addEventListener('load',()=>{
   buildPrefModal();
@@ -574,6 +612,7 @@ function startApp(){
   document.getElementById('setupScreen').classList.remove('active');
   document.getElementById('mainScreen').classList.add('active');
   updateProfileEditBtn();
+  saveUserProfile(); // ★ 起動時にuserProfilesに保存
   listenRiders();
   selectedPrefs.forEach(pref=>listenAreaChat(pref));
   buildPrefTabs();currentPref=myPref;
@@ -737,24 +776,18 @@ function openDirectChat(tid,tname,tbike,tphoto,tarea){
 function renderMsgs(msgs,type){
   const list=document.getElementById('messagesList');
   if(!msgs.length){list.innerHTML=`<div class="empty-msg">まだメッセージがありません<br>最初に話しかけてみよう！🏍️</div>`;return;}
-
-  // ★ senderキャッシュ：riders一覧 → メッセージのsenderフィールドの順で参照
-  const sc={};
-  msgs.forEach(m=>{
-    if(m.senderId&&m.senderId!==myId&&!sc[m.senderId]){
-      const rd=riders[m.senderId];
-      sc[m.senderId]={
-        name: rd?.name || m.senderName || '',
-        bike: rd?.bike || m.senderBike || '',
-        photo: rd?.photo || m.senderPhoto || '',
-        area: rd ? (rd.pref+(rd.city?' '+rd.city:'')) : (m.senderArea || '')
-      };
-    }
-  });
+  // senderIdのセットを集めてプロフィールをプリフェッチ
+  const senderIds=[...new Set(msgs.filter(m=>m.senderId&&m.senderId!==myId).map(m=>m.senderId))];
+  senderIds.forEach(sid=>{if(!profileCache[sid])fetchProfile(sid).then(()=>{}); });
 
   list.innerHTML=msgs.map(m=>{
     const mine=m.senderId===myId;
-    const s=sc[m.senderId]||{};const sp=s.photo||'';
+    const cached=profileCache[m.senderId];
+    const sname=esc(cached?.name||m.senderName||'');
+    const sbike=esc(cached?.bike||'');
+    const sphoto=esc(cached?.photo||'');
+    const sarea=esc(cached?.area||'');
+    const sid=esc(m.senderId||'');
     if(mine){
       return `<div class="msg-wrap">
         <div class="msg-mine-row">
@@ -764,16 +797,15 @@ function renderMsgs(msgs,type){
         <div class="msg-meta right">${fmt(m.createdAt)}</div>
       </div>`;
     } else {
-      const sid=esc(m.senderId||''),sname=esc(s.name||m.senderName||''),sbike=esc(s.bike||''),sphoto=esc(sp),sarea=esc(s.area||'');
-      const icon=sp
-        ?`<div class="msg-sender-icon" onclick="openProfile('${sid}','${sname}','${sbike}','${sphoto}','${sarea}')"><img src="${sp}" alt=""></div>`
+      const icon=sphoto
+        ?`<div class="msg-sender-icon" onclick="openProfile('${sid}','${sname}','${sbike}','${sphoto}','${sarea}')"><img src="${sphoto}" alt=""></div>`
         :`<div class="msg-sender-icon" onclick="openProfile('${sid}','${sname}','${sbike}','','${sarea}')">🏍️</div>`;
       return `<div class="msg-wrap">
         <div class="msg-theirs-row">
           ${icon}
           <div class="msg-theirs-content">
             <button class="profile-peek-btn" onclick="openProfile('${sid}','${sname}','${sbike}','${sphoto}','${sarea}')">👤 プロフィールを見る</button>
-            <div class="msg-sender-name">${sname}</div>
+            <div class="msg-sender-name">${sname||esc(m.senderName||'')}</div>
             <div class="msg-bubble theirs">${esc(m.text)}</div>
             <div class="msg-meta">${fmt(m.createdAt)}</div>
           </div>
@@ -790,30 +822,19 @@ function deleteMsg(msgId,type){
   if(type==='area'){db.collection('areaChat').doc('area_'+currentPref).collection('messages').doc(msgId).delete();}
   else if(directTarget){db.collection('directChat').doc(roomId(myId,directTarget.id)).collection('messages').doc(msgId).delete();}
 }
-
-// ★ 送信時にsenderBike・senderPhoto・senderAreaも保存
 function sendMessage(){
   const input=document.getElementById('chatInput'),text=input.value.trim();
   if(!text)return;
   input.value='';input.style.height='auto';
   document.getElementById('sendBtn').disabled=true;
   setTimeout(()=>document.getElementById('sendBtn').disabled=false,600);
-  const data={
-    text,
-    senderId:myId,
-    senderName:myName,
-    senderBike:myBike,
-    senderPhoto:myPhoto||'',
-    senderArea:myPref+(myCity?' '+myCity:''),
-    createdAt:firebase.firestore.FieldValue.serverTimestamp()
-  };
+  const data={text,senderId:myId,senderName:myName,createdAt:firebase.firestore.FieldValue.serverTimestamp()};
   if(currentMainTab==='area'){
     db.collection('areaChat').doc('area_'+currentPref).collection('messages').add(data);
   } else if(directTarget){
     db.collection('directChat').doc(roomId(myId,directTarget.id)).collection('messages').add(data);
   }
 }
-
 document.getElementById('chatInput').addEventListener('input',function(){
   this.style.height='auto';
   this.style.height=Math.min(this.scrollHeight,120)+'px';

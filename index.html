@@ -4,6 +4,11 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>RideConnect</title>
+<link rel="manifest" href="manifest.json">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="RideConnect">
+<meta name="theme-color" content="#ff6a00">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Noto+Sans+JP:wght@400;700;900&display=swap" rel="stylesheet">
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
@@ -324,8 +329,25 @@ input[type=file]{display:none;}
         </select>
       </div>
       <div><span class="edit-label">市区町村（任意）</span><input class="edit-input" id="editCity" maxlength="20" placeholder="例：上野"></div>
+      <div>
+        <span class="edit-label">チャットで見たい県（複数選択可）</span>
+        <div style="background:#2a2a2a;border:1px solid #333;border-radius:10px;padding:10px 14px;min-height:44px;margin-bottom:8px;font-size:13px;color:#f0ede8;line-height:1.8;" id="editSelectedPrefDisplay">未選択</div>
+        <button style="background:#2a2a2a;border:1px solid #444;border-radius:10px;padding:10px 16px;color:#ff6a00;font-size:13px;font-family:Noto Sans JP,sans-serif;font-weight:700;width:100%;cursor:pointer;text-align:left;" onclick="openEditPrefModal()">＋ 都道府県を選ぶ</button>
+      </div>
       <button class="edit-save-btn" onclick="saveProfile()">保存する</button>
     </div>
+  </div>
+</div>
+
+<!-- 編集用都道府県モーダル -->
+<div class="pref-modal" id="editPrefModal">
+  <div style="flex:1;" onclick="closeEditPrefModal()"></div>
+  <div class="pref-modal-inner">
+    <div class="pref-modal-header">
+      <h3>チャットで見たい県を選択</h3>
+      <button class="pref-modal-done" onclick="closeEditPrefModal()">完了</button>
+    </div>
+    <div class="pref-list" id="editPrefList"></div>
   </div>
 </div>
 
@@ -504,10 +526,12 @@ function openHeaderProfile(){if(currentMainTab==='direct'&&directTarget)openProf
 let editPhoto='';
 function openEditModal(){
   editPhoto=myPhoto;
+  editSelectedPrefs=[...selectedPrefs];
   document.getElementById('editName').value=myName;
   document.getElementById('editBike').value=myBike;
   document.getElementById('editPref').value=myPref;
   document.getElementById('editCity').value=myCity;
+  updateEditSelectedDisplay();
   const img=document.getElementById('editPhotoImg');
   const prev=document.getElementById('editPhotoPreview');
   if(myPhoto){img.src=myPhoto;prev.classList.add('has-img');}
@@ -523,6 +547,8 @@ function saveProfile(){
   if(!n||!b||!p){toast('名前・バイク・都道府県を入力してください');return;}
   const prefChanged=p!==myPref;
   myName=n;myBike=b;myPref=p;myCity=c;myPhoto=editPhoto;
+  selectedPrefs=editSelectedPrefs.length?editSelectedPrefs:[p];
+  if(!selectedPrefs.includes(p))selectedPrefs.unshift(p);
   localStorage.setItem('rcName',n);localStorage.setItem('rcBike',b);
   localStorage.setItem('rcPref',p);localStorage.setItem('rcCity',c);
   if(myPhoto)localStorage.setItem('rcPhoto',myPhoto);

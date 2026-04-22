@@ -456,8 +456,6 @@ async function fetchProfile(uid){
 
 /* ── プロフィール表示 ── */
 async function openProfile(tid,tname,tbike,tphoto,tarea){
-  alert("ID:"+tid+"
-名前:"+tname);
   if(!tid){toast('プロフィールを取得できませんでした');return;}
 
   // ローディング表示
@@ -567,29 +565,57 @@ window.addEventListener('load',()=>{
 
 function handlePhotoSelect(e,target){
   const file=e.target.files[0];if(!file)return;
-  const reader=new FileReader();
-  reader.onload=ev=>{
-    const img=new Image();
-    img.onload=()=>{
-      const canvas=document.createElement('canvas');
-      const MAX=400;let w=img.width,h=img.height;
-      if(w>h){if(w>MAX){h=h*MAX/w;w=MAX;}}else{if(h>MAX){w=w*MAX/h;h=MAX;}}
-      canvas.width=w;canvas.height=h;
-      canvas.getContext('2d').drawImage(img,0,0,w,h);
-      const data=canvas.toDataURL('image/jpeg',0.7);
-      if(target==='setup'){
-        myPhoto=data;
-        document.getElementById('bikePhotoImg').src=data;
-        document.getElementById('bikePhotoPreview').classList.add('has-img');
-      } else {
-        editPhoto=data;
-        document.getElementById('editPhotoImg').src=data;
-        document.getElementById('editPhotoPreview').classList.add('has-img');
-      }
-    };
-    img.src=ev.target.result;
+  // iOS Safari対応：URLを先に作成
+  const url=URL.createObjectURL(file);
+  const img=new Image();
+  img.onload=()=>{
+    const canvas=document.createElement('canvas');
+    const MAX=400;let w=img.width,h=img.height;
+    if(w>h){if(w>MAX){h=h*MAX/w;w=MAX;}}else{if(h>MAX){w=w*MAX/h;h=MAX;}}
+    canvas.width=w;canvas.height=h;
+    const ctx=canvas.getContext('2d');
+    ctx.drawImage(img,0,0,w,h);
+    URL.revokeObjectURL(url);
+    const data=canvas.toDataURL('image/jpeg',0.7);
+    if(target==='setup'){
+      myPhoto=data;
+      document.getElementById('bikePhotoImg').src=data;
+      document.getElementById('bikePhotoPreview').classList.add('has-img');
+      localStorage.setItem('rcPhoto',data);
+    } else {
+      editPhoto=data;
+      document.getElementById('editPhotoImg').src=data;
+      document.getElementById('editPhotoPreview').classList.add('has-img');
+    }
   };
-  reader.readAsDataURL(file);
+  img.onerror=()=>{
+    // フォールバック：FileReader方式
+    const reader=new FileReader();
+    reader.onload=ev=>{
+      const img2=new Image();
+      img2.onload=()=>{
+        const canvas=document.createElement('canvas');
+        const MAX=400;let w=img2.width,h=img2.height;
+        if(w>h){if(w>MAX){h=h*MAX/w;w=MAX;}}else{if(h>MAX){w=w*MAX/h;h=MAX;}}
+        canvas.width=w;canvas.height=h;
+        canvas.getContext('2d').drawImage(img2,0,0,w,h);
+        const data=canvas.toDataURL('image/jpeg',0.7);
+        if(target==='setup'){
+          myPhoto=data;
+          document.getElementById('bikePhotoImg').src=data;
+          document.getElementById('bikePhotoPreview').classList.add('has-img');
+          localStorage.setItem('rcPhoto',data);
+        } else {
+          editPhoto=data;
+          document.getElementById('editPhotoImg').src=data;
+          document.getElementById('editPhotoPreview').classList.add('has-img');
+        }
+      };
+      img2.src=ev.target.result;
+    };
+    reader.readAsDataURL(file);
+  };
+  img.src=url;
 }
 
 function buildPrefModal(){
@@ -619,7 +645,14 @@ function openPrefModal(){document.getElementById('prefModal').classList.add('ope
 function closePrefModal(){document.getElementById('prefModal').classList.remove('open');updateSelectedDisplay();}
 
 function startApp(){
-  if(!myId){toast('認証中です。少し待ってからもう一度お試しください。');return;}
+  // myIdがまだなければ認証を待って再実行
+  if(!myId){
+    toast('認証中...');
+    auth.signInAnonymously().then(()=>{
+      setTimeout(startApp,1000);
+    }).catch(e=>{toast('認証に失敗しました。再読み込みしてください。');});
+    return;
+  }
   const n=document.getElementById('inputName').value.trim();
   const b=document.getElementById('inputBike').value.trim();
   const p=document.getElementById('inputPref').value;

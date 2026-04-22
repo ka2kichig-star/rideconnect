@@ -456,6 +456,8 @@ async function fetchProfile(uid){
 
 /* ── プロフィール表示 ── */
 async function openProfile(tid,tname,tbike,tphoto,tarea){
+  alert("ID:"+tid+"
+名前:"+tname);
   if(!tid){toast('プロフィールを取得できませんでした');return;}
 
   // ローディング表示

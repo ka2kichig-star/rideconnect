@@ -711,23 +711,25 @@ function closePrefModal(){document.getElementById('prefModal').classList.remove(
 async function signInWithGoogle(){
   const provider = new firebase.auth.GoogleAuthProvider();
   try {
-    const result = await auth.signInWithPopup(provider);
-    const user = result.user;
-    myId = user.uid;
-    // Googleの名前を初期値として設定
-    if(user.displayName && !document.getElementById('inputName').value){
-      document.getElementById('inputName').value = user.displayName.split(' ')[0];
-    }
-    toast('Googleログイン成功！情報を入力してSTARTを押してください');
+    // リダイレクト方式（iOS Safari対応）
+    await auth.signInWithRedirect(provider);
   } catch(e) {
     console.error(e);
-    if(e.code === 'auth/popup-blocked'){
-      toast('ポップアップがブロックされました。Safariで開いてください');
-    } else {
-      toast('ログインに失敗しました');
-    }
+    toast('ログインに失敗しました');
   }
 }
+
+// リダイレクト後の処理
+auth.getRedirectResult().then(result=>{
+  if(result && result.user){
+    const user=result.user;
+    myId=user.uid;
+    if(user.displayName && !document.getElementById('inputName').value){
+      document.getElementById('inputName').value=user.displayName.split(' ')[0];
+    }
+    toast('Googleログイン成功！情報を入力してSTARTを押してください');
+  }
+}).catch(e=>console.error('redirect result error:',e));
 
 function startApp(){
   // myIdがまだなければ認証を待って再実行

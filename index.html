@@ -767,13 +767,18 @@ async function registerWithPin(){
   const pin=document.getElementById('registerPin').value.trim();
   const pin2=document.getElementById('registerPin2').value.trim();
   if(!name){toast('ニックネームを入力してください');return;}
-  if(pin.length!==4||!/^\d{4}$/.test(pin)){toast('PINは数字4桁で入力してください');return;}
+  if(pin.length!==4||!/^[0-9]{4}$/.test(pin)){toast('PINは数字4桁で入力してください');return;}
   if(pin!==pin2){toast('PINが一致しません');return;}
   toast('確認中...');
   try{
     // 同じニックネームが存在するか確認
     const existing=await db.collection('userProfiles').where('name','==',name).limit(1).get();
     if(!existing.empty){toast('このニックネームはすでに使われています');return;}
+    // 匿名ログインしてmyIdを確定
+    if(!myId){
+      const result=await auth.signInAnonymously();
+      myId=result.user.uid;
+    }
     // セットアップ画面へ
     document.getElementById('inputName').value=name;
     document.getElementById('loginScreen').classList.remove('active');

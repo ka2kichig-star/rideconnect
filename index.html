@@ -492,13 +492,13 @@ function toast(msg){const t=document.getElementById('toast');t.textContent=msg;t
 /* ── ★ userProfilesに保存 ── */
 function saveUserProfile(){
   if(!myId)return;
-  // pinHashは上書きしない（mergeを使う）
-  db.collection('userProfiles').doc(myId).set({
+  const docId=myName||myId; // ニックネームをIDとして使う
+  db.collection('userProfiles').doc(docId).set({
     name:myName,bike:myBike,pref:myPref,city:myCity,
     photo:myPhoto||'',selectedPrefs:selectedPrefs,
     updatedAt:firebase.firestore.FieldValue.serverTimestamp()
   },{merge:true});
-  profileCache[myId]={name:myName,bike:myBike,photo:myPhoto||'',area:myPref+(myCity?' '+myCity:'')};
+  profileCache[docId]={name:myName,bike:myBike,photo:myPhoto||'',area:myPref+(myCity?' '+myCity:'')};
 }
 
 /* ── ★ userProfilesから取得（キャッシュあり） ── */
@@ -738,18 +738,16 @@ async function loginWithPin(){
   const name=document.getElementById('loginName').value.trim();
   const pin=document.getElementById('loginPin').value.trim();
   if(!name||pin.length!==4){toast('ニックネームと4桁のPINを入力してください');return;}
-  if(!/^\d{4}$/.test(pin)){toast('PINは数字4桁で入力してください');return;}
   toast('ログイン中...');
   try{
     const hash=await hashPin(name,pin);
-    // userProfilesからニックネームで検索
-    const snap=await db.collection('userProfiles').where('name','==',name).where('pinHash','==',hash).limit(1).get();
-    if(snap.empty){toast('ニックネームまたはPINが違います');return;}
-    const doc=snap.docs[0];
+    // ニックネームをドキュメントIDとして直接取得
+    const doc=await db.collection('userProfiles').doc(name).get();
+    if(!doc.exists){toast('ニックネームまたはPINが違います');return;}
     const data=doc.data();
-    // このユーザーのUIDでFirebase匿名ログイン（既存UIDを使う）
-    myId=doc.id;
-    myName=data.name;myBike=data.bike||'';myPref=data.pref||'';myCity=data.city||'';myPhoto=data.photo||'';
+    if(data.pinHash!==hash){toast('ニックネームまたはPINが違います');return;}
+    myId=name; // ニックネームをIDとして使う
+    myName=data.name||name;myBike=data.bike||'';myPref=data.pref||'';myCity=data.city||'';myPhoto=data.photo||'';
     localStorage.setItem('rcName',myName);localStorage.setItem('rcBike',myBike);
     localStorage.setItem('rcPref',myPref);localStorage.setItem('rcCity',myCity);
     if(myPhoto)localStorage.setItem('rcPhoto',myPhoto);
@@ -767,18 +765,20 @@ async function registerWithPin(){
   const pin=document.getElementById('registerPin').value.trim();
   const pin2=document.getElementById('registerPin2').value.trim();
   if(!name){toast('ニックネームを入力してください');return;}
-  if(pin.length!==4||!/^[0-9]{4}$/.test(pin)){toast('PINは数字4桁で入力してください');return;}
+  if(pin.length!==4){toast('PINは数字4桁で入力してください');return;}
   if(pin!==pin2){toast('PINが一致しません');return;}
   toast('確認中...');
   try{
-    // 同じニックネームが存在するか確認
-    const existing=await db.collection('userProfiles').where('name','==',name).limit(1).get();
-    if(!existing.empty){toast('このニックネームはすでに使われています');return;}
-    // 匿名ログインしてmyIdを確定
+    // ニックネームをIDとしてドキュメントが存在するか確認
+    const existing=await db.collection('userProfiles').doc(name).get();
+    if(existing.exists){toast('このニックネームはすでに使われています');return;}
+    // 匿名ログインしてFirebase UIDを取得
     if(!myId){
       const result=await auth.signInAnonymously();
       myId=result.user.uid;
     }
+    // ニックネームをドキュメントIDとして使う
+    myId=name; // ★ PINログインではニックネームをIDとする
     // セットアップ画面へ
     document.getElementById('inputName').value=name;
     document.getElementById('loginScreen').classList.remove('active');

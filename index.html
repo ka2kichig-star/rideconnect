@@ -789,7 +789,20 @@ function goToMain(){
   document.getElementById('setupScreen').classList.remove('active');
   document.getElementById('mainScreen').classList.add('active');
   updateProfileEditBtn();
-  saveUserProfile();
+  // PINハッシュを含めて保存
+  if(window._pendingPin){
+    hashPin(myName, window._pendingPin).then(hash=>{
+      db.collection('userProfiles').doc(myId).set({
+        name:myName,bike:myBike,pref:myPref,city:myCity,
+        photo:myPhoto||'',pinHash:hash,selectedPrefs:selectedPrefs,
+        updatedAt:firebase.firestore.FieldValue.serverTimestamp()
+      },{merge:true});
+      console.log('PIN saved for', myName);
+    });
+    window._pendingPin=null;
+  } else {
+    saveUserProfile();
+  }
   listenRiders();
   selectedPrefs.forEach(pref=>listenAreaChat(pref));
   buildPrefTabs();currentPref=myPref;

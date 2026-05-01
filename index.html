@@ -68,6 +68,7 @@ input[type=file]{display:none;}
 .legal-links{display:flex;gap:16px;justify-content:center;flex-wrap:wrap;padding:4px 0;}
 .legal-link{font-size:11px;color:var(--gray);text-decoration:underline;cursor:pointer;background:none;border:none;font-family:'Noto Sans JP',sans-serif;}
 .legal-link:active{color:var(--orange);}
+.google-badge{display:none;background:#1a1a1a;border:1px solid #333;border-radius:20px;padding:4px 12px;font-size:11px;color:#4da6ff;font-weight:700;margin-top:4px;text-align:center;}
 .legal-modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.9);z-index:300;flex-direction:column;}
 .legal-modal.open{display:flex;}
 .legal-modal-inner{background:var(--surface);border-radius:20px 20px 0 0;margin-top:60px;flex:1;display:flex;flex-direction:column;overflow:hidden;}
@@ -373,6 +374,7 @@ input[type=file]{display:none;}
     </div>
   </div>
   <div class="region-banner">エリア：<span id="regionLabel">-</span></div>
+  <div class="google-badge" id="googleBadge"></div>
   <div class="riders-container">
     <div class="riders-area-title">同じエリアのライダー</div>
     <div id="riderList"></div>
@@ -597,30 +599,7 @@ window.addEventListener('load',()=>{
   auth.onAuthStateChanged(user=>{
     if(user){
       myId=user.uid;
-      // Googleログイン済みなら自動でメイン画面へ
-      if(user.providerData && user.providerData.length > 0 && user.providerData[0].providerId === 'google.com'){
-        const n=localStorage.getItem('rcName'),b=localStorage.getItem('rcBike'),p=localStorage.getItem('rcPref');
-        if(n&&b&&p){
-          myName=n;myBike=b;myPref=p;myCity=localStorage.getItem('rcCity')||'';
-          myPhoto=localStorage.getItem('rcPhoto')||'';
-          const sp=localStorage.getItem('rcSelectedPrefs');
-          if(sp)selectedPrefs=JSON.parse(sp);
-          if(!selectedPrefs.includes(myPref))selectedPrefs.unshift(myPref);
-          document.getElementById('regionLabel').textContent=myCity?myPref+' '+myCity:myPref;
-          document.getElementById('setupScreen').classList.remove('active');
-          document.getElementById('mainScreen').classList.add('active');
-          updateProfileEditBtn();
-          saveUserProfile();
-          listenRiders();
-          selectedPrefs.forEach(pref=>listenAreaChat(pref));
-          buildPrefTabs();currentPref=myPref;
-        } else {
-          // Googleログイン済みだが初回→名前等を事前入力
-          if(user.displayName){
-            document.getElementById('inputName').value=user.displayName.split(' ')[0];
-          }
-        }
-      }
+      updateGoogleBadge(user);
     } else {
       auth.signInAnonymously().catch(e=>console.error(e));
     }
@@ -724,12 +703,43 @@ auth.getRedirectResult().then(result=>{
   if(result && result.user){
     const user=result.user;
     myId=user.uid;
-    if(user.displayName && !document.getElementById('inputName').value){
-      document.getElementById('inputName').value=user.displayName.split(' ')[0];
+    // 前回の情報が保存済みなら自動でメイン画面へ
+    const n=localStorage.getItem('rcName'),b=localStorage.getItem('rcBike'),p=localStorage.getItem('rcPref');
+    if(n&&b&&p){
+      myName=n;myBike=b;myPref=p;myCity=localStorage.getItem('rcCity')||'';
+      myPhoto=localStorage.getItem('rcPhoto')||'';
+      const sp=localStorage.getItem('rcSelectedPrefs');
+      if(sp)selectedPrefs=JSON.parse(sp);
+      if(!selectedPrefs.includes(myPref))selectedPrefs.unshift(myPref);
+      document.getElementById('regionLabel').textContent=myCity?myPref+' '+myCity:myPref;
+      document.getElementById('setupScreen').classList.remove('active');
+      document.getElementById('mainScreen').classList.add('active');
+      updateProfileEditBtn();
+      updateGoogleBadge(user);
+      saveUserProfile();
+      listenRiders();
+      selectedPrefs.forEach(pref=>listenAreaChat(pref));
+      buildPrefTabs();currentPref=myPref;
+    } else {
+      // 初回：名前を事前入力
+      if(user.displayName && !document.getElementById('inputName').value){
+        document.getElementById('inputName').value=user.displayName.split(' ')[0];
+      }
+      toast('Googleログイン成功！情報を入力してSTARTを押してください');
     }
-    toast('Googleログイン成功！情報を入力してSTARTを押してください');
   }
 }).catch(e=>console.error('redirect result error:',e));
+
+function updateGoogleBadge(user){
+  const badge=document.getElementById('googleBadge');
+  if(!badge)return;
+  if(user && user.providerData && user.providerData[0]?.providerId==='google.com'){
+    badge.textContent='G '+( user.email||'Googleログイン中');
+    badge.style.display='block';
+  } else {
+    badge.style.display='none';
+  }
+}
 
 function startApp(){
   // myIdがまだなければ認証を待って再実行

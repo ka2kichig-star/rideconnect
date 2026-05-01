@@ -59,6 +59,11 @@ input[type=file]{display:none;}
 .pref-check-item.checked .pref-check-box{background:var(--orange);border-color:var(--orange);color:#000;}
 .pref-check-label{font-size:13px;}
 .btn-start{width:100%;background:var(--orange);color:#000;font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:3px;border:none;border-radius:12px;padding:15px;cursor:pointer;margin-top:4px;}
+.btn-google{width:100%;background:#fff;color:#333;font-family:'Noto Sans JP',sans-serif;font-size:15px;font-weight:700;border:2px solid #ddd;border-radius:12px;padding:14px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:10px;margin-top:4px;}
+.btn-google:active{background:#f5f5f5;}
+.btn-google img{width:20px;height:20px;}
+.login-divider{display:flex;align-items:center;gap:12px;color:var(--gray);font-size:12px;}
+.login-divider::before,.login-divider::after{content:'';flex:1;height:1px;background:#333;}
 .btn-start:active{transform:scale(.97);}
 .legal-links{display:flex;gap:16px;justify-content:center;flex-wrap:wrap;padding:4px 0;}
 .legal-link{font-size:11px;color:var(--gray);text-decoration:underline;cursor:pointer;background:none;border:none;font-family:'Noto Sans JP',sans-serif;}
@@ -240,6 +245,12 @@ input[type=file]{display:none;}
       <div class="pref-selected-display empty" id="selectedPrefDisplay">未選択（自分のエリアのみ表示）</div>
       <button class="pref-toggle-btn" onclick="openPrefModal()">＋ 都道府県を選ぶ</button>
     </div>
+    <div class="login-divider">Googleでかんたんログイン</div>
+    <button class="btn-google" onclick="signInWithGoogle()">
+      <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google">
+      Googleでログイン（推奨）
+    </button>
+    <div class="login-divider">または手動で入力</div>
     <button class="btn-start" onclick="startApp()">START RIDING 🏍️</button>
     <div class="legal-links">
       <button class="legal-link" onclick="openLegal('privacy')">プライバシーポリシー</button>
@@ -584,8 +595,35 @@ window.addEventListener('load',()=>{
   if(sp){selectedPrefs=JSON.parse(sp);updateSelectedDisplay();}
   if(ph){myPhoto=ph;document.getElementById('bikePhotoImg').src=ph;document.getElementById('bikePhotoPreview').classList.add('has-img');}
   auth.onAuthStateChanged(user=>{
-    if(user)myId=user.uid;
-    else auth.signInAnonymously().catch(e=>console.error(e));
+    if(user){
+      myId=user.uid;
+      // Googleログイン済みなら自動でメイン画面へ
+      if(user.providerData && user.providerData.length > 0 && user.providerData[0].providerId === 'google.com'){
+        const n=localStorage.getItem('rcName'),b=localStorage.getItem('rcBike'),p=localStorage.getItem('rcPref');
+        if(n&&b&&p){
+          myName=n;myBike=b;myPref=p;myCity=localStorage.getItem('rcCity')||'';
+          myPhoto=localStorage.getItem('rcPhoto')||'';
+          const sp=localStorage.getItem('rcSelectedPrefs');
+          if(sp)selectedPrefs=JSON.parse(sp);
+          if(!selectedPrefs.includes(myPref))selectedPrefs.unshift(myPref);
+          document.getElementById('regionLabel').textContent=myCity?myPref+' '+myCity:myPref;
+          document.getElementById('setupScreen').classList.remove('active');
+          document.getElementById('mainScreen').classList.add('active');
+          updateProfileEditBtn();
+          saveUserProfile();
+          listenRiders();
+          selectedPrefs.forEach(pref=>listenAreaChat(pref));
+          buildPrefTabs();currentPref=myPref;
+        } else {
+          // Googleログイン済みだが初回→名前等を事前入力
+          if(user.displayName){
+            document.getElementById('inputName').value=user.displayName.split(' ')[0];
+          }
+        }
+      }
+    } else {
+      auth.signInAnonymously().catch(e=>console.error(e));
+    }
   });
 });
 
@@ -669,6 +707,27 @@ function updateSelectedDisplay(){
 }
 function openPrefModal(){document.getElementById('prefModal').classList.add('open');updatePrefCheckUI();}
 function closePrefModal(){document.getElementById('prefModal').classList.remove('open');updateSelectedDisplay();}
+
+async function signInWithGoogle(){
+  const provider = new firebase.auth.GoogleAuthProvider();
+  try {
+    const result = await auth.signInWithPopup(provider);
+    const user = result.user;
+    myId = user.uid;
+    // Googleの名前を初期値として設定
+    if(user.displayName && !document.getElementById('inputName').value){
+      document.getElementById('inputName').value = user.displayName.split(' ')[0];
+    }
+    toast('Googleログイン成功！情報を入力してSTARTを押してください');
+  } catch(e) {
+    console.error(e);
+    if(e.code === 'auth/popup-blocked'){
+      toast('ポップアップがブロックされました。Safariで開いてください');
+    } else {
+      toast('ログインに失敗しました');
+    }
+  }
+}
 
 function startApp(){
   // myIdがまだなければ認証を待って再実行

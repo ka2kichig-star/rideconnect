@@ -59,11 +59,16 @@ input[type=file]{display:none;}
 .pref-check-item.checked .pref-check-box{background:var(--orange);border-color:var(--orange);color:#000;}
 .pref-check-label{font-size:13px;}
 .btn-start{width:100%;background:var(--orange);color:#000;font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:3px;border:none;border-radius:12px;padding:15px;cursor:pointer;margin-top:4px;}
-.btn-google{width:100%;background:#fff;color:#333;font-family:'Noto Sans JP',sans-serif;font-size:15px;font-weight:700;border:2px solid #ddd;border-radius:12px;padding:14px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:10px;margin-top:4px;}
-.btn-google:active{background:#f5f5f5;}
-.btn-google img{width:20px;height:20px;}
-.login-divider{display:flex;align-items:center;gap:12px;color:var(--gray);font-size:12px;}
-.login-divider::before,.login-divider::after{content:'';flex:1;height:1px;background:#333;}
+.pin-screen-inner{width:100%;display:flex;flex-direction:column;gap:14px;}
+.pin-tabs{display:flex;background:#1a1a1a;border-radius:12px;padding:4px;gap:4px;}
+.pin-tab{flex:1;padding:10px;border:none;border-radius:8px;font-family:'Noto Sans JP',sans-serif;font-size:14px;font-weight:700;cursor:pointer;background:transparent;color:var(--gray);}
+.pin-tab.active{background:var(--orange);color:#000;}
+.pin-input{width:100%;background:#2a2a2a;border:1px solid #333;border-radius:10px;padding:13px 16px;color:var(--white);font-family:'Noto Sans JP',sans-serif;font-size:16px;outline:none;transition:border-color .2s;}
+.pin-input:focus{border-color:var(--orange);}
+.pin-input-number{letter-spacing:8px;font-size:22px;text-align:center;}
+.btn-pin{width:100%;background:var(--orange);color:#000;font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:3px;border:none;border-radius:12px;padding:15px;cursor:pointer;}
+.btn-pin:active{transform:scale(.97);}
+.pin-note{font-size:11px;color:var(--gray);text-align:center;line-height:1.8;}
 .btn-start:active{transform:scale(.97);}
 .legal-links{display:flex;gap:16px;justify-content:center;flex-wrap:wrap;padding:4px 0;}
 .legal-link{font-size:11px;color:var(--gray);text-decoration:underline;cursor:pointer;background:none;border:none;font-family:'Noto Sans JP',sans-serif;}
@@ -208,12 +213,49 @@ input[type=file]{display:none;}
 </head>
 <body>
 
+<!-- LOGIN -->
+<div class="screen active" id="loginScreen">
+  <div style="background:linear-gradient(160deg,#1a0a00,#0e0e0e);flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:32px 24px;gap:20px;overflow-y:auto;">
+    <div style="font-family:'Bebas Neue',sans-serif;font-size:48px;letter-spacing:6px;color:var(--orange);line-height:1;">RIDE<span style="color:var(--white);">CONNECT</span></div>
+    <div style="font-size:13px;color:var(--gray);margin-top:-16px;">走りたい仲間を見つけよう</div>
+    <div class="pin-screen-inner">
+      <div class="pin-tabs">
+        <button class="pin-tab active" id="tabLogin" onclick="switchPinTab('login')">ログイン</button>
+        <button class="pin-tab" id="tabRegister" onclick="switchPinTab('register')">新規登録</button>
+      </div>
+      <!-- ログイン -->
+      <div id="loginForm">
+        <div style="display:flex;flex-direction:column;gap:10px;">
+          <input class="pin-input" id="loginName" placeholder="ニックネーム" maxlength="10" type="text">
+          <input class="pin-input pin-input-number" id="loginPin" placeholder="••••" maxlength="4" type="password" inputmode="numeric">
+          <button class="btn-pin" onclick="loginWithPin()">ログイン 🏍️</button>
+        </div>
+      </div>
+      <!-- 新規登録 -->
+      <div id="registerForm" style="display:none;">
+        <div style="display:flex;flex-direction:column;gap:10px;">
+          <input class="pin-input" id="registerName" placeholder="ニックネーム" maxlength="10" type="text">
+          <input class="pin-input pin-input-number" id="registerPin" placeholder="4桁のPIN" maxlength="4" type="password" inputmode="numeric">
+          <input class="pin-input pin-input-number" id="registerPin2" placeholder="PINを確認" maxlength="4" type="password" inputmode="numeric">
+          <button class="btn-pin" onclick="registerWithPin()">新規登録して始める 🏍️</button>
+        </div>
+      </div>
+      <div class="pin-note">PINコードはニックネームと組み合わせて<br>どのデバイスからでもログインできます</div>
+      <div class="legal-links">
+        <button class="legal-link" onclick="openLegal('privacy')">プライバシーポリシー</button>
+        <button class="legal-link" onclick="openLegal('terms')">利用規約</button>
+        <button class="legal-link" onclick="openLegal('operator')">運営者情報</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <!-- SETUP -->
-<div class="screen active" id="setupScreen">
+<div class="screen" id="setupScreen">
   <div class="setup-logo">RIDE<span>CONNECT</span></div>
   <div class="setup-sub">走りたい仲間を見つけよう</div>
   <div class="setup-form">
-    <div><label>ニックネーム</label><input type="text" id="inputName" placeholder="例：太郎" maxlength="10"></div>
+    <div><label>ニックネーム</label><input type="text" id="inputName" id="registerNameForSetup" placeholder="例：太郎" maxlength="10"></div>
     <div><label>バイク</label><input type="text" id="inputBike" placeholder="例：ZX-10R" maxlength="20"></div>
     <div class="bike-photo-upload">
       <label>バイクの写真（任意）</label>
@@ -246,12 +288,6 @@ input[type=file]{display:none;}
       <div class="pref-selected-display empty" id="selectedPrefDisplay">未選択（自分のエリアのみ表示）</div>
       <button class="pref-toggle-btn" onclick="openPrefModal()">＋ 都道府県を選ぶ</button>
     </div>
-    <div class="login-divider">Googleでかんたんログイン</div>
-    <button class="btn-google" onclick="signInWithGoogle()">
-      <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google">
-      Googleでログイン（推奨）
-    </button>
-    <div class="login-divider">または手動で入力</div>
     <button class="btn-start" onclick="startApp()">START RIDING 🏍️</button>
     <div class="legal-links">
       <button class="legal-link" onclick="openLegal('privacy')">プライバシーポリシー</button>
@@ -456,15 +492,12 @@ function toast(msg){const t=document.getElementById('toast');t.textContent=msg;t
 /* ── ★ userProfilesに保存 ── */
 function saveUserProfile(){
   if(!myId)return;
+  // pinHashは上書きしない（mergeを使う）
   db.collection('userProfiles').doc(myId).set({
-    name:myName,
-    bike:myBike,
-    pref:myPref,
-    city:myCity,
-    photo:myPhoto||'',
+    name:myName,bike:myBike,pref:myPref,city:myCity,
+    photo:myPhoto||'',selectedPrefs:selectedPrefs,
     updatedAt:firebase.firestore.FieldValue.serverTimestamp()
-  });
-  // 自分のキャッシュも更新
+  },{merge:true});
   profileCache[myId]={name:myName,bike:myBike,photo:myPhoto||'',area:myPref+(myCity?' '+myCity:'')};
 }
 
@@ -598,8 +631,8 @@ window.addEventListener('load',()=>{
   if(ph){myPhoto=ph;document.getElementById('bikePhotoImg').src=ph;document.getElementById('bikePhotoPreview').classList.add('has-img');}
   auth.onAuthStateChanged(user=>{
     if(user){
-      myId=user.uid;
-      updateGoogleBadge(user);
+      // PINログインでmyIdが既にセットされてる場合はUIDを上書きしない
+      if(!myId)myId=user.uid;
     } else {
       auth.signInAnonymously().catch(e=>console.error(e));
     }
@@ -687,59 +720,83 @@ function updateSelectedDisplay(){
 function openPrefModal(){document.getElementById('prefModal').classList.add('open');updatePrefCheckUI();}
 function closePrefModal(){document.getElementById('prefModal').classList.remove('open');updateSelectedDisplay();}
 
-async function signInWithGoogle(){
-  const provider = new firebase.auth.GoogleAuthProvider();
-  try {
-    // リダイレクト方式（iOS Safari対応）
-    await auth.signInWithRedirect(provider);
-  } catch(e) {
-    console.error(e);
-    toast('ログインに失敗しました');
-  }
+/* ── PINログイン ── */
+function switchPinTab(tab){
+  document.getElementById('tabLogin').classList.toggle('active',tab==='login');
+  document.getElementById('tabRegister').classList.toggle('active',tab==='register');
+  document.getElementById('loginForm').style.display=tab==='login'?'block':'none';
+  document.getElementById('registerForm').style.display=tab==='register'?'block':'none';
 }
 
-// リダイレクト後の処理
-auth.getRedirectResult().then(result=>{
-  if(result && result.user){
-    const user=result.user;
-    myId=user.uid;
-    // 前回の情報が保存済みなら自動でメイン画面へ
-    const n=localStorage.getItem('rcName'),b=localStorage.getItem('rcBike'),p=localStorage.getItem('rcPref');
-    if(n&&b&&p){
-      myName=n;myBike=b;myPref=p;myCity=localStorage.getItem('rcCity')||'';
-      myPhoto=localStorage.getItem('rcPhoto')||'';
-      const sp=localStorage.getItem('rcSelectedPrefs');
-      if(sp)selectedPrefs=JSON.parse(sp);
-      if(!selectedPrefs.includes(myPref))selectedPrefs.unshift(myPref);
-      document.getElementById('regionLabel').textContent=myCity?myPref+' '+myCity:myPref;
-      document.getElementById('setupScreen').classList.remove('active');
-      document.getElementById('mainScreen').classList.add('active');
-      updateProfileEditBtn();
-      updateGoogleBadge(user);
-      saveUserProfile();
-      listenRiders();
-      selectedPrefs.forEach(pref=>listenAreaChat(pref));
-      buildPrefTabs();currentPref=myPref;
-    } else {
-      // 初回：名前を事前入力
-      if(user.displayName && !document.getElementById('inputName').value){
-        document.getElementById('inputName').value=user.displayName.split(' ')[0];
-      }
-      toast('Googleログイン成功！情報を入力してSTARTを押してください');
-    }
-  }
-}).catch(e=>console.error('redirect result error:',e));
-
-function updateGoogleBadge(user){
-  const badge=document.getElementById('googleBadge');
-  if(!badge)return;
-  if(user && user.providerData && user.providerData[0]?.providerId==='google.com'){
-    badge.textContent='G '+( user.email||'Googleログイン中');
-    badge.style.display='block';
-  } else {
-    badge.style.display='none';
-  }
+async function hashPin(name,pin){
+  const text=name.toLowerCase()+'::'+pin;
+  const buf=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(text));
+  return Array.from(new Uint8Array(buf)).map(b=>b.toString(16).padStart(2,'0')).join('');
 }
+
+async function loginWithPin(){
+  const name=document.getElementById('loginName').value.trim();
+  const pin=document.getElementById('loginPin').value.trim();
+  if(!name||pin.length!==4){toast('ニックネームと4桁のPINを入力してください');return;}
+  if(!/^\d{4}$/.test(pin)){toast('PINは数字4桁で入力してください');return;}
+  toast('ログイン中...');
+  try{
+    const hash=await hashPin(name,pin);
+    // userProfilesからニックネームで検索
+    const snap=await db.collection('userProfiles').where('name','==',name).where('pinHash','==',hash).limit(1).get();
+    if(snap.empty){toast('ニックネームまたはPINが違います');return;}
+    const doc=snap.docs[0];
+    const data=doc.data();
+    // このユーザーのUIDでFirebase匿名ログイン（既存UIDを使う）
+    myId=doc.id;
+    myName=data.name;myBike=data.bike||'';myPref=data.pref||'';myCity=data.city||'';myPhoto=data.photo||'';
+    localStorage.setItem('rcName',myName);localStorage.setItem('rcBike',myBike);
+    localStorage.setItem('rcPref',myPref);localStorage.setItem('rcCity',myCity);
+    if(myPhoto)localStorage.setItem('rcPhoto',myPhoto);
+    localStorage.setItem('rcUid',myId);
+    const sp=data.selectedPrefs||[];
+    selectedPrefs=sp.length?sp:[myPref];
+    if(!selectedPrefs.includes(myPref))selectedPrefs.unshift(myPref);
+    localStorage.setItem('rcSelectedPrefs',JSON.stringify(selectedPrefs));
+    goToMain();
+  }catch(e){console.error(e);toast('ログインに失敗しました');}
+}
+
+async function registerWithPin(){
+  const name=document.getElementById('registerName').value.trim();
+  const pin=document.getElementById('registerPin').value.trim();
+  const pin2=document.getElementById('registerPin2').value.trim();
+  if(!name){toast('ニックネームを入力してください');return;}
+  if(pin.length!==4||!/^\d{4}$/.test(pin)){toast('PINは数字4桁で入力してください');return;}
+  if(pin!==pin2){toast('PINが一致しません');return;}
+  toast('確認中...');
+  try{
+    // 同じニックネームが存在するか確認
+    const existing=await db.collection('userProfiles').where('name','==',name).limit(1).get();
+    if(!existing.empty){toast('このニックネームはすでに使われています');return;}
+    // セットアップ画面へ
+    document.getElementById('registerNameForSetup').value=name;
+    document.getElementById('loginScreen').classList.remove('active');
+    document.getElementById('setupScreen').classList.add('active');
+    // PINを一時保存
+    window._pendingPin=pin;
+    window._pendingName=name;
+  }catch(e){console.error(e);toast('エラーが発生しました');}
+}
+
+function goToMain(){
+  document.getElementById('loginScreen').classList.remove('active');
+  document.getElementById('setupScreen').classList.remove('active');
+  document.getElementById('mainScreen').classList.add('active');
+  updateProfileEditBtn();
+  saveUserProfile();
+  listenRiders();
+  selectedPrefs.forEach(pref=>listenAreaChat(pref));
+  buildPrefTabs();currentPref=myPref;
+  document.getElementById('regionLabel').textContent=myCity?myPref+' '+myCity:myPref;
+}
+
+function updateGoogleBadge(user){}
 
 function startApp(){
   // myIdがまだなければ認証を待って再実行

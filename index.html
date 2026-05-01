@@ -759,7 +759,7 @@ async function loginWithPin(){
     if(!selectedPrefs.includes(myPref))selectedPrefs.unshift(myPref);
     localStorage.setItem('rcSelectedPrefs',JSON.stringify(selectedPrefs));
     goToMain();
-  }catch(e){console.error(e);toast('ログインに失敗しました');}
+  }catch(e){console.error('loginWithPin error:',e);toast('エラー: '+e.message);}
 }
 
 async function registerWithPin(){
@@ -775,13 +775,13 @@ async function registerWithPin(){
     const existing=await db.collection('userProfiles').where('name','==',name).limit(1).get();
     if(!existing.empty){toast('このニックネームはすでに使われています');return;}
     // セットアップ画面へ
-    document.getElementById('registerNameForSetup').value=name;
+    document.getElementById('inputName').value=name;
     document.getElementById('loginScreen').classList.remove('active');
     document.getElementById('setupScreen').classList.add('active');
     // PINを一時保存
     window._pendingPin=pin;
     window._pendingName=name;
-  }catch(e){console.error(e);toast('エラーが発生しました');}
+  }catch(e){console.error('registerWithPin error:',e);toast('エラー: '+e.message);}
 }
 
 function goToMain(){

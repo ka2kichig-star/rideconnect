@@ -209,18 +209,9 @@ input[type=file]{display:none;}
 .empty-msg{text-align:center;color:var(--gray);font-size:13px;padding:32px 16px;align-self:center;}
 .toast{position:fixed;top:70px;left:50%;transform:translateX(-50%) translateY(-10px);background:var(--orange);color:#000;font-weight:700;font-size:13px;padding:8px 20px;border-radius:20px;opacity:0;pointer-events:none;transition:opacity .3s,transform .3s;z-index:9999;white-space:nowrap;}
 .toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
-.lp-screen{background:url('https://images.unsplash.com/photo-1558981403-c5f9899a28bc?q=80&w=1080&auto=format&fit=crop') center/cover;position:relative;}
-.lp-overlay{position:absolute;inset:0;background:linear-gradient(to bottom, rgba(0,0,0,0.3), rgba(14,14,14,1));}
-.lp-content{position:relative;z-index:10;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%;padding:40px 24px 60px;text-align:center;}
-.lp-title{font-family:'Bebas Neue',sans-serif;font-size:56px;letter-spacing:6px;color:var(--orange);line-height:1;margin-bottom:8px;}
-.lp-title span{color:var(--white);}
-.lp-subtitle{font-size:16px;font-weight:700;color:var(--white);margin-bottom:12px;}
-.lp-desc{font-size:13px;color:var(--gray);line-height:1.6;margin-bottom:32px;}
 </style>
 </head>
 <body>
-
-
 
 <!-- LOGIN -->
 <div class="screen active" id="loginScreen">
@@ -343,18 +334,25 @@ input[type=file]{display:none;}
     <div class="profile-bike-photo" id="profilePhoto"><div class="no-photo">🏍️</div></div>
     <div class="profile-info">
       <div class="profile-name" id="profileName">-</div>
-      <div class="profile-row" style="display:flex;gap:12px;">
+      <div class="profile-row">
         <div class="profile-row-icon">🏍️</div>
-        <div style="flex:2;"><div class="profile-row-label">バイク</div><div class="profile-row-text" id="profileBike">-</div></div>
-        <div style="flex:1;"><div class="profile-row-label">排気量</div><div class="profile-row-text" id="profileCc" style="font-weight:700;">-</div></div>
-      </div>
-      <div class="profile-row" style="display:flex;gap:32px;">
-        <div style="flex:1;"><div class="profile-row-label">走り方</div><div class="profile-row-text" id="profileStyle" style="font-weight:700;">-</div></div>
-        <div style="flex:1;"><div class="profile-row-label">インカム</div><div class="profile-row-text" id="profileIntercom" style="font-weight:700;">-</div></div>
+        <div><div class="profile-row-label">バイク</div><div class="profile-row-text" id="profileBike">-</div></div>
       </div>
       <div class="profile-row">
         <div class="profile-row-icon">📍</div>
         <div><div class="profile-row-label">エリア</div><div class="profile-row-text" id="profileArea">-</div></div>
+      </div>
+      <div class="profile-row">
+        <div class="profile-row-icon">⚙️</div>
+        <div><div class="profile-row-label">排気量</div><div class="profile-row-text" id="profileCc">-</div></div>
+      </div>
+      <div class="profile-row">
+        <div class="profile-row-icon">🛣️</div>
+        <div><div class="profile-row-label">走り方</div><div class="profile-row-text" id="profileStyle">-</div></div>
+      </div>
+      <div class="profile-row">
+        <div class="profile-row-icon">🎧</div>
+        <div><div class="profile-row-label">インカム</div><div class="profile-row-text" id="profileIntercom">-</div></div>
       </div>
     </div>
     <button class="profile-dm-btn" id="profileDmBtn">💬 個別にメッセージを送る</button>
@@ -528,7 +526,7 @@ function saveUserProfile(){
     style:myStyle,intercom:myIntercom,cc:myCc,
     updatedAt:firebase.firestore.FieldValue.serverTimestamp()
   },{merge:true});
-  profileCache[docId]={name:myName,bike:myBike,photo:myPhoto||'',area:myPref+(myCity?' '+myCity:''),style:myStyle,intercom:myIntercom,cc:myCc};
+  profileCache[docId]={name:myName,bike:myBike,photo:myPhoto||'',area:myPref+(myCity?' '+myCity:'')};
 }
 
 /* ── ★ userProfilesから取得（キャッシュあり） ── */
@@ -537,7 +535,7 @@ async function fetchProfile(uid){
   // riders一覧（ONのユーザー）にいれば使う
   if(riders[uid]){
     const d=riders[uid];
-    const p={name:d.name,bike:d.bike,photo:d.photo||'',area:d.pref+(d.city?' '+d.city:''),style:d.style||'未設定',intercom:d.intercom||'あり',cc:d.cc||'未設定'};
+    const p={name:d.name,bike:d.bike,photo:d.photo||'',area:d.pref+(d.city?' '+d.city:'')};
     profileCache[uid]=p;return p;
   }
   // userProfilesから取得
@@ -545,7 +543,7 @@ async function fetchProfile(uid){
     const doc=await db.collection('userProfiles').doc(uid).get();
     if(doc.exists){
       const d=doc.data();
-      const p={name:d.name||'',bike:d.bike||'',photo:d.photo||'',area:d.pref+(d.city?' '+d.city:''),style:d.style||'未設定',intercom:d.intercom||'あり',cc:d.cc||'未設定'};
+      const p={name:d.name||'',bike:d.bike||'',photo:d.photo||'',area:d.pref+(d.city?' '+d.city:'')};
       profileCache[uid]=p;return p;
     }
   }catch(e){}
@@ -561,37 +559,39 @@ async function openProfile(tid,tname,tbike,tphoto,tarea){
   document.getElementById('profileName').textContent=tname||'読み込み中...';
   document.getElementById('profileBike').textContent='読み込み中...';
   document.getElementById('profileArea').textContent='読み込み中...';
-  document.getElementById('profileCc').textContent='...';
-  document.getElementById('profileStyle').textContent='...';
-  document.getElementById('profileIntercom').textContent='...';
   document.getElementById('profileModal').classList.add('open');
 
   // userProfilesから取得（awaitで完全に待つ）
-  let name=tname,bike=tbike,photo=tphoto,area=tarea,style='未設定',intercom='あり',cc='未設定';
+  let name=tname,bike=tbike,photo=tphoto,area=tarea,cc='未設定',style='未設定',intercom='あり';
   try{
+    // まずridersキャッシュ
     if(riders[tid]){
       const d=riders[tid];
       name=d.name||tname;bike=d.bike||tbike;photo=d.photo||tphoto;
       area=d.pref+(d.city?' '+d.city:'');
-      style=d.style||'未設定';intercom=d.intercom||'あり';cc=d.cc||'未設定';
+      cc=d.cc||'未設定';style=d.style||'未設定';intercom=d.intercom||'あり';
     } else {
+      // Firestoreから直接取得
       const doc=await db.collection('userProfiles').doc(tid).get();
       if(doc.exists){
         const d=doc.data();
-        name=d.name||tname;bike=d.bike||tbike;photo=d.photo||tphoto;
+        name=d.name||tname;
+        bike=d.bike||tbike;
+        photo=d.photo||tphoto;
         area=d.pref+(d.city?' '+d.city:'');
-        style=d.style||'未設定';intercom=d.intercom||'あり';cc=d.cc||'未設定';
-        profileCache[tid]={name,bike,photo,area,style,intercom,cc};
+        cc=d.cc||'未設定';style=d.style||'未設定';intercom=d.intercom||'あり';
+        profileCache[tid]={name,bike,photo,area};
       }
     }
   }catch(e){console.error('profile fetch error',e);}
 
+  // モーダルがまだ開いてるなら更新
   if(document.getElementById('profileModal').classList.contains('open')){
     document.getElementById('profilePhoto').innerHTML=photo?`<img src="${photo}" alt="バイク">`:`<div class="no-photo">🏍️</div>`;
     document.getElementById('profileName').textContent=name||'ライダー';
     document.getElementById('profileBike').textContent=bike||'-';
-    document.getElementById('profileCc').textContent=cc;
     document.getElementById('profileArea').textContent=area||'-';
+    document.getElementById('profileCc').textContent=cc;
     document.getElementById('profileStyle').textContent=style;
     document.getElementById('profileIntercom').textContent=intercom;
     document.getElementById('profileDmBtn').onclick=()=>{closeProfile();openDirectChat(tid,name,bike,photo,area);};
@@ -637,8 +637,7 @@ function saveProfile(){
   if(!selectedPrefs.includes(p))selectedPrefs.unshift(p);
   localStorage.setItem('rcName',n);localStorage.setItem('rcBike',b);
   localStorage.setItem('rcPref',p);localStorage.setItem('rcCity',c);
-  localStorage.setItem('rcStyle',s);localStorage.setItem('rcIntercom',i);
-  localStorage.setItem('rcCc',v_cc);
+  localStorage.setItem('rcStyle',s);localStorage.setItem('rcIntercom',i);localStorage.setItem('rcCc',v_cc);
   if(myPhoto)localStorage.setItem('rcPhoto',myPhoto);
   updateProfileEditBtn();
   document.getElementById('regionLabel').textContent=c?p+' '+c:p;
@@ -776,18 +775,8 @@ function switchPinTab(tab){
 
 async function hashPin(name,pin){
   const text=name.toLowerCase()+'::'+pin;
-  if(window.crypto && window.crypto.subtle) {
-    const buf=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(text));
-    return Array.from(new Uint8Array(buf)).map(b=>b.toString(16).padStart(2,'0')).join('');
-  } else {
-    let hash = 0;
-    for (let i = 0; i < text.length; i++) {
-      const char = text.charCodeAt(i);
-      hash = ((hash << 5) - hash) + char;
-      hash = hash & hash;
-    }
-    return Math.abs(hash).toString(16);
-  }
+  const buf=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(text));
+  return Array.from(new Uint8Array(buf)).map(b=>b.toString(16).padStart(2,'0')).join('');
 }
 
 async function loginWithPin(){
@@ -807,8 +796,7 @@ async function loginWithPin(){
     myStyle=data.style||'未設定';myIntercom=data.intercom||'あり';myCc=data.cc||'未設定';
     localStorage.setItem('rcName',myName);localStorage.setItem('rcBike',myBike);
     localStorage.setItem('rcPref',myPref);localStorage.setItem('rcCity',myCity);
-    localStorage.setItem('rcStyle',myStyle);localStorage.setItem('rcIntercom',myIntercom);
-    localStorage.setItem('rcCc',myCc);
+    localStorage.setItem('rcStyle',myStyle);localStorage.setItem('rcIntercom',myIntercom);localStorage.setItem('rcCc',myCc);
     if(myPhoto)localStorage.setItem('rcPhoto',myPhoto);
     localStorage.setItem('rcUid',myId);
     const sp=data.selectedPrefs||[];
@@ -892,14 +880,11 @@ function startApp(){
   const i=document.getElementById('inputIntercom').value;
   const v_cc=document.getElementById('inputCc').value;
   if(!n||!b||!p){toast('名前・バイク・都道府県を入力してください');return;}
-  myName=n;myBike=b;myPref=p;myCity=c;
-  myStyle=s;myIntercom=i;myCc=v_cc;
-  myId=myName;
+  myName=n;myBike=b;myPref=p;myCity=c;myStyle=s;myIntercom=i;myCc=v_cc;
   if(!selectedPrefs.includes(p))selectedPrefs.unshift(p);
   localStorage.setItem('rcName',n);localStorage.setItem('rcBike',b);
   localStorage.setItem('rcPref',p);localStorage.setItem('rcCity',c);
-  localStorage.setItem('rcStyle',s);localStorage.setItem('rcIntercom',i);
-  localStorage.setItem('rcCc',v_cc);
+  localStorage.setItem('rcStyle',s);localStorage.setItem('rcIntercom',i);localStorage.setItem('rcCc',v_cc);
   localStorage.setItem('rcSelectedPrefs',JSON.stringify(selectedPrefs));
   if(myPhoto)localStorage.setItem('rcPhoto',myPhoto);
   db.collection('riders').doc(myId).delete().catch(()=>{});
@@ -907,20 +892,7 @@ function startApp(){
   document.getElementById('setupScreen').classList.remove('active');
   document.getElementById('mainScreen').classList.add('active');
   updateProfileEditBtn();
-  // PINハッシュを含めて保存
-  if(window._pendingPin){
-    hashPin(myName, window._pendingPin).then(hash=>{
-      db.collection('userProfiles').doc(myId).set({
-        name:myName,bike:myBike,pref:myPref,city:myCity,
-        photo:myPhoto||'',pinHash:hash,selectedPrefs:selectedPrefs,
-        updatedAt:firebase.firestore.FieldValue.serverTimestamp()
-      },{merge:true});
-      console.log('PIN saved for', myName);
-    });
-    window._pendingPin=null;
-  } else {
-    saveUserProfile(); // ★ 起動時にuserProfilesに保存
-  }
+  saveUserProfile(); // ★ 起動時にuserProfilesに保存
   listenRiders();
   selectedPrefs.forEach(pref=>listenAreaChat(pref));
   buildPrefTabs();currentPref=myPref;

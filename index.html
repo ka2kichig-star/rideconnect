@@ -220,19 +220,10 @@ input[type=file]{display:none;}
 </head>
 <body>
 
-<!-- LP SCREEN -->
-<div class="screen active lp-screen" id="lpScreen">
-  <div class="lp-overlay"></div>
-  <div class="lp-content">
-    <div class="lp-title">RIDE<span>CONNECT</span></div>
-    <div class="lp-subtitle">同じエリアのライダーと繋がろう</div>
-    <div class="lp-desc">ツーリング仲間を探したり、<br>気軽なチャットで情報交換ができます。</div>
-    <button class="btn-start" onclick="document.getElementById('lpScreen').classList.remove('active');document.getElementById('loginScreen').classList.add('active');" style="width:100%;max-width:300px;">はじめる 🏍️</button>
-  </div>
-</div>
+
 
 <!-- LOGIN -->
-<div class="screen" id="loginScreen">
+<div class="screen active" id="loginScreen">
   <div style="background:linear-gradient(160deg,#1a0a00,#0e0e0e);flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:32px 24px;gap:20px;overflow-y:auto;">
     <div style="font-family:'Bebas Neue',sans-serif;font-size:48px;letter-spacing:6px;color:var(--orange);line-height:1;">RIDE<span style="color:var(--white);">CONNECT</span></div>
     <div style="font-size:13px;color:var(--gray);margin-top:-16px;">走りたい仲間を見つけよう</div>

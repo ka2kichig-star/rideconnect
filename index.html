@@ -14,6 +14,8 @@
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <style>
 :root{--bg:#0e0e0e;--surface:#1a1a1a;--card:#222;--orange:#ff6a00;--white:#f0ede8;--gray:#888;--green:#39ff6a;--red:#ff3b3b;--blue:#4da6ff;}
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
@@ -147,8 +149,45 @@ input[type=file]{display:none;}
 .rider-info .bike{font-size:12px;color:var(--gray);}
 .rider-info .region{font-size:11px;color:var(--blue);margin-top:2px;}
 .msg-btn-small{background:#2a2a2a;border:none;border-radius:8px;color:var(--blue);font-size:12px;font-family:'Noto Sans JP',sans-serif;padding:6px 12px;cursor:pointer;white-space:nowrap;}
-.empty-riders{text-align:center;color:var(--gray);font-size:13px;padding:48px 16px;line-height:2;}
+.nav-btn{background:#2a2a2a;border:none;border-radius:12px;color:var(--white);font-size:11px;font-family:'Noto Sans JP',sans-serif;font-weight:700;padding:6px 10px;cursor:pointer;display:flex;align-items:center;gap:4px;transition:background 0.2s;}
+.nav-btn:active{opacity:0.8;}
+.profile-nav-btn{padding-left:6px;}
+.profile-nav-btn img{width:20px;height:20px;object-fit:cover;border-radius:50%;}
+.empty-riders-wrapper{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:60px 24px;text-align:center;min-height:50vh;position:relative;overflow:hidden;border-radius:16px;background:linear-gradient(160deg,rgba(255,106,0,0.05),transparent 60%);border:1px solid rgba(255,106,0,0.1);}
+.empty-svg-icon{width:90px;height:auto;margin-bottom:20px;fill:var(--orange);filter:drop-shadow(0 0 10px rgba(255,106,0,0.4));animation:float 3s ease-in-out infinite;}
+@keyframes float{0%{transform:translateY(0px);}50%{transform:translateY(-10px);filter:drop-shadow(0 0 15px rgba(255,106,0,0.6));}100%{transform:translateY(0px);}}
+.empty-title{font-family:'Bebas Neue',sans-serif;font-size:24px;letter-spacing:2px;color:var(--white);margin-bottom:8px;}
+.empty-text{font-size:13px;color:var(--gray);line-height:1.6;}
+.empty-text span{color:var(--orange);font-weight:700;}
+.profile-comment-box{width:100%;background:#2a2a2a;border-left:4px solid var(--orange);border-radius:8px;padding:12px;margin-top:4px;}
+.profile-comment-text{font-size:13px;line-height:1.5;color:var(--white);}
 .bottom-panel{flex-shrink:0;background:var(--surface);border-top:1px solid #2f2f2f;padding:12px 16px 16px;z-index:100;}
+/* ── ルート提案モーダル ── */
+.route-modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.9);z-index:600;flex-direction:column;}
+.route-modal.open{display:flex;}
+.route-modal-inner{background:var(--surface);border-radius:20px 20px 0 0;margin-top:auto;max-height:90vh;display:flex;flex-direction:column;}
+.route-modal-header{display:flex;align-items:center;justify-content:space-between;padding:16px 20px;border-bottom:1px solid #2a2a2a;flex-shrink:0;}
+.route-modal-header h3{font-size:16px;font-weight:700;}
+.route-modal-close{background:none;border:none;color:var(--gray);font-size:24px;cursor:pointer;}
+.route-modal-body{overflow-y:auto;padding:20px;flex:1;display:flex;flex-direction:column;gap:14px;}
+.route-label{font-size:11px;color:var(--gray);letter-spacing:1px;text-transform:uppercase;margin-bottom:3px;display:block;}
+.route-input{width:100%;background:#2a2a2a;border:1px solid #333;border-radius:10px;padding:13px 16px;color:var(--white);font-family:'Noto Sans JP',sans-serif;font-size:15px;outline:none;transition:border-color .2s;}
+.route-input:focus{border-color:var(--orange);}
+.route-type-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+.route-type-btn{background:#2a2a2a;border:2px solid #333;border-radius:10px;padding:10px 12px;color:var(--gray);font-family:'Noto Sans JP',sans-serif;font-size:13px;cursor:pointer;text-align:center;transition:all .2s;}
+.route-type-btn.selected{border-color:var(--orange);background:#1a0e00;color:var(--orange);font-weight:700;}
+.route-suggest-btn{width:100%;background:var(--orange);color:#000;font-family:'Bebas Neue',sans-serif;font-size:20px;letter-spacing:3px;border:none;border-radius:12px;padding:14px;cursor:pointer;margin-top:4px;transition:opacity .2s;}
+.route-suggest-btn:disabled{opacity:.5;cursor:default;}
+.route-result{background:#111;border:1px solid #2a2a2a;border-radius:12px;padding:16px;white-space:pre-wrap;font-size:13px;line-height:1.8;color:var(--white);display:none;}
+.route-result.show{display:block;}
+.route-result h4{color:var(--orange);font-size:14px;font-weight:700;margin:12px 0 4px;}
+.route-result h4:first-child{margin-top:0;}
+.route-map{width:100%;height:220px;border-radius:10px;overflow:hidden;background:#111;display:none;margin-top:8px;}
+.route-map.show{display:block;}
+.route-info-cards{display:flex;gap:8px;margin-bottom:4px;flex-wrap:wrap;}
+.route-info-card{flex:1;min-width:80px;background:#2a2a2a;border-radius:10px;padding:10px 12px;text-align:center;}
+.route-info-card .val{font-family:'Bebas Neue',sans-serif;font-size:22px;color:var(--orange);}
+.route-info-card .lbl{font-size:10px;color:var(--gray);margin-top:2px;}
 .status-row{display:flex;align-items:center;justify-content:space-between;}
 .status-label .title{font-size:11px;color:var(--gray);margin-bottom:2px;}
 .status-label .value{font-size:15px;font-weight:900;color:var(--red);}
@@ -209,7 +248,145 @@ input[type=file]{display:none;}
 .empty-msg{text-align:center;color:var(--gray);font-size:13px;padding:32px 16px;align-self:center;}
 .toast{position:fixed;top:70px;left:50%;transform:translateX(-50%) translateY(-10px);background:var(--orange);color:#000;font-weight:700;font-size:13px;padding:8px 20px;border-radius:20px;opacity:0;pointer-events:none;transition:opacity .3s,transform .3s;z-index:9999;white-space:nowrap;}
 .toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
-</style>
+/* ── 目的別フィルター ── */
+.purpose-filter-wrap{flex-shrink:0;background:#111;border-bottom:1px solid #2a2a2a;overflow-x:auto;scrollbar-width:none;padding:0 8px;}
+.purpose-filter-wrap::-webkit-scrollbar{display:none;}
+.purpose-filter{display:flex;gap:6px;padding:8px 0;white-space:nowrap;}
+.purpose-btn{flex-shrink:0;padding:6px 14px;background:#2a2a2a;border:1px solid #333;border-radius:20px;color:var(--gray);font-family:'Noto Sans JP',sans-serif;font-size:12px;font-weight:700;cursor:pointer;transition:all .2s;}
+.purpose-btn.active{background:#1a0e00;border-color:var(--orange);color:var(--orange);}
+.purpose-badge{display:inline-block;font-size:9px;font-weight:700;padding:1px 5px;border-radius:4px;margin-left:4px;vertical-align:middle;}
+.purpose-badge-touring{background:#1a2a1a;color:#39ff6a;}
+.purpose-badge-custom{background:#1a1a2a;color:#4da6ff;}
+.purpose-badge-tandem{background:#2a1a2a;color:#ff6af2;}
+/* ── 今すぐノリ ── */
+.now-riding-btn{width:100%;margin-top:10px;background:linear-gradient(135deg,#1a1a1a,#2a2a2a);border:1px solid #ff6a00;border-radius:10px;padding:10px 14px;color:var(--orange);font-family:'Noto Sans JP',sans-serif;font-size:13px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:space-between;transition:all .2s;}
+.now-riding-btn.on{background:linear-gradient(135deg,#ff6a00,#ff9000);border-color:#ff9000;color:#000;}
+.now-riding-btn:disabled{opacity:.3;cursor:default;}
+.now-riding-pulse{width:10px;height:10px;border-radius:50%;background:var(--orange);animation:pulse-dot 1.2s infinite;}
+.now-riding-btn.on .now-riding-pulse{background:#000;}
+@keyframes pulse-dot{0%{box-shadow:0 0 0 0 rgba(255,106,0,0.7);}70%{box-shadow:0 0 0 8px rgba(255,106,0,0);}100%{box-shadow:0 0 0 0 rgba(255,106,0,0);}}
+.now-riding-banner{display:none;background:linear-gradient(90deg,#ff6a00,#ff9000);padding:6px 16px;font-size:12px;font-weight:700;color:#000;text-align:center;flex-shrink:0;animation:banner-flash 2s ease-in-out infinite;}
+.now-riding-banner.show{display:block;}
+@keyframes banner-flash{0%,100%{opacity:1;}50%{opacity:.7;}}
+.now-badge{font-size:10px;font-weight:700;background:#ff6a00;color:#000;padding:2px 6px;border-radius:4px;margin-left:4px;animation:badge-glow .8s ease-in-out infinite alternate;}
+@keyframes badge-glow{from{box-shadow:0 0 2px #ff6a00;}to{box-shadow:0 0 8px #ff9000;}}
+/* ── カルテモーダル ── */
+.karte-modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.95);z-index:700;flex-direction:column;}
+.karte-modal.open{display:flex;}
+.karte-modal-inner{background:var(--bg);flex:1;display:flex;flex-direction:column;overflow:hidden;}
+.karte-modal-header{display:flex;align-items:center;justify-content:space-between;padding:14px 18px;background:var(--surface);border-bottom:1px solid #2a2a2a;flex-shrink:0;}
+.karte-modal-header h3{font-family:'Bebas Neue',sans-serif;font-size:20px;letter-spacing:2px;color:var(--orange);}
+.karte-modal-close{background:none;border:none;color:var(--gray);font-size:24px;cursor:pointer;}
+.karte-add-btn{background:var(--orange);color:#000;border:none;border-radius:10px;padding:8px 14px;font-family:'Noto Sans JP',sans-serif;font-size:12px;font-weight:700;cursor:pointer;}
+.karte-total-bar{background:#1a1a1a;border-bottom:1px solid #2a2a2a;padding:8px 18px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;}
+.karte-total-label{font-size:11px;color:var(--gray);}
+.karte-total-val{font-family:'Bebas Neue',sans-serif;font-size:20px;color:var(--orange);}
+.karte-list{flex:1;overflow-y:auto;padding:12px 16px;}
+.karte-item{background:var(--card);border-radius:12px;padding:14px 16px;margin-bottom:10px;border:1px solid #2f2f2f;position:relative;}
+.karte-item-header{display:flex;align-items:center;gap:8px;margin-bottom:6px;}
+.karte-type-badge{font-size:10px;font-weight:700;padding:2px 8px;border-radius:4px;}
+.karte-type-custom{background:#1a1a2a;color:#4da6ff;border:1px solid #4da6ff;}
+.karte-type-maint{background:#1a2a1a;color:#39ff6a;border:1px solid #39ff6a;}
+.karte-item-title{font-size:14px;font-weight:700;flex:1;}
+.karte-item-del{background:none;border:none;color:#444;font-size:16px;cursor:pointer;padding:0 4px;flex-shrink:0;}
+.karte-item-del:active{color:var(--red);}
+.karte-item-detail{font-size:12px;color:var(--gray);line-height:1.6;margin-bottom:6px;}
+.karte-item-footer{display:flex;align-items:center;justify-content:space-between;}
+.karte-item-date{font-size:11px;color:#555;}
+.karte-item-cost{font-family:'Bebas Neue',sans-serif;font-size:16px;color:var(--orange);}
+.karte-empty{text-align:center;color:var(--gray);padding:48px 16px;font-size:13px;line-height:2;}
+.karte-form-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.9);z-index:800;flex-direction:column;align-items:center;justify-content:flex-end;}
+.karte-form-overlay.open{display:flex;}
+.karte-form-inner{background:var(--surface);width:100%;border-radius:20px 20px 0 0;padding:20px 20px 36px;display:flex;flex-direction:column;gap:12px;max-height:85vh;overflow-y:auto;}
+.karte-form-title{font-family:'Bebas Neue',sans-serif;font-size:20px;letter-spacing:2px;color:var(--orange);margin-bottom:4px;}
+.karte-type-row{display:flex;gap:8px;}
+.karte-type-sel{flex:1;padding:10px;border-radius:10px;border:2px solid #333;background:#2a2a2a;color:var(--gray);font-family:'Noto Sans JP',sans-serif;font-size:13px;cursor:pointer;text-align:center;transition:all .2s;}
+.karte-type-sel.sel{border-color:var(--orange);background:#1a0e00;color:var(--orange);font-weight:700;}
+.karte-inp{width:100%;background:#2a2a2a;border:1px solid #333;border-radius:10px;padding:12px 14px;color:var(--white);font-family:'Noto Sans JP',sans-serif;font-size:15px;outline:none;transition:border-color .2s;}
+.karte-inp:focus{border-color:var(--orange);}
+.karte-save-btn{width:100%;background:var(--orange);color:#000;font-family:'Bebas Neue',sans-serif;font-size:20px;letter-spacing:3px;border:none;border-radius:12px;padding:14px;cursor:pointer;}
+.karte-cancel-btn{width:100%;background:transparent;color:var(--gray);font-family:'Noto Sans JP',sans-serif;font-size:14px;border:1px solid #333;border-radius:12px;padding:12px;cursor:pointer;}
+/* 目的選択（プロフィール編集内） */
+.purpose-check-row{display:flex;flex-direction:column;gap:8px;}
+.purpose-check-item{display:flex;align-items:center;gap:10px;background:var(--card);border:1px solid #2f2f2f;border-radius:10px;padding:10px 14px;cursor:pointer;transition:border-color .2s;}
+.purpose-check-item.checked{border-color:var(--orange);background:#1a0e00;}
+.purpose-check-box{width:18px;height:18px;border-radius:4px;border:2px solid #555;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:12px;}
+.purpose-check-item.checked .purpose-check-box{background:var(--orange);border-color:var(--orange);color:#000;}
+/* ── ハンバーガーメニュー ── */
+.menu-btn{width:40px;height:40px;border-radius:50%;background:#2a2a2a;border:none;color:var(--white);font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.slide-menu{display:none;position:fixed;inset:0;z-index:900;flex-direction:row;}
+.slide-menu.open{display:flex;}
+.slide-menu-overlay{flex:1;background:rgba(0,0,0,0.7);}
+.slide-menu-panel{width:260px;background:var(--surface);display:flex;flex-direction:column;padding:48px 0 24px;gap:4px;overflow-y:auto;}
+.slide-menu-item{display:flex;align-items:center;gap:14px;padding:14px 22px;color:var(--white);font-size:15px;font-family:'Noto Sans JP',sans-serif;font-weight:700;cursor:pointer;transition:background .15s;border:none;background:none;width:100%;text-align:left;}
+.slide-menu-item:active{background:#2a2a2a;}
+.slide-menu-item .mi-icon{font-size:20px;width:28px;text-align:center;}
+.slide-menu-item .mi-badge{margin-left:auto;font-size:10px;font-weight:700;padding:2px 8px;border-radius:10px;background:var(--orange);color:#000;}
+.slide-menu-divider{height:1px;background:#2a2a2a;margin:8px 22px;}
+.slide-menu-head{padding:14px 22px 4px;font-size:10px;color:var(--gray);letter-spacing:2px;text-transform:uppercase;}
+/* ── 共通フルスクリーンモーダル ── */
+.fs-modal{display:none;position:fixed;inset:0;background:var(--bg);z-index:800;flex-direction:column;}
+.fs-modal.open{display:flex;}
+.fs-modal-header{display:flex;align-items:center;gap:12px;padding:14px 16px;background:var(--surface);border-bottom:1px solid #2a2a2a;flex-shrink:0;}
+.fs-modal-back{background:none;border:none;color:var(--orange);font-size:22px;cursor:pointer;padding:0 4px;}
+.fs-modal-title{font-family:'Bebas Neue',sans-serif;font-size:20px;letter-spacing:2px;color:var(--orange);flex:1;}
+.fs-modal-body{flex:1;overflow-y:auto;}
+/* ── ランキング ── */
+.rank-tabs{display:flex;background:#111;border-bottom:1px solid #2a2a2a;flex-shrink:0;}
+.rank-tab{flex:1;padding:11px;background:none;border:none;color:var(--gray);font-family:'Noto Sans JP',sans-serif;font-size:12px;font-weight:700;cursor:pointer;border-bottom:2px solid transparent;}
+.rank-tab.active{color:var(--orange);border-bottom-color:var(--orange);}
+.rank-list{padding:12px 16px;display:flex;flex-direction:column;gap:8px;}
+.rank-item{background:var(--card);border-radius:12px;padding:14px 16px;border:1px solid #2f2f2f;display:flex;align-items:center;gap:12px;}
+.rank-no{font-family:'Bebas Neue',sans-serif;font-size:28px;min-width:36px;text-align:center;}
+.rank-no.gold{color:#ffd700;}.rank-no.silver{color:#c0c0c0;}.rank-no.bronze{color:#cd7f32;}
+.rank-no.other{color:var(--gray);}
+.rank-avatar{width:44px;height:44px;border-radius:50%;background:var(--orange);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;overflow:hidden;border:2px solid #333;}
+.rank-avatar img{width:100%;height:100%;object-fit:cover;}
+.rank-info{flex:1;}
+.rank-name{font-size:14px;font-weight:700;margin-bottom:2px;}
+.rank-sub{font-size:11px;color:var(--gray);}
+.rank-score{font-family:'Bebas Neue',sans-serif;font-size:22px;color:var(--orange);}
+.rank-score-lbl{font-size:9px;color:var(--gray);text-align:right;}
+/* ── ツーリングレポート ── */
+.report-fab{position:fixed;bottom:90px;right:16px;width:52px;height:52px;border-radius:50%;background:var(--orange);border:none;font-size:24px;cursor:pointer;z-index:200;display:none;box-shadow:0 4px 16px rgba(255,106,0,0.4);}
+.report-list{padding:12px 16px;display:flex;flex-direction:column;gap:12px;}
+.report-card{background:var(--card);border-radius:14px;padding:16px;border:1px solid #2f2f2f;}
+.report-card-header{display:flex;align-items:center;gap:10px;margin-bottom:10px;}
+.report-card-avatar{width:36px;height:36px;border-radius:50%;background:var(--orange);display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0;overflow:hidden;border:2px solid #333;}
+.report-card-avatar img{width:100%;height:100%;object-fit:cover;}
+.report-card-meta{flex:1;}
+.report-card-name{font-size:13px;font-weight:700;}
+.report-card-date{font-size:11px;color:var(--gray);}
+.report-route{font-size:12px;color:var(--orange);font-weight:700;margin-bottom:8px;}
+.report-comment{font-size:13px;color:var(--white);line-height:1.7;margin-bottom:10px;}
+.report-like-btn{background:none;border:1px solid #333;border-radius:20px;padding:5px 14px;color:var(--gray);font-family:'Noto Sans JP',sans-serif;font-size:12px;cursor:pointer;display:flex;align-items:center;gap:5px;transition:all .2s;}
+.report-like-btn.liked{border-color:var(--orange);color:var(--orange);background:#1a0e00;}
+.report-form{padding:20px;display:flex;flex-direction:column;gap:12px;}
+.report-inp{width:100%;background:#2a2a2a;border:1px solid #333;border-radius:10px;padding:12px 14px;color:var(--white);font-family:'Noto Sans JP',sans-serif;font-size:15px;outline:none;transition:border-color .2s;}
+.report-inp:focus{border-color:var(--orange);}
+.report-submit-btn{width:100%;background:var(--orange);color:#000;font-family:'Bebas Neue',sans-serif;font-size:20px;letter-spacing:3px;border:none;border-radius:12px;padding:14px;cursor:pointer;}
+/* ── 車種コミュニティ ── */
+.bike-group-list{padding:12px 16px;display:flex;flex-direction:column;gap:8px;}
+.bike-group-item{background:var(--card);border-radius:12px;padding:14px 16px;border:1px solid #2f2f2f;display:flex;align-items:center;gap:12px;cursor:pointer;transition:border-color .2s;}
+.bike-group-item:active{border-color:var(--orange);}
+.bike-group-icon{font-size:28px;width:40px;text-align:center;}
+.bike-group-info{flex:1;}
+.bike-group-name{font-size:14px;font-weight:700;margin-bottom:2px;}
+.bike-group-count{font-size:11px;color:var(--gray);}
+.bike-group-arrow{color:var(--gray);font-size:18px;}
+/* ── 初心者サポート ── */
+.beginner-banner{background:linear-gradient(135deg,#1a2a1a,#0e0e0e);border:1px solid #39ff6a33;border-radius:14px;padding:16px;margin:12px 16px;}
+.beginner-banner-title{font-family:'Bebas Neue',sans-serif;font-size:20px;letter-spacing:2px;color:#39ff6a;margin-bottom:8px;}
+.beginner-tip-list{display:flex;flex-direction:column;gap:8px;}
+.beginner-tip{background:#1a2a1a;border-radius:10px;padding:10px 14px;font-size:13px;color:var(--white);line-height:1.6;border-left:3px solid #39ff6a;}
+.beginner-badge-toggle{display:flex;align-items:center;justify-content:space-between;background:var(--card);border:1px solid #2f2f2f;border-radius:12px;padding:14px 16px;margin:12px 16px;cursor:pointer;}
+.beginner-badge-label{font-size:14px;font-weight:700;}
+.beginner-badge-sub{font-size:11px;color:var(--gray);margin-top:2px;}
+.beginner-toggle{width:52px;height:28px;border-radius:14px;border:none;background:#333;position:relative;cursor:pointer;transition:background .3s;flex-shrink:0;}
+.beginner-toggle.on{background:#39ff6a;}
+.beginner-toggle::after{content:'';position:absolute;width:22px;height:22px;border-radius:50%;background:#fff;top:3px;left:3px;transition:transform .3s cubic-bezier(.34,1.56,.64,1);}
+.beginner-toggle.on::after{transform:translateX(24px);}
+.beginner-badge{font-size:10px;font-weight:700;background:#39ff6a22;color:#39ff6a;border:1px solid #39ff6a44;padding:2px 6px;border-radius:4px;margin-left:4px;}
 </head>
 <body>
 
@@ -354,6 +531,9 @@ input[type=file]{display:none;}
         <div class="profile-row-icon">🎧</div>
         <div><div class="profile-row-label">インカム</div><div class="profile-row-text" id="profileIntercom">-</div></div>
       </div>
+      <div class="profile-comment-box" id="profileCommentBox" style="display:none;">
+        <div class="profile-comment-text" id="profileComment">-</div>
+      </div>
     </div>
     <button class="profile-dm-btn" id="profileDmBtn">💬 個別にメッセージを送る</button>
     <button class="profile-close-btn" onclick="closeProfile()">閉じる</button>
@@ -403,10 +583,28 @@ input[type=file]{display:none;}
         </select>
       </div>
       <div><span class="edit-label">市区町村（任意）</span><input class="edit-input" id="editCity" maxlength="20" placeholder="例：上野"></div>
+      <div><span class="edit-label">一言コメント</span><textarea class="edit-input" id="editComment" maxlength="100" rows="3" placeholder="例：今日は海沿いを走りたいです！"></textarea></div>
       <div>
         <span class="edit-label">チャットで見たい県（複数選択可）</span>
         <div style="background:#2a2a2a;border:1px solid #333;border-radius:10px;padding:10px 14px;min-height:44px;margin-bottom:8px;font-size:13px;color:#f0ede8;line-height:1.8;" id="editSelectedPrefDisplay">未選択</div>
         <button style="background:#2a2a2a;border:1px solid #444;border-radius:10px;padding:10px 16px;color:#ff6a00;font-size:13px;font-family:Noto Sans JP,sans-serif;font-weight:700;width:100%;cursor:pointer;text-align:left;" onclick="openEditPrefModal()">＋ 都道府県を選ぶ</button>
+      </div>
+      <div>
+        <span class="edit-label">走りの目的（複数選択可）</span>
+        <div class="purpose-check-row">
+          <div class="purpose-check-item" id="pci_touring" onclick="togglePurposeEdit('touring')">
+            <div class="purpose-check-box" id="pcb_touring"></div>
+            <div><div style="font-size:13px;font-weight:700;">🌄 ツーリング仲間を探す</div><div style="font-size:11px;color:var(--gray);">一緒に走れるライダーに出会いたい</div></div>
+          </div>
+          <div class="purpose-check-item" id="pci_custom" onclick="togglePurposeEdit('custom')">
+            <div class="purpose-check-box" id="pcb_custom"></div>
+            <div><div style="font-size:13px;font-weight:700;">🔩 カスタム・DIY相談</div><div style="font-size:11px;color:var(--gray);">カスタムについて語れる仲間を探したい</div></div>
+          </div>
+          <div class="purpose-check-item" id="pci_tandem" onclick="togglePurposeEdit('tandem')">
+            <div class="purpose-check-box" id="pcb_tandem"></div>
+            <div><div style="font-size:13px;font-weight:700;">🛵 タンデム仲間を探す</div><div style="font-size:11px;color:var(--gray);">二人乗りツーリングを楽しみたい</div></div>
+          </div>
+        </div>
       </div>
       <button class="edit-save-btn" onclick="saveProfile()">保存する</button>
     </div>
@@ -428,15 +626,26 @@ input[type=file]{display:none;}
 <!-- MAIN -->
 <div class="screen" id="mainScreen">
   <div class="header">
-    <div class="logo">RIDE<span>CONNECT</span></div>
+    <a href="lp.html" class="logo" style="text-decoration:none;">RIDE<span>CONNECT</span></a>
     <div class="header-right">
       <div class="nearby-badge"><strong id="riderCount">0</strong>近くのライダー</div>
-      <button class="profile-edit-btn" id="profileEditBtn" onclick="openEditModal()">👤</button>
+      <button class="nav-btn profile-nav-btn" id="profileEditBtn" onclick="openEditModal()">👤</button>
       <button class="chat-btn" onclick="openChat()">💬<div class="chat-badge" id="chatBadge"></div></button>
+      <button class="menu-btn" onclick="openSlideMenu()">&#9776;</button>
     </div>
   </div>
+  <div class="now-riding-banner" id="nowRidingBanner">⚡ 今すぐノリ！モード ON — あなたのエリアで即合流できます</div>
   <div class="region-banner">エリア：<span id="regionLabel">-</span></div>
   <div class="google-badge" id="googleBadge"></div>
+  <div class="purpose-filter-wrap">
+    <div class="purpose-filter">
+      <button class="purpose-btn active" id="pf_all" onclick="setPurposeFilter('all')">🏍️ 全員</button>
+      <button class="purpose-btn" id="pf_touring" onclick="setPurposeFilter('touring')">🌄 ツーリング</button>
+      <button class="purpose-btn" id="pf_custom" onclick="setPurposeFilter('custom')">🔩 カスタム相談</button>
+      <button class="purpose-btn" id="pf_tandem" onclick="setPurposeFilter('tandem')">🛵 タンデム仲間</button>
+      <button class="purpose-btn" id="pf_beginner" onclick="setPurposeFilter('beginner')">🔰 初心者</button>
+    </div>
+  </div>
   <div class="riders-container">
     <div class="riders-area-title">同じエリアのライダー</div>
     <div id="riderList"></div>
@@ -449,6 +658,10 @@ input[type=file]{display:none;}
       </div>
       <button class="toggle-btn" id="toggleBtn" onclick="toggleStatus()"></button>
     </div>
+    <button class="now-riding-btn" id="nowRidingBtn" onclick="toggleNowRiding()" disabled>
+      <span id="nowRidingLabel">⚡ 今すぐノリ！（走りたい！ONのとき有効）</span>
+      <div class="now-riding-pulse" id="nowRidingPulse"></div>
+    </button>
   </div>
 </div>
 
@@ -479,6 +692,214 @@ input[type=file]{display:none;}
 
 <div class="toast" id="toast"></div>
 
+<!-- スライドメニュー -->
+<div class="slide-menu" id="slideMenu">
+  <div class="slide-menu-overlay" onclick="closeSlideMenu()"></div>
+  <div class="slide-menu-panel">
+    <div class="slide-menu-head">RIDE CONNECT</div>
+    <button class="slide-menu-item" onclick="closeSlideMenu();openRouteModal();">
+      <span class="mi-icon">🗺️</span>ツーリングルート
+    </button>
+    <button class="slide-menu-item" onclick="closeSlideMenu();openKarteModal();">
+      <span class="mi-icon">🔧</span>カスタム・整備カルテ
+    </button>
+    <div class="slide-menu-divider"></div>
+    <div class="slide-menu-head">COMMUNITY</div>
+    <button class="slide-menu-item" onclick="closeSlideMenu();openRankModal();">
+      <span class="mi-icon">🏆</span>ライダーランキング<span class="mi-badge">NEW</span>
+    </button>
+    <button class="slide-menu-item" onclick="closeSlideMenu();openReportModal();">
+      <span class="mi-icon">📝</span>ツーリングレポート<span class="mi-badge">NEW</span>
+    </button>
+    <button class="slide-menu-item" onclick="closeSlideMenu();openCommunityModal();">
+      <span class="mi-icon">🏍️</span>車種コミュニティ<span class="mi-badge">NEW</span>
+    </button>
+    <button class="slide-menu-item" onclick="closeSlideMenu();openBeginnerModal();">
+      <span class="mi-icon">🔰</span>初心者サポート<span class="mi-badge">NEW</span>
+    </button>
+    <div class="slide-menu-divider"></div>
+    <button class="slide-menu-item" onclick="closeSlideMenu();openEditModal();">
+      <span class="mi-icon">👤</span>マイプロフィール
+    </button>
+  </div>
+</div>
+
+<!-- 🏆 ランキングモーダル -->
+<div class="fs-modal" id="rankModal">
+  <div class="fs-modal-header">
+    <button class="fs-modal-back" onclick="closeRankModal()">←</button>
+    <div class="fs-modal-title">🏆 RIDER RANKING</div>
+  </div>
+  <div class="rank-tabs">
+    <button class="rank-tab active" id="rt_likes" onclick="switchRankTab('likes')">👍 いいね数</button>
+    <button class="rank-tab" id="rt_reports" onclick="switchRankTab('reports')">📝 レポート数</button>
+    <button class="rank-tab" id="rt_karte" onclick="switchRankTab('karte')">🔧 カルテ数</button>
+  </div>
+  <div class="fs-modal-body">
+    <div class="rank-list" id="rankList"><div style="text-align:center;padding:40px;color:var(--gray);">読み込み中…</div></div>
+  </div>
+</div>
+
+<!-- 📝 ツーリングレポートモーダル -->
+<div class="fs-modal" id="reportModal">
+  <div class="fs-modal-header">
+    <button class="fs-modal-back" onclick="closeReportModal()">←</button>
+    <div class="fs-modal-title">📝 TOURING REPORT</div>
+    <button class="nav-btn" style="flex-shrink:0;" onclick="openReportForm()">＋ 投稿</button>
+  </div>
+  <div class="fs-modal-body" id="reportModalBody">
+    <div class="report-list" id="reportList"><div style="text-align:center;padding:40px;color:var(--gray);">読み込み中…</div></div>
+  </div>
+</div>
+
+<!-- 📝 レポート投稿フォーム -->
+<div class="fs-modal" id="reportFormModal">
+  <div class="fs-modal-header">
+    <button class="fs-modal-back" onclick="closeReportForm()">←</button>
+    <div class="fs-modal-title">レポートを投稿</div>
+  </div>
+  <div class="fs-modal-body">
+    <div class="report-form">
+      <div><span class="route-label">出発地</span><input class="report-inp" id="rpFrom" type="text" placeholder="例：東京都渋谷区" maxlength="30"></div>
+      <div><span class="route-label">目的地</span><input class="report-inp" id="rpTo" type="text" placeholder="例：筑波巌" maxlength="30"></div>
+      <div><span class="route-label">ツーリング日</span><input class="report-inp" id="rpDate" type="date"></div>
+      <div><span class="route-label">レポートコメント</span><textarea class="report-inp" id="rpComment" rows="5" placeholder="ツーリングの感想やおすすめポイントを書こう！（最大300文字）" maxlength="300"></textarea></div>
+      <button class="report-submit-btn" onclick="submitReport()">投稿する</button>
+    </div>
+  </div>
+</div>
+
+<!-- 🏍️ 車種コミュニティモーダル -->
+<div class="fs-modal" id="communityModal">
+  <div class="fs-modal-header">
+    <button class="fs-modal-back" onclick="closeCommunityModal()">←</button>
+    <div class="fs-modal-title">🏍️ BIKE COMMUNITY</div>
+  </div>
+  <div class="fs-modal-body" id="communityModalBody">
+    <div style="padding:16px;font-size:13px;color:var(--gray);">&#x1F449; チャットルームを選んでください</div>
+    <div class="bike-group-list" id="bikeGroupList"><div style="text-align:center;padding:40px;color:var(--gray);">読み込み中…</div></div>
+  </div>
+</div>
+
+<!-- 🏍️ 車種チャットモーダル -->
+<div class="fs-modal" id="bikeGroupChatModal">
+  <div class="fs-modal-header" style="flex-shrink:0;">
+    <button class="fs-modal-back" onclick="closeBikeGroupChat()">←</button>
+    <div class="fs-modal-title" id="bikeGroupChatTitle">COMMUNITY CHAT</div>
+  </div>
+  <div class="messages-list" id="bikeGroupMessages" style="flex:1;overflow-y:auto;padding:16px;"></div>
+  <div class="chat-input-row" style="flex-shrink:0;">
+    <textarea class="chat-input" id="bikeGroupInput" placeholder="メッセージを入力..." maxlength="200" rows="1"></textarea>
+    <button class="send-btn" onclick="sendBikeGroupMsg()">➤</button>
+  </div>
+</div>
+
+<!-- 🔰 初心者サポートモーダル -->
+<div class="fs-modal" id="beginnerModal">
+  <div class="fs-modal-header">
+    <button class="fs-modal-back" onclick="closeBeginnerModal()">←</button>
+    <div class="fs-modal-title">🔰 BEGINNER SUPPORT</div>
+  </div>
+  <div class="fs-modal-body">
+    <div class="beginner-badge-toggle" onclick="toggleBeginnerBadge()">
+      <div>
+        <div class="beginner-badge-label">🔰 初心者バッジを表示する</div>
+        <div class="beginner-badge-sub">ライダー一覧に「🔰」バッジが表示され、先輩ライダーから声がかかりやすくなります</div>
+      </div>
+      <button class="beginner-toggle" id="beginnerToggle"></button>
+    </div>
+    <div class="beginner-banner">
+      <div class="beginner-banner-title">🔰 BEGINNER TIPS</div>
+      <div class="beginner-tip-list">
+        <div class="beginner-tip">⚠️ バイクに乗る前に必ずプロテクターギア（ヘルメット・グローブ・ジャケット）を著用しましょう。フルフェイスヘルメットがおすすめです。</div>
+        <div class="beginner-tip">🔧 復路を確認する習慣をつけましょう。出発前にタイヤ・ブレーキ・オイル・ライトの点検を行う「九つの復路」を習慣に。</div>
+        <div class="beginner-tip">📍 最初は短距離・空いている道路で練習。干線道路から成长してたまに掛け路を走るのがコツです。</div>
+        <div class="beginner-tip">👥 RideConnectで先輩ライダーに学びましょう。フィルター「🔰 初心者」で山を知ったライダーにコンタクト。</div>
+        <div class="beginner-tip">⛽ 走り始めたら定期整備を心がけましょう。オイル交換は基本。カルテ機能で記録しておくと便利です！</div>
+      </div>
+    </div>
+    <div style="padding:0 16px 24px;">
+      <div style="font-size:12px;color:var(--gray);margin-bottom:10px;">&#x1F4A1; 初心者フィルターで同じエリアの初心者ライダーや先輩ライダーが見つかります。</div>
+      <button class="route-suggest-btn" style="font-size:16px;letter-spacing:2px;" onclick="closeBeginnerModal();setPurposeFilter('beginner');">🔰 初心者ライダーを探す</button>
+    </div>
+  </div>
+</div>
+
+<!-- カルテモーダル -->
+<div class="karte-modal" id="karteModal">
+  <div class="karte-modal-inner">
+    <div class="karte-modal-header">
+      <h3>🔧 カスタム・整備カルテ</h3>
+      <div style="display:flex;gap:8px;align-items:center;">
+        <button class="karte-add-btn" onclick="openKarteForm()">＋ 記録追加</button>
+        <button class="karte-modal-close" onclick="closeKarteModal()">×</button>
+      </div>
+    </div>
+    <div class="karte-total-bar">
+      <span class="karte-total-label">総費用</span>
+      <span class="karte-total-val" id="karteTotalCost">&yen;0</span>
+    </div>
+    <div class="karte-list" id="karteList">
+      <div class="karte-empty">🔧<br>まだ記録がありません。<br>「記録追加」からカスタム・整備履歴を決しましょう！</div>
+    </div>
+  </div>
+</div>
+
+<!-- カルテ入力フォーム -->
+<div class="karte-form-overlay" id="karteFormOverlay">
+  <div class="karte-form-inner">
+    <div class="karte-form-title">🔧 記録を追加</div>
+    <div>
+      <div class="karte-type-row">
+        <button class="karte-type-sel sel" id="ks_custom" onclick="selectKarteType('custom')">🔧 カスタム</button>
+        <button class="karte-type-sel" id="ks_maint" onclick="selectKarteType('maint')">⚙️ 整備</button>
+      </div>
+    </div>
+    <input class="karte-inp" id="karteTitle" type="text" placeholder="項目名（例：ブレーキパッド交換）" maxlength="40">
+    <textarea class="karte-inp" id="karteDetail" rows="3" placeholder="詳細メモ（任意）" maxlength="200"></textarea>
+    <input class="karte-inp" id="karteDate" type="date">
+    <input class="karte-inp" id="karteCost" type="number" placeholder="費用（円）任意" min="0">
+    <button class="karte-save-btn" onclick="saveKarteRecord()">保存する</button>
+    <button class="karte-cancel-btn" onclick="closeKarteForm()">キャンセル</button>
+  </div>
+</div>
+
+<!-- ルート提案モーダル -->
+<div class="route-modal" id="routeModal">
+  <div style="flex:1;" onclick="closeRouteModal()"></div>
+  <div class="route-modal-inner">
+    <div class="route-modal-header">
+      <h3>🗺️ ツーリングルート検索</h3>
+      <button class="route-modal-close" onclick="closeRouteModal()">&times;</button>
+    </div>
+    <div class="route-modal-body">
+      <div>
+        <span class="route-label">出発地</span>
+        <input class="route-input" id="routeFrom" type="text" placeholder="例：東京都渋谷区">
+      </div>
+      <div>
+        <span class="route-label">目的地</span>
+        <input class="route-input" id="routeTo" type="text" placeholder="例：筕波巌">
+      </div>
+      <div>
+        <span class="route-label">移動手段</span>
+        <div class="route-type-grid">
+          <button class="route-type-btn selected" id="mode_bike" onclick="selectMode('bike')">🏍️ バイク</button>
+          <button class="route-type-btn" id="mode_car" onclick="selectMode('car')">🚗 自動車</button>
+        </div>
+      </div>
+      <button class="route-suggest-btn" id="routeSuggestBtn" onclick="searchRoute()">ルートを検索</button>
+      <div class="route-loading" id="routeLoading">🏍️ ルートを検索中…</div>
+      <div id="routeInfoCards" class="route-info-cards" style="display:none;">
+        <div class="route-info-card"><div class="val" id="routeDistVal">-</div><div class="lbl">距離</div></div>
+        <div class="route-info-card"><div class="val" id="routeTimeVal">-</div><div class="lbl">所要時間</div></div>
+      </div>
+      <div id="routeMap" class="route-map"></div>
+      <div class="route-result" id="routeResult"></div>
+    </div>
+  </div>
+</div>
+
 <script>
 const PREFS=['北海道','青森県','岩手県','宮城県','秋田県','山形県','福島県','茨城県','栃木県','群馬県','埼玉県','千葉県','東京都','神奈川県','新潟県','富山県','石川県','福井県','山梨県','長野県','岐阜県','静岡県','愛知県','三重県','滋賀県','京都府','大阪府','兵庫県','奈良県','和歌山県','鳥取県','島根県','岡山県','広島県','山口県','徳島県','香川県','愛媛県','高知県','福岡県','佐賀県','長崎県','熊本県','大分県','宮崎県','鹿児島県','沖縄県'];
 
@@ -501,12 +922,14 @@ firebase.initializeApp({
 const db=firebase.firestore();
 const auth=firebase.auth();
 
-let myId=null,myName='',myBike='',myPref='',myCity='',myPhoto='';
+let myId=null,myName='',myBike='',myPref='',myCity='',myPhoto='',myComment='';
 let myStyle='未設定',myIntercom='あり',myCc='未設定';
-let selectedPrefs=[],isActive=false,riders={};
-let currentMainTab='area',currentPref='',directTarget=null;
+let myPurpose=[];
+let selectedPrefs=[],isActive=false,isNowRiding=false,riders={};
+let currentMainTab='area',currentPref='',directTarget=null,currentPurposeFilter='all';
 let unsubRiders=null,unsubDirect=null,prefUnsubs={},prefMsgsCache={};
 let unreadCount=0;
+let isBeginner=false;
 
 // ★ userProfilesキャッシュ（senderIdごと）
 const profileCache={};
@@ -524,9 +947,10 @@ function saveUserProfile(){
     name:myName,bike:myBike,pref:myPref,city:myCity,
     photo:myPhoto||'',selectedPrefs:selectedPrefs,
     style:myStyle,intercom:myIntercom,cc:myCc,
+    comment:myComment,purpose:myPurpose,
     updatedAt:firebase.firestore.FieldValue.serverTimestamp()
   },{merge:true});
-  profileCache[docId]={name:myName,bike:myBike,photo:myPhoto||'',area:myPref+(myCity?' '+myCity:'')};
+  profileCache[docId]={name:myName,bike:myBike,photo:myPhoto||'',area:myPref+(myCity?' '+myCity:''),comment:myComment,purpose:myPurpose};
 }
 
 /* ── ★ userProfilesから取得（キャッシュあり） ── */
@@ -535,7 +959,7 @@ async function fetchProfile(uid){
   // riders一覧（ONのユーザー）にいれば使う
   if(riders[uid]){
     const d=riders[uid];
-    const p={name:d.name,bike:d.bike,photo:d.photo||'',area:d.pref+(d.city?' '+d.city:'')};
+    const p={name:d.name,bike:d.bike,photo:d.photo||'',area:d.pref+(d.city?' '+d.city:''),comment:d.comment||''};
     profileCache[uid]=p;return p;
   }
   // userProfilesから取得
@@ -543,7 +967,7 @@ async function fetchProfile(uid){
     const doc=await db.collection('userProfiles').doc(uid).get();
     if(doc.exists){
       const d=doc.data();
-      const p={name:d.name||'',bike:d.bike||'',photo:d.photo||'',area:d.pref+(d.city?' '+d.city:'')};
+      const p={name:d.name||'',bike:d.bike||'',photo:d.photo||'',area:d.pref+(d.city?' '+d.city:''),comment:d.comment||''};
       profileCache[uid]=p;return p;
     }
   }catch(e){}
@@ -562,14 +986,14 @@ async function openProfile(tid,tname,tbike,tphoto,tarea){
   document.getElementById('profileModal').classList.add('open');
 
   // userProfilesから取得（awaitで完全に待つ）
-  let name=tname,bike=tbike,photo=tphoto,area=tarea,cc='未設定',style='未設定',intercom='あり';
+  let name=tname,bike=tbike,photo=tphoto,area=tarea,cc='未設定',style='未設定',intercom='あり',comment='';
   try{
     // まずridersキャッシュ
     if(riders[tid]){
       const d=riders[tid];
       name=d.name||tname;bike=d.bike||tbike;photo=d.photo||tphoto;
       area=d.pref+(d.city?' '+d.city:'');
-      cc=d.cc||'未設定';style=d.style||'未設定';intercom=d.intercom||'あり';
+      cc=d.cc||'未設定';style=d.style||'未設定';intercom=d.intercom||'あり';comment=d.comment||'';
     } else {
       // Firestoreから直接取得
       const doc=await db.collection('userProfiles').doc(tid).get();
@@ -579,8 +1003,8 @@ async function openProfile(tid,tname,tbike,tphoto,tarea){
         bike=d.bike||tbike;
         photo=d.photo||tphoto;
         area=d.pref+(d.city?' '+d.city:'');
-        cc=d.cc||'未設定';style=d.style||'未設定';intercom=d.intercom||'あり';
-        profileCache[tid]={name,bike,photo,area};
+        cc=d.cc||'未設定';style=d.style||'未設定';intercom=d.intercom||'あり';comment=d.comment||'';
+        profileCache[tid]={name,bike,photo,area,comment};
       }
     }
   }catch(e){console.error('profile fetch error',e);}
@@ -594,6 +1018,13 @@ async function openProfile(tid,tname,tbike,tphoto,tarea){
     document.getElementById('profileCc').textContent=cc;
     document.getElementById('profileStyle').textContent=style;
     document.getElementById('profileIntercom').textContent=intercom;
+    const commentBox = document.getElementById('profileCommentBox');
+    if(comment){
+      document.getElementById('profileComment').textContent=comment;
+      commentBox.style.display='block';
+    }else{
+      commentBox.style.display='none';
+    }
     document.getElementById('profileDmBtn').onclick=()=>{closeProfile();openDirectChat(tid,name,bike,photo,area);};
   }
 }
@@ -606,6 +1037,7 @@ let editPhoto='';
 function openEditModal(){
   editPhoto=myPhoto;
   editSelectedPrefs=[...selectedPrefs];
+  editPurpose=[...myPurpose];
   document.getElementById('editName').value=myName;
   document.getElementById('editBike').value=myBike;
   document.getElementById('editPref').value=myPref;
@@ -613,7 +1045,9 @@ function openEditModal(){
   document.getElementById('editStyle').value=myStyle;
   document.getElementById('editIntercom').value=myIntercom;
   document.getElementById('editCc').value=myCc;
+  document.getElementById('editComment').value=myComment;
   updateEditSelectedDisplay();
+  updatePurposeEditUI();
   const img=document.getElementById('editPhotoImg');
   const prev=document.getElementById('editPhotoPreview');
   if(myPhoto){img.src=myPhoto;prev.classList.add('has-img');}
@@ -629,15 +1063,19 @@ function saveProfile(){
   const s=document.getElementById('editStyle').value;
   const i=document.getElementById('editIntercom').value;
   const v_cc=document.getElementById('editCc').value;
+  const cmt=document.getElementById('editComment').value.trim();
   if(!n||!b||!p){toast('名前・バイク・都道府県を入力してください');return;}
   const prefChanged=p!==myPref;
   myName=n;myBike=b;myPref=p;myCity=c;myPhoto=editPhoto;
-  myStyle=s;myIntercom=i;myCc=v_cc;
+  myStyle=s;myIntercom=i;myCc=v_cc;myComment=cmt;
+  myPurpose=editPurpose.slice();
+  localStorage.setItem('rcPurpose',JSON.stringify(myPurpose));
   selectedPrefs=editSelectedPrefs.length?editSelectedPrefs:[p];
   if(!selectedPrefs.includes(p))selectedPrefs.unshift(p);
   localStorage.setItem('rcName',n);localStorage.setItem('rcBike',b);
   localStorage.setItem('rcPref',p);localStorage.setItem('rcCity',c);
   localStorage.setItem('rcStyle',s);localStorage.setItem('rcIntercom',i);localStorage.setItem('rcCc',v_cc);
+  localStorage.setItem('rcComment',cmt);
   if(myPhoto)localStorage.setItem('rcPhoto',myPhoto);
   updateProfileEditBtn();
   document.getElementById('regionLabel').textContent=c?p+' '+c:p;
@@ -664,7 +1102,7 @@ window.addEventListener('load',()=>{
   const n=localStorage.getItem('rcName'),b=localStorage.getItem('rcBike');
   const p=localStorage.getItem('rcPref'),c=localStorage.getItem('rcCity');
   const s=localStorage.getItem('rcStyle'),i=localStorage.getItem('rcIntercom'),v_cc=localStorage.getItem('rcCc');
-  const sp=localStorage.getItem('rcSelectedPrefs'),ph=localStorage.getItem('rcPhoto');
+  const sp=localStorage.getItem('rcSelectedPrefs'),ph=localStorage.getItem('rcPhoto'),cmt=localStorage.getItem('rcComment');
   if(n)document.getElementById('inputName').value=n;
   if(b)document.getElementById('inputBike').value=b;
   if(p)document.getElementById('inputPref').value=p;
@@ -673,6 +1111,7 @@ window.addEventListener('load',()=>{
   if(i){document.getElementById('inputIntercom').value=i;myIntercom=i;}
   if(v_cc){document.getElementById('inputCc').value=v_cc;myCc=v_cc;}
   if(sp){selectedPrefs=JSON.parse(sp);updateSelectedDisplay();}
+  if(cmt){myComment=cmt;}
   if(ph){myPhoto=ph;document.getElementById('bikePhotoImg').src=ph;document.getElementById('bikePhotoPreview').classList.add('has-img');}
   auth.onAuthStateChanged(user=>{
     if(user){
@@ -900,23 +1339,49 @@ function startApp(){
 
 function listenRiders(){
   if(unsubRiders){unsubRiders();unsubRiders=null;}
+  const now=new Date();
   unsubRiders=db.collection('riders').where('pref','==',myPref).where('active','==',true)
     .onSnapshot(snap=>{
       riders={};
-      snap.docs.forEach(d=>{if(d.id!==myId)riders[d.id]=d.data();});
+      snap.docs.forEach(d=>{
+        if(d.id===myId)return;
+        const data=d.data();
+        // expireAtが存在する場合は期限チェック
+        if(data.expireAt){
+          const exp=data.expireAt.toDate?data.expireAt.toDate():new Date(data.expireAt);
+          if(exp<now)return; // 期限切れは除外
+        }
+        riders[d.id]=data;
+      });
       renderCards();
       if(currentMainTab==='direct')renderDirectRidersList();
     });
 }
 function saveLocation(){
+  const expireAt=new Date(Date.now()+6*60*60*1000);
+  const nowExp=isNowRiding?new Date(Date.now()+60*60*1000):new Date(0);
   db.collection('riders').doc(myId).set({
     name:myName,bike:myBike,pref:myPref,city:myCity,
     photo:myPhoto||'',active:true,
-    style:myStyle,intercom:myIntercom,cc:myCc,
+    style:myStyle,intercom:myIntercom,cc:myCc,comment:myComment,
+    purpose:myPurpose,beginner:isBeginner,
+    nowRiding:isNowRiding,
+    nowRidingExpireAt:firebase.firestore.Timestamp.fromDate(nowExp),
+    expireAt:firebase.firestore.Timestamp.fromDate(expireAt),
     updatedAt:firebase.firestore.FieldValue.serverTimestamp()
   });
+  if(myBike){
+    const grp=myBike.split(' ')[0];
+    db.collection('bikeGroups').doc(grp).set({name:grp},{merge:true});
+  }
 }
-function removeLocation(){db.collection('riders').doc(myId).delete();}
+function removeLocation(){
+  // expireAtを過去に設定してオフライン扱い（削除はしない）
+  db.collection('riders').doc(myId).update({
+    active:false,
+    expireAt:firebase.firestore.Timestamp.fromDate(new Date(0))
+  }).catch(()=>db.collection('riders').doc(myId).delete());
+}
 function toggleStatus(){
   isActive=!isActive;
   document.getElementById('toggleBtn').classList.toggle('on',isActive);
@@ -924,7 +1389,15 @@ function toggleStatus(){
   v.textContent=isActive?'走りたい！':'オフライン';
   v.className='value'+(isActive?' active':'');
   toast(isActive?'🏍️ 走りたいモード ON！':'オフラインにしました');
-  isActive?saveLocation():removeLocation();
+  const btn=document.getElementById('nowRidingBtn');
+  btn.disabled=!isActive;
+  if(!isActive){
+    isNowRiding=false;
+    updateNowRidingUI();
+    removeLocation();
+  } else {
+    saveLocation();
+  }
 }
 function mkAvatar(photo,fallback,cls){
   if(photo)return `<div class="${cls}"><img src="${photo}" alt=""></div>`;
@@ -932,23 +1405,43 @@ function mkAvatar(photo,fallback,cls){
 }
 function renderCards(){
   const list=document.getElementById('riderList');
-  const entries=Object.entries(riders);
-  document.getElementById('riderCount').textContent=entries.length;
+  const allEntries=Object.entries(riders);
+  const now=Date.now();
+  // 目的フィルター
+  const entries=allEntries.filter(([id,d])=>{
+    if(currentPurposeFilter==='all')return true;
+    if(currentPurposeFilter==='beginner')return !!d.beginner;
+    return Array.isArray(d.purpose)&&d.purpose.includes(currentPurposeFilter);
+  });
+  document.getElementById('riderCount').textContent=allEntries.length;
   if(!entries.length){
-    list.innerHTML=`<div class="empty-riders">🏍️<br>${myPref}にまだライダーがいません<br><br>「走りたい！」をONにして<br>仲間を待ちましょう！</div>`;return;
+    const msg=currentPurposeFilter==='all'?'「走りたい！」をONにして<br>仲間を待ちましょう！':'この目的のライダーはまだいません';
+    list.innerHTML=`<div class="empty-riders-wrapper">
+      <svg class="empty-svg-icon" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
+        <path d="M375.4,196.2l-25.1-41.9c-4.7-7.9-12.9-13.1-22.1-14.2l-40.6-5.1c-1.3-0.2-2.7-0.2-4.1,0L241,141.4l-38.6-25.7 c-7.3-4.9-16.7-5.9-24.9-2.7l-41.2,16.5c-7.3,2.9-12.8,8.8-15,16.5L108,189.5c-19,10.6-32.3,30.3-33.8,53.4c-25,12.7-42.2,38.8-42.2,69.1 c0,42.5,34.5,77,77,77c22.5,0,42.8-9.7,56.9-25.1l36.1-5.2h47.2l34.8,11.6c13.7,18,35.4,29.7,59.8,29.7c42.5,0,77-34.5,77-77 C420.8,279.7,402.1,241,375.4,196.2z M109,357c-24.8,0-45-20.2-45-45s20.2-45,45-45s45,20.2,45,45S133.8,357,109,357z M343.8,367 c-24.8,0-45-20.2-45-45s20.2-45,45-45s45,20.2,45,45S368.6,367,343.8,367z M253.3,267.5c-4.4,0-8-3.6-8-8c0-4.4,3.6-8,8-8h45 c4.4,0,8,3.6,8,8c0,4.4-3.6,8-8,8H253.3z" />
+      </svg>
+      <div class="empty-title">NO RIDERS NEARBY</div>
+      <div class="empty-text"><span>${myPref}</span> には現在アクティブな<br>ライダーがいません。<br><br>${msg}</div>
+    </div>`;return;
   }
-  list.innerHTML=entries.map(([id,d])=>`
-    <div class="rider-item" onclick="openProfile('${id}','${esc(d.name)}','${esc(d.bike)}','${esc(d.photo||'')}','${esc(d.pref+(d.city?' '+d.city:''))}')">
+  const purposeMap={touring:'🌄',custom:'🔩',tandem:'🛵'};
+  list.innerHTML=entries.map(([id,d])=>{
+    const isNR=d.nowRiding&&d.nowRidingExpireAt&&(d.nowRidingExpireAt.toDate?d.nowRidingExpireAt.toDate():new Date(d.nowRidingExpireAt))>new Date();
+    const nowBadge=isNR?'<span class="now-badge">⚡今すぐノリ</span>':'';
+    const beginnerBadge=d.beginner?'<span class="beginner-badge">🔰初心者</span>':'';
+    const purpBadges=(d.purpose||[]).map(p=>purposeMap[p]?`<span style="font-size:12px;">${purposeMap[p]}</span>`:'').join('');
+    return `<div class="rider-item" onclick="openProfile('${id}','${esc(d.name)}','${esc(d.bike)}','${esc(d.photo||'')}','${esc(d.pref+(d.city?' '+d.city:''))}')">
       <div class="rider-item-left">
         ${mkAvatar(d.photo,'🏍️','rider-avatar')}
         <div class="rider-info">
-          <div class="name">${esc(d.name)}</div>
+          <div class="name">${esc(d.name)}${beginnerBadge}${nowBadge}${purpBadges}</div>
           <div class="bike">${esc(d.bike)}</div>
           <div class="region">📍 ${esc(d.pref)}${d.city?' '+esc(d.city):''}</div>
         </div>
       </div>
       <button class="msg-btn-small" onclick="event.stopPropagation();openDirectChat('${id}','${esc(d.name)}','${esc(d.bike)}','${esc(d.photo||'')}','${esc(d.pref+(d.city?' '+d.city:''))}')">💬 話す</button>
-    </div>`).join('');
+    </div>`;
+  }).join('');
 }
 function renderDirectRidersList(){
   const list=document.getElementById('directRidersList');
@@ -1120,7 +1613,422 @@ document.getElementById('chatInput').addEventListener('input',function(){
   this.style.height='auto';
   this.style.height=Math.min(this.scrollHeight,120)+'px';
 });
-window.addEventListener('beforeunload',()=>{if(isActive)removeLocation();});
-</script>
+// beforeunload時はexpireAtを更新しない（6時間保持）
+
+/* ── ルート検索機能（OpenStreetMap / OSRM） ── */
+let routeMap=null, routeLayer=null, selectedMode='bike';
+function openRouteModal(){
+  document.getElementById('routeResult').classList.remove('show');
+  document.getElementById('routeResult').innerHTML='';
+  document.getElementById('routeLoading').classList.remove('show');
+  document.getElementById('routeInfoCards').style.display='none';
+  document.getElementById('routeMap').classList.remove('show');
+  document.getElementById('routeModal').classList.add('open');
+}
+function closeRouteModal(){document.getElementById('routeModal').classList.remove('open');}
+function selectMode(m){
+  selectedMode=m;
+  ['bike','car'].forEach(id=>document.getElementById('mode_'+id).classList.toggle('selected',id===m));
+}
+async function geocode(place){
+  const url=`https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(place+' 日本')}&format=json&limit=1&accept-language=ja`;
+  const res=await fetch(url,{headers:{'User-Agent':'RideConnect/1.0'}});
+  const data=await res.json();
+  if(!data.length)throw new Error(`「${place}」の屋内が見つかりませんでした`);
+  return {lat:parseFloat(data[0].lat),lng:parseFloat(data[0].lon),name:data[0].display_name.split(',')[0]};
+}
+async function searchRoute(){
+  const from=document.getElementById('routeFrom').value.trim();
+  const to=document.getElementById('routeTo').value.trim();
+  if(!from||!to){toast('出発地と目的地の両方を入力してください');return;}
+  document.getElementById('routeSuggestBtn').disabled=true;
+  document.getElementById('routeLoading').classList.add('show');
+  document.getElementById('routeResult').classList.remove('show');
+  document.getElementById('routeInfoCards').style.display='none';
+  document.getElementById('routeMap').classList.remove('show');
+  try{
+    const [origin,dest]=await Promise.all([geocode(from),geocode(to)]);
+    // OSRMルート検索（バイクは自転車プロファイルを使用）
+    const profile=selectedMode==='bike'?'bike':'car';
+    const osrmUrl=`https://router.project-osrm.org/route/v1/${profile}/${origin.lng},${origin.lat};${dest.lng},${dest.lat}?overview=full&geometries=geojson&steps=true`;
+    const routeRes=await fetch(osrmUrl);
+    const routeData=await routeRes.json();
+    if(routeData.code!=='Ok')throw new Error('ルートを取得できませんでした');
+    const route=routeData.routes[0];
+    const distKm=(route.distance/1000).toFixed(1);
+    const mins=Math.round(route.duration/60);
+    const hrs=Math.floor(mins/60),rem=mins%60;
+    const timeStr=hrs>0?`${hrs}時間${rem}分`:`${rem}分`;
+    // 距離・時間表示
+    document.getElementById('routeDistVal').textContent=distKm+'km';
+    document.getElementById('routeTimeVal').textContent=timeStr;
+    document.getElementById('routeInfoCards').style.display='flex';
+    // ステップ一覧（20件まで）
+    const steps=route.legs[0].steps.slice(0,20);
+    const stepsHtml=steps.map(s=>{
+      const d=(s.distance/1000).toFixed(1);
+      return `<div style="display:flex;gap:8px;align-items:flex-start;padding:5px 0;border-bottom:1px solid #2a2a2a;">
+        <span style="color:var(--orange);flex-shrink:0;">&#9655;</span>
+        <span style="font-size:12px;color:var(--white);">${s.name||'道路'} <span style="color:var(--gray);font-size:11px;">(${d}km)</span></span>
+      </div>`;
+    }).join('');
+    document.getElementById('routeResult').innerHTML=
+      `<h4>🛣️ ${origin.name} → ${dest.name}</h4>${stepsHtml}`;
+    document.getElementById('routeResult').classList.add('show');
+    // Leafletマップ表示
+    const mapEl=document.getElementById('routeMap');
+    mapEl.classList.add('show');
+    if(routeMap){routeMap.remove();routeMap=null;}
+    setTimeout(()=>{
+      routeMap=L.map('routeMap',{zoomControl:true,attributionControl:false});
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:18}).addTo(routeMap);
+      const coords=route.geometry.coordinates.map(c=>[c[1],c[0]]);
+      routeLayer=L.polyline(coords,{color:'#ff6a00',weight:5,opacity:0.85}).addTo(routeMap);
+      L.marker([origin.lat,origin.lng]).addTo(routeMap).bindPopup(origin.name);
+      L.marker([dest.lat,dest.lng]).addTo(routeMap).bindPopup(dest.name);
+      routeMap.fitBounds(routeLayer.getBounds(),{padding:[20,20]});
+    },200);
+  }catch(e){
+    toast('エラー: '+e.message);
+    console.error('Route error:',e);
+  }finally{
+    document.getElementById('routeSuggestBtn').disabled=false;
+    document.getElementById('routeLoading').classList.remove('show');
+  }
+}
+/* ── 目的フィルター ── */
+function setPurposeFilter(f){
+  currentPurposeFilter=f;
+  ['all','touring','custom','tandem'].forEach(id=>{
+    const el=document.getElementById('pf_'+id);
+    if(el)el.classList.toggle('active',id===f);
+  });
+  renderCards();
+}
+
+/* ── プロフィール編集の目的選択 ── */
+let editPurpose=[];
+function togglePurposeEdit(type){
+  const idx=editPurpose.indexOf(type);
+  if(idx>=0)editPurpose.splice(idx,1);
+  else editPurpose.push(type);
+  updatePurposeEditUI();
+}
+function updatePurposeEditUI(){
+  ['touring','custom','tandem'].forEach(t=>{
+    const item=document.getElementById('pci_'+t);
+    const box=document.getElementById('pcb_'+t);
+    if(!item||!box)return;
+    const checked=editPurpose.includes(t);
+    item.classList.toggle('checked',checked);
+    box.textContent=checked?'✓':'';
+  });
+}
+
+/* ── 今すぐノリ機能 ── */
+function toggleNowRiding(){
+  if(!isActive){toast('まず「走りたい！」をONにしてください');return;}
+  isNowRiding=!isNowRiding;
+  updateNowRidingUI();
+  saveLocation();
+  toast(isNowRiding?'⚡ 今すぐノリモード ON！':'今すぐノリを解除しました');
+}
+function updateNowRidingUI(){
+  const btn=document.getElementById('nowRidingBtn');
+  const lbl=document.getElementById('nowRidingLabel');
+  const banner=document.getElementById('nowRidingBanner');
+  btn.classList.toggle('on',isNowRiding);
+  banner.classList.toggle('show',isNowRiding);
+  lbl.textContent=isNowRiding?'⚡ 今すぐノリモード ON！（1時間有効）':'⚡ 今すぐノリ！（走りたい！ONのとき有効）';
+}
+
+/* ── カルテ機能 ── */
+let karteType='custom';
+function openKarteModal(){
+  if(!myId){toast('ログイン後にご利用ください');return;}
+  document.getElementById('karteModal').classList.add('open');
+  loadKarteRecords();
+}
+function closeKarteModal(){document.getElementById('karteModal').classList.remove('open');}
+function openKarteForm(){
+  karteType='custom';
+  document.getElementById('karteTitle').value='';
+  document.getElementById('karteDetail').value='';
+  document.getElementById('karteDate').value=new Date().toISOString().split('T')[0];
+  document.getElementById('karteCost').value='';
+  ['ks_custom','ks_maint'].forEach(id=>document.getElementById(id).classList.remove('sel'));
+  document.getElementById('ks_custom').classList.add('sel');
+  document.getElementById('karteFormOverlay').classList.add('open');
+}
+function closeKarteForm(){document.getElementById('karteFormOverlay').classList.remove('open');}
+function selectKarteType(t){
+  karteType=t;
+  document.getElementById('ks_custom').classList.toggle('sel',t==='custom');
+  document.getElementById('ks_maint').classList.toggle('sel',t==='maint');
+}
+async function saveKarteRecord(){
+  const title=document.getElementById('karteTitle').value.trim();
+  if(!title){toast('項目名を入力してください');return;}
+  const detail=document.getElementById('karteDetail').value.trim();
+  const date=document.getElementById('karteDate').value;
+  const costVal=document.getElementById('karteCost').value;
+  const cost=costVal?parseInt(costVal):null;
+  try{
+    await db.collection('userProfiles').doc(myId).collection('karteRecords').add({
+      type:karteType,title,detail,date,cost,
+      createdAt:firebase.firestore.FieldValue.serverTimestamp()
+    });
+    closeKarteForm();
+    await db.collection('userProfiles').doc(myId).set({karteCount:firebase.firestore.FieldValue.increment(1)},{merge:true});
+    toast('記録を保存しました！');
+    loadKarteRecords();
+  }catch(e){toast('保存エラー: '+e.message);}
+}
+async function deleteKarteRecord(id){
+  if(!confirm('この記録を削除しますか？'))return;
+  try{
+    await db.collection('userProfiles').doc(myId).collection('karteRecords').doc(id).delete();
+    toast('削除しました');
+    loadKarteRecords();
+  }catch(e){toast('削除エラー: '+e.message);}
+}
+async function loadKarteRecords(){
+  if(!myId)return;
+  const list=document.getElementById('karteList');
+  list.innerHTML='<div style="text-align:center;padding:20px;color:var(--gray);">読み込み中…</div>';
+  try{
+    const snap=await db.collection('userProfiles').doc(myId).collection('karteRecords')
+      .orderBy('createdAt','desc').limit(100).get();
+    if(snap.empty){
+      list.innerHTML='<div class="karte-empty">🔧<br>まだ記録がありません。<br>「記録追加」からカスタム・整備履歴を保存しましょう！</div>';
+      document.getElementById('karteTotalCost').textContent='¥0';
+      return;
+    }
+    const records=snap.docs.map(d=>({id:d.id,...d.data()}));
+    const total=records.reduce((s,r)=>s+(r.cost||0),0);
+    document.getElementById('karteTotalCost').textContent='¥'+total.toLocaleString();
+    list.innerHTML=records.map(r=>{
+      const badge=r.type==='custom'
+        ?'<span class="karte-type-badge karte-type-custom">🔧 カスタム</span>'
+        :'<span class="karte-type-badge karte-type-maint">⚙️ 整備</span>';
+      const cost=r.cost!=null?`<span class="karte-item-cost">¥${r.cost.toLocaleString()}</span>`:'<span></span>';
+      return `<div class="karte-item">
+        <div class="karte-item-header">${badge}<span class="karte-item-title">${esc(r.title)}</span><button class="karte-item-del" onclick="deleteKarteRecord('${r.id}')">✕</button></div>
+        ${r.detail?`<div class="karte-item-detail">${esc(r.detail)}</div>`:''}
+        <div class="karte-item-footer"><span class="karte-item-date">📅 ${r.date||''}</span>${cost}</div>
+      </div>`;
+    }).join('');
+  }catch(e){
+    list.innerHTML='<div class="karte-empty">読み込みエラー</div>';
+  }
+}
+// 起動時に目的をlocalStorageから復元
+(function(){
+  const saved=localStorage.getItem('rcPurpose');
+  if(saved){try{myPurpose=JSON.parse(saved);}catch(e){}}
+  const sb=localStorage.getItem('rcBeginner');
+  if(sb==='1'){isBeginner=true;}
+})();
+
+
+function closeSlideMenu(){document.getElementById('slideMenu').classList.remove('open');}
+
+/* ── 🏆 ランキング ── */
+let rankTab='likes';
+function openRankModal(){
+  document.getElementById('rankModal').classList.add('open');
+  switchRankTab('likes');
+}
+function closeRankModal(){document.getElementById('rankModal').classList.remove('open');}
+function switchRankTab(t){
+  rankTab=t;
+  ['likes','reports','karte'].forEach(id=>document.getElementById('rt_'+id).classList.toggle('active',id===t));
+  loadRanking(t);
+}
+async function loadRanking(type){
+  const list=document.getElementById('rankList');
+  list.innerHTML='<div style="text-align:center;padding:40px;color:var(--gray);">読み込み中…</div>';
+  try{
+    let snap;
+    if(type==='likes'){
+      snap=await db.collection('userProfiles').orderBy('likeCount','desc').limit(20).get();
+    } else if(type==='reports'){
+      snap=await db.collection('userProfiles').orderBy('reportCount','desc').limit(20).get();
+    } else {
+      snap=await db.collection('userProfiles').orderBy('karteCount','desc').limit(20).get();
+    }
+    if(snap.empty){list.innerHTML='<div style="text-align:center;padding:40px;color:var(--gray);">まだデータがありません</div>';return;}
+    const noClass=['gold','silver','bronze'];
+    const scoreKey={likes:'likeCount',reports:'reportCount',karte:'karteCount'};
+    const scoreLabel={likes:'❤️ いいね',reports:'📝 投稿',karte:'🔧 記録'};
+    list.innerHTML=snap.docs.map((d,i)=>{
+      const data=d.data();
+      const nc=i<3?noClass[i]:'other';
+      const score=data[scoreKey[type]]||0;
+      const av=data.photo?`<div class="rank-avatar"><img src="${esc(data.photo)}" alt=""></div>`:`<div class="rank-avatar">🏍️</div>`;
+      return `<div class="rank-item">
+        <div class="rank-no ${nc}">${i+1}</div>
+        ${av}
+        <div class="rank-info"><div class="rank-name">${esc(data.name||'匿名')}</div><div class="rank-sub">${esc(data.bike||'')}</div></div>
+        <div><div class="rank-score">${score}</div><div class="rank-score-lbl">${scoreLabel[type]}</div></div>
+      </div>`;
+    }).join('');
+  }catch(e){list.innerHTML='<div style="text-align:center;padding:40px;color:var(--gray);">読み込みエラー</div>';}
+}
+
+/* ── 📝 ツーリングレポート ── */
+let reportUnsub=null;
+function openReportModal(){
+  document.getElementById('reportModal').classList.add('open');
+  loadReports();
+}
+function closeReportModal(){
+  document.getElementById('reportModal').classList.remove('open');
+  if(reportUnsub){reportUnsub();reportUnsub=null;}
+}
+function openReportForm(){
+  document.getElementById('rpFrom').value='';
+  document.getElementById('rpTo').value='';
+  document.getElementById('rpDate').value=new Date().toISOString().split('T')[0];
+  document.getElementById('rpComment').value='';
+  document.getElementById('reportFormModal').classList.add('open');
+}
+function closeReportForm(){document.getElementById('reportFormModal').classList.remove('open');}
+async function submitReport(){
+  const from=document.getElementById('rpFrom').value.trim();
+  const comment=document.getElementById('rpComment').value.trim();
+  if(!from||!comment){toast('出発地とコメントを入力してください');return;}
+  const to=document.getElementById('rpTo').value.trim();
+  const date=document.getElementById('rpDate').value;
+  try{
+    const ref=await db.collection('reports').add({
+      uid:myId,name:myName,bike:myBike,photo:myPhoto||'',pref:myPref,
+      routeFrom:from,routeTo:to,date,comment,
+      likeCount:0,likedBy:[],
+      createdAt:firebase.firestore.FieldValue.serverTimestamp()
+    });
+    await db.collection('userProfiles').doc(myId).set({reportCount:firebase.firestore.FieldValue.increment(1)},{merge:true});
+    closeReportForm();
+    toast('レポートを投稿しました！🏍️');
+    loadReports();
+  }catch(e){toast('投稿エラー: '+e.message);}
+}
+function loadReports(){
+  if(reportUnsub)reportUnsub();
+  const list=document.getElementById('reportList');
+  list.innerHTML='<div style="text-align:center;padding:40px;color:var(--gray);">読み込み中…</div>';
+  reportUnsub=db.collection('reports').orderBy('createdAt','desc').limit(30)
+    .onSnapshot(snap=>{
+      if(snap.empty){list.innerHTML='<div style="text-align:center;padding:40px;color:var(--gray);">まだレポートがありません。<br>最初に投稿してみましょう！</div>';return;}
+      list.innerHTML=snap.docs.map(d=>{
+        const r={id:d.id,...d.data()};
+        const liked=Array.isArray(r.likedBy)&&r.likedBy.includes(myId);
+        const av=r.photo?`<div class="report-card-avatar"><img src="${esc(r.photo)}" alt=""></div>`:`<div class="report-card-avatar">🏍️</div>`;
+        const route=r.routeFrom?(r.routeTo?`${esc(r.routeFrom)} → ${esc(r.routeTo)}`:esc(r.routeFrom)):'';
+        return `<div class="report-card">
+          <div class="report-card-header">${av}<div class="report-card-meta"><div class="report-card-name">${esc(r.name)} <span style="color:var(--gray);font-size:11px;">${esc(r.bike)}</span></div><div class="report-card-date">📅 ${r.date||''} · 📍 ${esc(r.pref||'')}</div></div></div>
+          ${route?`<div class="report-route">🛣️ ${route}</div>`:''}
+          <div class="report-comment">${esc(r.comment)}</div>
+          <button class="report-like-btn ${liked?'liked':''}" onclick="toggleReportLike('${r.id}',${liked})">❤️ ${r.likeCount||0}</button>
+        </div>`;
+      }).join('');
+    });
+}
+async function toggleReportLike(id,isLiked){
+  const ref=db.collection('reports').doc(id);
+  if(isLiked){
+    await ref.update({likeCount:firebase.firestore.FieldValue.increment(-1),likedBy:firebase.firestore.FieldValue.arrayRemove(myId)});
+  } else {
+    await ref.update({likeCount:firebase.firestore.FieldValue.increment(1),likedBy:firebase.firestore.FieldValue.arrayUnion(myId)});
+    await db.collection('userProfiles').doc(myId).set({likeCount:firebase.firestore.FieldValue.increment(1)},{merge:true});
+  }
+}
+
+/* ── 🏍️ 車種コミュニティ ── */
+let bikeGroupUnsub=null,currentBikeGroup='';
+function openCommunityModal(){
+  document.getElementById('communityModal').classList.add('open');
+  loadBikeGroups();
+}
+function closeCommunityModal(){document.getElementById('communityModal').classList.remove('open');}
+async function loadBikeGroups(){
+  const list=document.getElementById('bikeGroupList');
+  list.innerHTML='<div style="text-align:center;padding:40px;color:var(--gray);">読み込み中…</div>';
+  try{
+    const snap=await db.collection('bikeGroups').orderBy('memberCount','desc').limit(20).get();
+    // 自分の車種を先頭に追加（なければ作成）
+    const myGroup=myBike?myBike.split(' ')[0]:null;
+    const groups=[];
+    if(myGroup)groups.push({id:myGroup,name:myGroup,memberCount:0,isOwn:true});
+    if(!snap.empty)snap.docs.forEach(d=>{if(d.id!==myGroup)groups.push({id:d.id,...d.data(),isOwn:false});});
+    if(!groups.length){list.innerHTML='<div style="text-align:center;padding:40px;color:var(--gray);">コミュニティがまだありません。<br>プロフィールを登録すると自動作成されます。</div>';return;}
+    list.innerHTML=groups.map(g=>{
+      return `<div class="bike-group-item" onclick="openBikeGroupChat('${esc(g.id)}','${esc(g.name||g.id)}')">
+        <div class="bike-group-icon">🏍️</div>
+        <div class="bike-group-info"><div class="bike-group-name">${esc(g.name||g.id)}${g.isOwn?' <span style="font-size:10px;color:var(--orange);">MY BIKE</span>':''}</div><div class="bike-group-count">${g.memberCount||0}人が参加</div></div>
+        <div class="bike-group-arrow">›</div>
+      </div>`;
+    }).join('');
+  }catch(e){list.innerHTML='<div style="text-align:center;padding:40px;color:var(--gray);">読み込みエラー</div>';}
+}
+function openBikeGroupChat(groupId,groupName){
+  currentBikeGroup=groupId;
+  document.getElementById('bikeGroupChatTitle').textContent=groupName+' CHAT';
+  document.getElementById('bikeGroupChatModal').classList.add('open');
+  if(bikeGroupUnsub)bikeGroupUnsub();
+  const msgList=document.getElementById('bikeGroupMessages');
+  msgList.innerHTML='';
+  bikeGroupUnsub=db.collection('bikeGroups').doc(groupId).collection('messages')
+    .orderBy('createdAt').limitToLast(100)
+    .onSnapshot(snap=>{
+      if(snap.empty){msgList.innerHTML='<div class="empty-msg">まだメッセージがありません</div>';return;}
+      msgList.innerHTML=snap.docs.map(d=>{
+        const m={id:d.id,...d.data()};
+        const mine=m.senderId===myId;
+        if(mine)return `<div class="msg-wrap"><div class="msg-mine-row"><div class="msg-bubble mine">${esc(m.text)}</div></div><div class="msg-meta right">${fmt(m.createdAt)}</div></div>`;
+        return `<div class="msg-wrap"><div class="msg-theirs-row"><div class="msg-theirs-content"><div class="msg-sender-name">${esc(m.senderName)}</div><div class="msg-bubble theirs">${esc(m.text)}</div><div class="msg-meta">${fmt(m.createdAt)}</div></div></div></div>`;
+      }).join('');
+      msgList.scrollTop=msgList.scrollHeight;
+    });
+  // メンバー数を更新
+  db.collection('bikeGroups').doc(groupId).set({name:groupId,memberCount:firebase.firestore.FieldValue.increment(1)},{merge:true});
+}
+function closeBikeGroupChat(){
+  document.getElementById('bikeGroupChatModal').classList.remove('open');
+  if(bikeGroupUnsub){bikeGroupUnsub();bikeGroupUnsub=null;}
+}
+function sendBikeGroupMsg(){
+  const inp=document.getElementById('bikeGroupInput');
+  const text=inp.value.trim();
+  if(!text||!currentBikeGroup)return;
+  inp.value='';
+  db.collection('bikeGroups').doc(currentBikeGroup).collection('messages').add({
+    text,senderId:myId,senderName:myName,
+    createdAt:firebase.firestore.FieldValue.serverTimestamp()
+  });
+}
+
+/* ── 🔰 初心者サポート ── */
+function openBeginnerModal(){
+  document.getElementById('beginnerModal').classList.add('open');
+  document.getElementById('beginnerToggle').classList.toggle('on',isBeginner);
+}
+function closeBeginnerModal(){document.getElementById('beginnerModal').classList.remove('open');}
+function toggleBeginnerBadge(){
+  isBeginner=!isBeginner;
+  localStorage.setItem('rcBeginner',isBeginner?'1':'0');
+  document.getElementById('beginnerToggle').classList.toggle('on',isBeginner);
+  if(isActive)saveLocation();
+  toast(isBeginner?'🔰 初心者バッジをONにしました':'バッジをOFFにしました');
+}
+// 起動時に初期化
+(function(){
+  const saved=localStorage.getItem('rcPurpose');
+  if(saved){try{myPurpose=JSON.parse(saved);}catch(e){}}
+  if(localStorage.getItem('rcBeginner')==='1')isBeginner=true;
+})();
+/* ── スライドメニュー ── */
+function openSlideMenu(){document.getElementById('slideMenu').classList.add('open');}
+function closeSlideMenu(){document.getElementById('slideMenu').classList.remove('open');}</script>
 </body>
 </html>

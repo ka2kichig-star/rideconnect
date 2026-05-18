@@ -691,6 +691,10 @@ input[type=file]{display:none;}
       <button class="purpose-btn" id="pf_beginner" onclick="setPurposeFilter('beginner')">🔰 初心者</button>
     </div>
   </div>
+  <div id="purposeDescBox" style="display:none; background:#111; padding:12px 16px; border-bottom:1px solid #2a2a2a; border-top:1px solid #2a2a2a; margin-top:-1px;">
+    <div id="purposeDescText" style="font-size:12px; color:var(--gray); margin-bottom:10px; line-height:1.5;"></div>
+    <button id="purposeDescBtn" onclick="" style="background:var(--card); color:var(--orange); border:1px solid var(--orange); border-radius:12px; padding:8px 14px; font-weight:700; font-size:12px; font-family:'Noto Sans JP',sans-serif; cursor:pointer; width:100%; display:flex; align-items:center; justify-content:center; gap:6px; transition:all .2s;"></button>
+  </div>
   <div class="riders-container">
     <div class="riders-area-title">同じエリアのライダー</div>
     <div id="riderList"></div>
@@ -1946,11 +1950,38 @@ async function searchRoute(){
 /* ── 目的フィルター ── */
 function setPurposeFilter(f){
   currentPurposeFilter=f;
-  ['all','touring','custom','tandem'].forEach(id=>{
+  ['all','touring','custom','tandem','beginner'].forEach(id=>{
     const el=document.getElementById('pf_'+id);
     if(el)el.classList.toggle('active',id===f);
   });
   renderCards();
+  
+  const box = document.getElementById('purposeDescBox');
+  const text = document.getElementById('purposeDescText');
+  const btn = document.getElementById('purposeDescBtn');
+  if(f === 'all') {
+    box.style.display = 'none';
+  } else if(f === 'touring') {
+    box.style.display = 'block';
+    text.textContent = '一緒に走る仲間を募集したり、おすすめスポットを共有しよう。下のボタンから全国のライダーとチャットで話せます。';
+    btn.innerHTML = '💬 ツーリング専用コミュニティを開く';
+    btn.onclick = () => openChannelChat('touring','ツーリング','一緒に走る仲間を募集したり、おすすめスポットを共有しよう','🏍️');
+  } else if(f === 'custom') {
+    box.style.display = 'block';
+    text.textContent = 'パーツ選びやDIYメンテ、おすすめカスタムについて質問・相談しよう。下のボタンから専用チャットに参加できます。';
+    btn.innerHTML = '💬 カスタム相談コミュニティを開く';
+    btn.onclick = () => openChannelChat('custom','カスタム相談','パーツ選びやDIYメンテ、おすすめカスタムについて質問・相談しよう','🔧');
+  } else if(f === 'tandem') {
+    box.style.display = 'block';
+    text.textContent = '二人乗りツーリングを楽しみたいライダー同士でつながろう。専用のチャットルームで募集や情報交換ができます。';
+    btn.innerHTML = '💬 デート・タンデムコミュニティを開く';
+    btn.onclick = () => openChannelChat('tandem','デート・タンデム','二人乗りツーリングを楽しみたいライダー同士でつながろう','🛵');
+  } else if(f === 'beginner') {
+    box.style.display = 'block';
+    text.textContent = '初心者マークをつけているライダーに絞り込みます。ベテランからのアドバイスや同じ初心者同士の交流のためのチャットルームもあります。';
+    btn.innerHTML = '💬 初心者サポートコミュニティを開く';
+    btn.onclick = () => openChannelChat('beginner','初心者サポート','ベテランからのアドバイスや同じ初心者同士で交流しよう','🔰');
+  }
 }
 
 /* ── プロフィール編集の目的選択 ── */

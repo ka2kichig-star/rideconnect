@@ -1820,7 +1820,7 @@ async function loadKarteRecords(){
       </div>`;
     }).join('');
   }catch(e){
-    list.innerHTML='<div class="karte-empty">読み込みエラー</div>';
+    list.innerHTML=`<div class="karte-empty">読み込みエラー: ${e.message}</div>`;
   }
 }
 // 起動時に目的をlocalStorageから復元
